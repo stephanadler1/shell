@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <!--
+  * [Configuring NuGet behavior](https://docs.microsoft.com/en-us/nuget/consume-packages/configuring-nuget-behavior)
+  * [NuGet.Config reference](https://docs.microsoft.com/en-us/nuget/reference/nuget-config-file)
+  
+  Package restore behavior
+  * [Package Restore](https://docs.microsoft.com/en-us/nuget/consume-packages/package-restore#migrating-to-automatic-restore)
+  
+  Clear all caches of NuGet
+  * [nuget locals all -clear](https://docs.microsoft.com/en-us/nuget/consume-packages/managing-the-nuget-cache)
+  -->
+  <config>
+    <add key="dependencyVersion" value="Highest" />
+    <add key="packageSaveMode" value="nuspec" />
+  </config>
+    <packageRestore>
+      <!-- The 'enabled' key is True when the "Allow NuGet to download missing packages" checkbox is set.
+           Clearing the box sets this to False, disabling command-line, automatic, and MSBuild-Integrated restore. -->
+      <add key="enabled" value="True" />
+      <!-- The 'automatic' key is set to True when the "Automatically check for missing packages during
+           build in Visual Studio" checkbox is set. Clearing the box sets this to False and disables
+           automatic restore. -->
+      <add key="automatic" value="True" />
+    </packageRestore>
+  <solution>
+    <add key="disableSourceControlIntegration" value="true" />
+  </solution>
+</configuration>

@@ -1,0 +1,8 @@
+.=pushd "..\$1"
+..=pushd "..\..\$1"
+...=pushd "..\..\..\$1"
+....=pushd "..\..\..\..\$1"
+bb=popd
+dev=IF DEFINED SOURCES_ROOT ( pushd "%SOURCES_ROOT%\$1" ) ELSE ( IF EXIST "D:\dev" ( pushd "D:\dev\$1" ) ELSE ( pushd "%SYSTEMDRIVE%\dev\$1" ) )
+n="%TOOLS%\n.cmd" $*
+nn="%TOOLS%\n.cmd" $*
