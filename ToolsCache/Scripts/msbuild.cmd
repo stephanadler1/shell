@@ -33,7 +33,11 @@ if not defined _MSBUILD (
 )
 
 if not defined _MSBUILD goto ErrorMsBuildNotFound
-if not exist "%_MSBUILD%" goto ErrorMsBuildNotFound
+if not exist "!_MSBUILD!" goto ErrorMsBuildNotFound
+
+:: Set PATH to nothing, to detect poorly written build scripts, assuming tools to 
+:: be accessible on the system, instead of relying on packages to provide them.
+if not defined MSBUILD_DISABLEISOLATION call :SetupIsolation
 
 echo.
 echo Started !DATE! !TIME!
@@ -41,12 +45,14 @@ echo Started !DATE! !TIME!
 :: Set default arguments
 set _MSBUILD_ARGS=/m:!_cpu! /nr:false
 
-echo ^> "%_MSBUILD%" %_MSBUILD_ARGS% %MSBUILD_ARGS% %*
+echo ^> "!_MSBUILD!" !_MSBUILD_ARGS! !MSBUILD_ARGS! %*
 echo. 
-call "%_MSBUILD%" %_MSBUILD_ARGS% %MSBUILD_ARGS% %*
+call "!_MSBUILD!" !_MSBUILD_ARGS! !MSBUILD_ARGS! %*
 
 :: Kill all still running instances of MSBuild
-pskill -accepteula -t msbuild > nul 2>&1
+call "%TOOLS_SYSINTERNALS%\pskill" -accepteula -t msbuild > nul 2>&1
+
+if not defined MSBUILD_DISABLEISOLATION call :ReportIsolation
 
 goto EOF
 
@@ -63,7 +69,40 @@ goto EOF
     exit /b 1
     goto EOF
 
+:AppendToolPath
+    if defined PATH (set "PATH=%PATH%;%~dp1." ) else (set "PATH=%~dp1." )
+    exit /b 0
+    
+:SetupIsolation
+    set _TEMP=%TEMP%\wtf
+    rem if exist "!_TEMP!" rd /s /q "!_TEMP!" > nul 2>&1
+    if exist "!_TEMP!" rd /s /q "!_TEMP!\VGhpc0lz" > nul 2>&1
+    md "!_TEMP!\VGhpc0lz" > nul 2>&1
 
+    rem call :AppendToolPath "!_MSBUILD!"
+    set PATH=!_TEMP!\VGhpc0lz
+    set TEMP=!_TEMP!
+    set TMP=!_TEMP!
+    
+    echo.
+    echo *** BUILD ISOLATION ACTIVE ***
+    echo PATH     = !PATH!
+    echo TEMP/TMP = !TEMP!
+    echo ******************************
+    exit /b 0
+    
+:ReportIsolation
+    dir /b /s /a:-d "!_TEMP!" | "%WINDIR%\System32\findstr.exe" /i /r "^\S*" > nul 2>&1
+    if errorlevel 1 echo.
+    if errorlevel 0 (
+        echo Ended !DATE! !TIME!
+        echo.
+        echo *** FILES WRITTEN OUTSIDE OF BUILD OUTPUT ***
+        dir /b /s /a:-d "!_TEMP!"
+        echo *********************************************
+        echo.
+    )
+    exit /b 0
 
 :EOF
     echo Ended !DATE! !TIME!

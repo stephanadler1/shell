@@ -16,9 +16,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-
 Set-StrictMode -Version Latest
-
 
 function script:ConvertPathToRegExpandSz
 {
@@ -130,7 +128,7 @@ function script:AddPath
 function script:ScanThreats
 {
     param([string] $path)
-return    
+
     if ([System.IO.Directory]::Exists($path) -eq $false)
     {
         return
@@ -245,12 +243,27 @@ function script:IsSystemDriveOnSsd
     return $false
 }
 
+function script:GetADUserFullName
+{
+    $user = Get-CimInstance -Class Win32_UserAccount -Filter "Name='$env:USERNAME'"
+    if ($user -ne $null)
+    {
+        Write-Debug "User name from AD is '$($user.FullName)'."
+        return $user.FullName
+    }
 
+    throw "User not found."
+}
 
 
 function script:GetEmailAddress
 {
     return $emailAddress
+}
+
+function script:GetUserName
+{
+    return $userName
 }
 
 function script:GetPackageCacheRoot

@@ -121,8 +121,6 @@ if ([string]::IsNullOrWhiteSpace($toolsRootPathExpanded) -eq $true)
 }
 
 
-# ScanThreats $rootPath
-
 if ([string]::IsNullOrEmpty($dataDrive) -eq $true)
 {
     # Trying to auto-detect the data drive on D:
@@ -144,7 +142,8 @@ if ([string]::IsNullOrEmpty($dataDrive) -eq $true)
             [System.IO.File]::Delete($tempFileName)
         }
     }
-    else
+	
+    if ([string]::IsNullOrEmpty($dataDrive) -eq $true)
     {
         # Auto-detection didn't work, assume the $env:SystemDrive, usually C:
         $dataDrive = $env:SystemDrive
@@ -175,10 +174,17 @@ $nugetCacheDirectory = $(GetNugetCacheDirectory)
 
 
 # -----------------------------------------------------------------------
+# Scanning for threats
+# -----------------------------------------------------------------------
+
+ScanThreats $rootPath
+
+
+# -----------------------------------------------------------------------
 # Source Code Folder
 # -----------------------------------------------------------------------
 
-CreateOrUpdateFolder $sourceCodeFolder ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\FolderIcon-Lego.ico')) 'Source code folder.' @('+I')
+CreateOrUpdateFolder $sourceCodeFolder ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\FolderIcon-Lego.ico')) 'Source code folder. Environment variable SOURCES_ROOT points to it.' @('+I')
 & icacls $sourceCodeFolder $icaclsAddUser | Out-Null
 [System.Environment]::SetEnvironmentVariable('SOURCES_ROOT', $sourceCodeFolder, $enviromentUserScope)
 
@@ -270,25 +276,6 @@ else
 
 
 # -----------------------------------------------------------------------
-# PasswordSafe Shortcut
-# -----------------------------------------------------------------------
-
-$script:passwordSafePath = ([System.IO.Path]::GetFullPath([System.IO.Path]::Combine($rootPath, '..\Documents\My Safes')))
-$script:passwordSafeExe = ([System.IO.Path]::Combine($passwordSafePath, 'bin\pwsafe.exe'))
-$script:passwordSafeFile = ([System.IO.Path]::Combine($passwordSafePath, 'pwsafe.psafe3'))
-if ([System.IO.File]::Exists($passwordSafeExe) -eq $true)
-{
-    if ([System.IO.File]::Exists($passwordSafeFile) -eq $true)
-    {
-        ScanThreats $passwordSafePath
-
-        Write-Host 'Configure PasswordSafe Desktop shortcuts...'
-        AddDesktopShortcut 'Private PasswordSafe' $passwordSafeExe @("`"$passwordSafeFile`"") 'PasswordSafe' "$passwordSafePath"
-    }
-}
-
-
-# -----------------------------------------------------------------------
 # Create Symbols directory and environment variables
 # -----------------------------------------------------------------------
 
@@ -359,19 +346,19 @@ if ([System.IO.File]::Exists($nugetConfigFile) -ne $true)
 # Configure Git
 # -----------------------------------------------------------------------
 
-Write-Host 'Configuring global Git settings...'
+Write-Host "Configuring global Git settings for '$(GetUserName)'..."
 # Environment variables to consider: https://git-scm.com/book/en/v2/Git-Internals-Environment-Variables
 # More aliases to consider
 # http://haacked.com/archive/2014/07/28/github-flow-aliases/
 # http://durdn.com/blog/2012/11/22/must-have-git-aliases-advanced-examples/
-ConfigureGitGlobally $gitPath 'user.name' $userName
+ConfigureGitGlobally $gitPath 'user.name' $(GetUserName)
 ConfigureGitGlobally $gitPath 'alias.br' 'branch'
 ConfigureGitGlobally $gitPath 'alias.co' 'checkout'
 ConfigureGitGlobally $gitPath 'alias.hist' "log --pretty=format:'%C(yellow)%h %Cred%ad%Creset | %s%d %Cblue[%an]' --graph --date=short"
 ConfigureGitGlobally $gitPath 'alias.lol' 'log --graph --oneline'
-ConfigureGitGlobally $gitPath 'alias.nb' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git checkout -b dev/$un/$bn master; git push --set-upstream origin dev/$un/$bn; }; f'
+ConfigureGitGlobally $gitPath 'alias.nb' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git checkout -b dev/$un/$bn origin/master; git push --set-upstream origin dev/$un/$bn; }; f'
 # ConfigureGitGlobally $gitPath 'alias.nb' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git checkout -b dev/$un/$bn master; git branch --set-upstream-to origin dev/$un/$bn; }; f'
-ConfigureGitGlobally $gitPath 'alias.nf' '!f() { bn=${1-zzz_temp$RANDOM}; git checkout -b feature/$bn master; git push --set-upstream origin feature/$bn; }; f'
+ConfigureGitGlobally $gitPath 'alias.nf' '!f() { bn=${1-zzz_temp$RANDOM}; git checkout -b feature/$bn origin/master; git push --set-upstream origin feature/$bn; }; f'
 # ConfigureGitGlobally $gitPath 'alias.nf' '!f() { bn=${1-zzz_temp$RANDOM}; git checkout -b feature/$bn master; git branch --set-upstream-to origin feature/$bn; }; f'
 ConfigureGitGlobally $gitPath 'alias.st' 'status'
 ConfigureGitGlobally $gitPath 'alias.up' "!f() { git pull --rebase --prune $@; git submodule update --init --recursive; }; f"

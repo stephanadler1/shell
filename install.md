@@ -7,7 +7,7 @@ and keep all the different tools up-to-date without installing them on each and 
 The solution, after many detours (see below), is this:
 
 - I'm using peer sync software, like [Resilio Sync](https://www.resilio.com/), [OneDrive](https://www.onedrive.com/), ..., to get this folder and it's tools on all my workstations.
-- When I setup a new machine, I run the `configure-os.ps1` script, usually through `configure-os.cmd`. It applies my most frequently changed OS settings.
+- When I setup a new machine, I run the `configure-os.ps1` script, usually through `configure-os.cmd`. It applies my most frequently changed OS settings. Afterwards, on touch-enabled machines, I run `configure-user.cmd`, to change the alignment of the menus back to "normal".
 - To initially configure **or re-configure** the machine, I run the `install.ps1` script, usually through `install.cmd`. To learn more about the configuration, run `help install.ps1` or invoke `install - help.cmd`.
 - In addition to having many tools available, I don't want to have my systems slow down because of all their deployment folders show up in PATH. An easy way to solve this was to use invocation scripts (all in .\ToolsCache). This has the nice side effect that I can use abbreviations to invoke tools, like `n` (instead of Notepad++) or `b` (instead of msbuild). Similar to the git customizations, where I can use `git nb branchname` instead of `git checkout -b dev/stephan/branchname`.
 

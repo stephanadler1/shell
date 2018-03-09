@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------
-# <copyright file="install.ps1" company="Stephan Adler">
+# <copyright file="change-directory.ps1" company="Stephan Adler">
 # Copyright (c) Stephan Adler. All Rights Reserved.
 # </copyright>
 #
