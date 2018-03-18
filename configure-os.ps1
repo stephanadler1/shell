@@ -117,6 +117,15 @@ foreach($service in @())
     Stop-Service -Name $service -ErrorAction SilentlyContinue
 }
 
+$rk = [Microsoft.Win32.Registry]::ClassesRoot.OpenSubKey($null, $true)
+foreach($fileExtension in @('.md'))
+{
+    $subKey = $rk.CreateSubKey($fileExtension, $true)
+    $subKey.SetValue($null, 'txtfile')
+    $subKey.SetValue('ContentType', 'text/plain')
+    $subKey.SetValue('PerceivedType', 'text')
+}
+
 
 Write-Host 'Done.'
 

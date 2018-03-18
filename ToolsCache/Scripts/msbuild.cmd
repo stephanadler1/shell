@@ -79,13 +79,15 @@ goto EOF
     if exist "!_TEMP!" rd /s /q "!_TEMP!\VGhpc0lz" > nul 2>&1
     md "!_TEMP!\VGhpc0lz" > nul 2>&1
 
-    rem call :AppendToolPath "!_MSBUILD!"
-    set PATH=!_TEMP!\VGhpc0lz
+    set PATH=
+    rem call :AppendToolPath "%_MSBUILD%"
+    call :AppendToolPath "!_TEMP!\VGhpc0lz"
     set TEMP=!_TEMP!
     set TMP=!_TEMP!
     
     echo.
     echo *** BUILD ISOLATION ACTIVE ***
+    echo To disable isolation mode, set MSBUILD_DISABLEISOLATION=1
     echo PATH     = !PATH!
     echo TEMP/TMP = !TEMP!
     echo ******************************
@@ -98,7 +100,7 @@ goto EOF
         echo Ended !DATE! !TIME!
         echo.
         echo *** FILES WRITTEN OUTSIDE OF BUILD OUTPUT ***
-        dir /b /s /a:-d "!_TEMP!"
+        echo dir /b /s /a:-d "!_TEMP!"
         echo *********************************************
         echo.
     )

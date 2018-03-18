@@ -13,7 +13,7 @@ The solution, after many detours (see below), is this:
 
 The command shortcuts available in Windows (e.g. Windows+R, always requires the added `.cmd`), Windows Command Prompt or Windows PowerShell command prompt:
 
-- Shortcuts for **msbuild** are: `b` (incremental build), `bcc` (clean build, historic for `build.exe -cC`), `msb` (incremental build with reduced log output). All commands use the multi-threaded build option (`/m`).
+- Shortcuts for **msbuild** are: `b` (incremental build), `bcc` (clean build, historic for `build.exe -cC`), `bdiag` (2 builds, one with /pp and the second with diagnostic logging), `msb` (incremental build with reduced log output). All commands use the multi-threaded build option (`/m`).
 - Shortcuts to **calculate file hashes** are: `md5` (MD5), `sha1`, `sha256`. Use `sha256 filename expected_hash` to compare the calculcated hash to the expected hash.
 - `dc`: Windows Management console including the most frequently used snap-ins. Opens file `.\ToolsCache\Scripts\DeveloperConsole.msc`.
 - `dig`: Invokes Bind Dig tool.
@@ -27,6 +27,9 @@ The command shortcuts available in Windows (e.g. Windows+R, always requires the 
 - `open`: If you have Microsoft's VSMSBuild or SlnGen tool, generates a `.sln` file based on a `dirs.proj` hierarchy and opens the generated solution in Visual Studio.
 - `openssl`: Invokes OpenSSL.
 - `python`: Invokes Python.
+- `root`: Switches to the current root of the enlistment for Git, Mercurial, Subversion and CoreXT or a subdirectory of it with `root subdir`.
+- `tools`: Opens this directory in Visual Studio Code (if installed), or changes the current directory to it.
+- `self`: Opens the developer directory, usually `%USERPROFILE%` or inside the current enlistment directory.
 - `vs`: Opens Visual Studio from the current path.
 
 The folder layout:
@@ -43,18 +46,18 @@ The folder layout:
     <td>Root path for all tools and invocation scripts for lesser used tools, like openssl.cmd or n.cmd</td></tr>
 <tr><td>.\ToolsCache\ConEmu</td>
     <td>No</td>
-    <td>My preferred console host on Windows. Still lightyears ahead of the default console, even on Windows 10.</td></tr>
+    <td>My preferred console host on Windows. Still lightyears ahead of the default console, even on Windows 10. Get if from <a href="https://conemu.github.io/">ConEmu</a> and unpack it in this directory.</td></tr>
 <tr><td>.\ToolsCache\Dig</td>
     <td>No</td>
     <td>A "better" version of <code>nslookup</code>.</td></tr>
 <tr><td>.\ToolsCache\Git.portable</td>
-    <td>Kind Of</td>
+    <td>Yes</td>
     <td>A copy of portable Git, including modifications to the authentication to allow handling of Visual Studio online. Like in a normal Git installation, <code>.\ToolsCache\Git.portable\cmd</code> is added to the PATH.</td></tr>
 <tr><td>.\ToolsCache\Git.portable.prev</td>
     <td>No</td>
     <td>A secondary copy of Git, for peer sync software that isn't as quick as a BitTorrent based solution (hello OneDrive!).</td></tr>
 <tr><td>.\ToolsCache\GnuWin32.CoreTools</td>
-    <td>Kind Of</td>
+    <td>Yes</td>
     <td>Copy of the GnuWin core tools. <code>.\ToolsCache\GnuWin32.CoreTools\bin</code> is added to the PATH.</td></tr>
 <tr><td>.\ToolsCache\ILSpy</td>
     <td>No</td>
@@ -67,10 +70,10 @@ The folder layout:
     <td>Invoke through nmap.cmd and ncat.cmd.</td></tr>
 <tr><td>.\ToolsCache\npp.7.5.4.bin.x64</td>
     <td>No</td>
-    <td>Notepad++. Invoke through n.cmd.</td></tr>
+    <td>Notepad++. Invoke through <code>n.cmd</code>. Get if from <a href="https://notepad-plus-plus.org/">Notepad++</a> and unpack the portable installer in this directory or create a new one and modify <code>n.cmd</code>.</td></tr>
 <tr><td>.\ToolsCache\Nuget</td>
     <td>No</td>
-    <td>Invoke through nuget.cmd.</td></tr>
+    <td>Invoke through <code>nuget.cmd</code>. Get it from <a href="https://www.nuget.org/downloads">Nuget.org</a> or from any Visual Studio Online repository and place it in this directory.</td></tr>
 <tr><td>.\ToolsCache\OpenSSL</td>
     <td>No</td>
     <td>Invoke through openssl.cmd.</td></tr>
@@ -79,7 +82,7 @@ The folder layout:
     <td>Invoke through python.cmd.</td></tr>
 <tr><td>.\ToolsCache\Sysinternals</td>
     <td>Yes</td>
-    <td>Copy of the Sysinternals suite.</td></tr>
+    <td>Copy of the Sysinternals suite. Get if from <a href="https://docs.microsoft.com/en-us/sysinternals/">Windows Sysinternals</a> and unpack it in this directory.</td></tr>
 <tr><td>.\ToolsCache\Various</td>
     <td>Yes</td>
     <td>Various other tools. Will always be last in PATH.</td></tr>

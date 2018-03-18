@@ -163,7 +163,12 @@ function script:ScanThreats
 
 function script:AddDesktopShortcut
 {
-    param([string] $shortcutName, [string] $targetPath, [string[]] $arguments, [string] $description, [string] $workingDirectory)
+    param([string] $shortcutName, [string] $targetPath, [string[]] $arguments, [string] $description, [string] $workingDirectory = $null, [string] $iconLocation = $null)
+
+    if ([System.String]::IsNullOrWhiteSpace($workingDirectory) -eq $true)
+    {
+        $workingDirectory = '%USERPROFILE%'
+    }
 
     $wshShell = New-Object -ComObject WScript.Shell
     $linkFile = ([System.IO.Path]::Combine("$home\Desktop", $shortcutName + ".lnk"))
@@ -172,6 +177,12 @@ function script:AddDesktopShortcut
     $shortcut.Arguments = [string]::Join(' ', $arguments)
     $shortcut.Description = $description
     $shortcut.WorkingDirectory = $workingDirectory
+
+    if ([System.String]::IsNullOrWhiteSpace($iconLocation) -ne $true)
+    {
+        $shortcut.IconLocation = $iconLocation
+    }
+
     $shortcut.Save()
 }
 
@@ -214,12 +225,18 @@ function script:CreateOrUpdateFolder
         $desktopIniFileContents += "InfoTip=$infoTip"
     }
 
-    if (([System.String]::IsNullOrWhiteSpace($folderIconFile) -ne $true) -and 
-        ([System.IO.File]::Exists($folderIconFile) -eq $true))
+    if ([System.String]::IsNullOrWhiteSpace($folderIconFile) -ne $true)
     {
-        $desktopIniFileContents += "IconFile=$folderIconFile"
-        $desktopIniFileContents += "IconIndex=0"
-        $desktopIniFileContents += "IconResource=$folderIconFile,0"
+        if ([System.IO.File]::Exists($folderIconFile) -eq $true)
+        {
+            $desktopIniFileContents += "IconFile=$folderIconFile"
+            $desktopIniFileContents += "IconIndex=0"
+            $desktopIniFileContents += "IconResource=$folderIconFile,0"
+        }
+        else
+        {
+            $desktopIniFileContents += "IconResource=$folderIconFile"
+        }
     }
 
     [System.IO.File]::WriteAllLines($desktopIniFilePath, $desktopIniFileContents, [System.Text.Encoding]::ASCII);
