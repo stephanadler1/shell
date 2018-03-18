@@ -103,6 +103,11 @@ $script:icaclsUserOnly = @(
     '/grant:r', "$($env:USERDOMAIN)\$($env:USERNAME):(OI)(CI)(F)",
     '/inheritance:r')
 
+$iconLockScreen = '%WINDIR%\System32\Shell32.dll,47'
+#$iconLego = ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\FolderIcon-Lego.ico'))
+#$iconGroup = ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\FolderIcon-Group.ico'))
+$iconLego = "$env:WINDIR\System32\Shell32.dll,80"
+$iconGroup = "$env:WINDIR\System32\Shell32.dll,160"
 
 if ([string]::IsNullOrWhiteSpace($env:OneDrive) -eq $false)
 {
@@ -184,7 +189,7 @@ ScanThreats $rootPath
 # Source Code Folder
 # -----------------------------------------------------------------------
 
-CreateOrUpdateFolder $sourceCodeFolder ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\FolderIcon-Lego.ico')) 'Source code folder. Environment variable SOURCES_ROOT points to it.' @('+I')
+CreateOrUpdateFolder $sourceCodeFolder $iconLego 'Source code folder. Environment variable SOURCES_ROOT points to it.' @('+I')
 & icacls $sourceCodeFolder $icaclsAddUser | Out-Null
 [System.Environment]::SetEnvironmentVariable('SOURCES_ROOT', $sourceCodeFolder, $enviromentUserScope)
 
@@ -197,7 +202,7 @@ if (-not ($dataDrive.StartsWith($env:SystemDrive, [System.StringComparison]::Ord
 {
     # Only create a new user folder if it is not the SYSTEMDRIVE!
     $script:secondaryUsersFolder = [System.IO.Path]::Combine($dataDrive, 'Users')
-    CreateOrUpdateFolder $secondaryUsersFolder ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\FolderIcon-Group.ico')) 'Secondary user profile folder.'
+    CreateOrUpdateFolder $secondaryUsersFolder $iconGroup 'Secondary user profile folder.'
     
     $secondaryUserFolder = [System.IO.Path]::Combine($secondaryUsersFolder, $env:USERNAME)
     if ([System.IO.Directory]::Exists($secondaryUserFolder) -ne $true)
@@ -250,7 +255,7 @@ if ([System.Environment]::OSVersion.Version.Major -ge 10)
 else 
 {
     # This is the original Windows command prompt
-    [System.Environment]::SetEnvironmentVariable('PROMPT', '$P$G', $enviromentUserScope)
+    [System.Environment]::SetEnvironmentVariable('PROMPT', '$P$G$S', $enviromentUserScope)
 }
 
 
@@ -273,6 +278,10 @@ else
 {
     Write-Host "Unable to find ConEmu at '$conEmuPath'."    
 }
+
+# https://www.tenforums.com/tutorials/77458-rundll32-commands-list-windows-10-a.html
+# rundll32.exe user32.dll, LockWorkStation
+AddDesktopShortcut 'Lock Computer' '%WINDIR%\System32\rundll32.exe' @('user32.dll,LockWorkStation') -iconLocation $iconLockScreen
 
 
 # -----------------------------------------------------------------------
@@ -299,7 +308,7 @@ SetSymbolServers $defaultSymbolPath $enviromentUserScope
 
 SpecificDeveloperMachineSetup
 
-Write-Host "Enable minimal builds in Visual Studio for specific builds..." 
+Write-Host "Enable minimal builds in Visual Studio for specific source repositories..." 
 [System.Environment]::SetEnvironmentVariable('MINIMAL_VS_BUILD', '1', $enviromentUserScope)
 
 

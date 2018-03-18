@@ -34,6 +34,7 @@ for %%v in ("Microsoft Visual Studio\2017" "Microsoft Visual Studio 14.0" "Micro
 echo No developer command prompt found.
 echo.
 
+if not defined TOOLS (echo TOOLS missing.)
 :LoadAliases
 if exist "%~dp0%~n0.doskey.alias.txt" doskey /MACROFILE="%~dp0%~n0.doskey.alias.txt"
 if exist "%~dp0%~n0.doskey.powershell.txt" doskey /MACROFILE="%~dp0%~n0.doskey.powershell.txt"
