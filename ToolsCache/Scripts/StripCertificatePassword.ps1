@@ -18,11 +18,11 @@
 
 param(
     [Parameter(Mandatory = $true)]
-	[ValidateNotNullOrEmpty()]
+    [ValidateNotNullOrEmpty()]
     [string] $in,
 
     [Parameter(Mandatory = $true)]
-	[ValidateNotNullOrEmpty()]
+    [ValidateNotNullOrEmpty()]
     [string] $password,
 
     [Parameter(Mandatory = $false)]
@@ -32,12 +32,12 @@ param(
 begin {
     Set-StrictMode -Version Latest
     $ErrorActionPreference = 'Stop'
-	
-	if ([System.IO.File]::Exists($in) -eq $false)
-	{
+    
+    if ([System.IO.File]::Exists($in) -eq $false)
+    {
         Write-Error "File '$in' not found."
-        return 1;
-	}
+        [System.Environment]::Exit(1)
+    }
 }
 
 process {
@@ -52,7 +52,5 @@ process {
 
     Write-Host "Done. The new file is at '$out'."
 
-return 0
-
-
+    [System.Environment]::Exit(0)
 }
