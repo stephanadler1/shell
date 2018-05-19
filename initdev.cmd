@@ -20,6 +20,9 @@
 
 set _WORKINGDIR=%CD%
 
+rem Disable isolation until .NET Standard 2.0 problem is solved
+set MSBUILD_DISABLEISOLATION=1
+
 for %%v in ("Microsoft Visual Studio\2017" "Microsoft Visual Studio 14.0" "Microsoft Visual Studio 12.0" "Microsoft Visual Studio 11.0") do (
     for %%e in (Enterprise Community .) do (
         if exist "%ProgramFiles(x86)%\%%~v\%%~e\Common7\Tools\VsDevCmd.bat" (

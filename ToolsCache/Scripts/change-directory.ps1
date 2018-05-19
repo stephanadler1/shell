@@ -68,18 +68,22 @@ process {
 
         try {
             # Subversion
-            $svnOutput = & svn info .
+            & svn info . 2>&1 | Out-Null
             if ($LASTEXITCODE -eq 0)
             {
-                $regEx = New-Object System.Text.RegularExpressions.Regex('Working Copy Root Path: (.*?)URL:')
-                $match = $regEx.Match($svnOutput)
-                if ($match.Success -and ($match.Groups.Count -ge 1))
+                $svnOutput = & svn info .
+                if ($LASTEXITCODE -eq 0)
                 {
-                    $path = $match.Groups[1].Value.TrimEnd(' ')
-                    return $path
-                }
+                    $regEx = New-Object System.Text.RegularExpressions.Regex('Working Copy Root Path: (.*?)URL:')
+                    $match = $regEx.Match($svnOutput)
+                    if ($match.Success -and ($match.Groups.Count -ge 1))
+                    {
+                        $path = $match.Groups[1].Value.TrimEnd(' ')
+                        return $path
+                    }
 
-                return ''
+                    return ''
+                }
             }
         }
         catch {
