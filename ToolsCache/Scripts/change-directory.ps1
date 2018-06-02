@@ -21,7 +21,7 @@ param(
     [string] $option,
 
     [Parameter(Mandatory = $false)]
-    [string] $relativePath
+    [string] $relativePath = ''
 )
 
 begin {
@@ -134,6 +134,9 @@ process {
 
     #Write-Host "*** ChangeTo=$changeTo"
 
+    $relativePath = $relativePath.TrimEnd('\')
+    #Write-Host "*** RelativePath=$relativePath"
+
     if (-not ([System.String]::IsNullOrWhitespace($relativePath)))
     {
         $changeToSub = [System.IO.Path]::Combine($changeTo, $relativePath)
@@ -151,9 +154,10 @@ process {
         $switchTo = $changeTo
     }
 
-    if (-not ([System.IO.Directory]::GetCurrentDirectory().Equals($switchTo, [System.StringComparison]::OrdinalIgnoreCase)))
+    #Write-Host "*** SwitchTo=$switchTo"
+    #Write-Host "*** GetCurrentDirectory=$([System.IO.Directory]::GetCurrentDirectory())"
+    if (-not ([System.IO.Directory]::GetCurrentDirectory().Equals($switchTo, [System.StringComparison]::OrdinalIgnoreCase) -eq $true))
     {
-        #Write-Host "*** SwitchTo=$switchTo"
         Set-Location -Path $switchTo | Out-Null
         Write-Output $switchTo
         return
