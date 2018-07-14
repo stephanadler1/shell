@@ -19,6 +19,7 @@
 :: -----------------------------------------------------------------------
 
 setlocal enabledelayedexpansion
+set _EXITCODE=1
 
 :: Calculate parallelism
 set /A _cpu=!NUMBER_OF_PROCESSORS! * !NUMBER_OF_PROCESSORS!
@@ -48,13 +49,14 @@ set _MSBUILD_ARGS=/m:!_cpu! /nr:false
 echo ^> "!_MSBUILD!" !_MSBUILD_ARGS! !MSBUILD_ARGS! %*
 echo. 
 call "!_MSBUILD!" !_MSBUILD_ARGS! !MSBUILD_ARGS! %*
+set _EXITCODE=%ERRORLEVEL%
 
 :: Kill all still running instances of MSBuild
 call "%TOOLS_SYSINTERNALS%\pskill.exe" -accepteula -t msbuild > nul 2>&1
 
 if not defined MSBUILD_DISABLEISOLATION call :ReportIsolation
 
-exit /b 0
+exit /b %_EXITCODE%
 
 
 :SetTool
