@@ -19,7 +19,7 @@ The command shortcuts available in Windows (e.g. Windows+R, always requires the 
 - `dig`: Invokes Bind Dig tool.
 - `e`: Opens the Windows Explorer from the current location, or any other location with `e path`.
 - `ilspy`: Invokes ILSpy.
-- `n`: Invokes Notepad++, to open a file use `n file1 [file2...]`
+- `n`, `nn`: Invokes Notepad++, to open a file use `n file1 [file2...]`
 - `nant`: Invokes NAnt.
 - `ncat`: Invokes NCat.
 - `nmap`: Invokes NMap.
