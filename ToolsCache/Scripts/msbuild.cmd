@@ -50,16 +50,16 @@ echo.
 call "!_MSBUILD!" !_MSBUILD_ARGS! !MSBUILD_ARGS! %*
 
 :: Kill all still running instances of MSBuild
-call "%TOOLS_SYSINTERNALS%\pskill" -accepteula -t msbuild > nul 2>&1
+call "%TOOLS_SYSINTERNALS%\pskill.exe" -accepteula -t msbuild > nul 2>&1
 
 if not defined MSBUILD_DISABLEISOLATION call :ReportIsolation
 
-goto EOF
+exit /b 0
 
 
 :SetTool
     set %~2=%~f$PATH:1
-    goto :EOF
+    exit /b 0
 
 
 :ErrorMsBuildNotFound
@@ -67,7 +67,6 @@ goto EOF
     echo *** FATAL *** - MSBUILD.EXE was not found on the system. Cannot build.
     echo.
     exit /b 1
-    goto EOF
 
 :AppendToolPath
     if defined PATH (set "PATH=%PATH%;%~dp1." ) else (set "PATH=%~dp1." )
@@ -75,25 +74,37 @@ goto EOF
     
 :SetupIsolation
     set _TEMP=%TEMP%\wtf
+    set _PATH=%_TEMP%\VGhpc0lz
     rem if exist "!_TEMP!" rd /s /q "!_TEMP!" > nul 2>&1
-    if exist "!_TEMP!" rd /s /q "!_TEMP!\VGhpc0lz" > nul 2>&1
-    md "!_TEMP!\VGhpc0lz" > nul 2>&1
+    if exist "%_TEMP%" rd /s /q "%_TEMP%" > nul 2>&1
+    md "%_TEMP%" > nul 2>&1
+    md "%_PATH%" > nul 2>&1
 
-    set PATH=
+    rem PATH needs to be set to something. Some applications will through an exception otherwise.
+    set PATH=%_PATH%
+    rem set PATH=!PATH!;%SYSTEMROOT%\System32;%SYSTEMROOT%
     rem call :AppendToolPath "%_MSBUILD%"
-    call :AppendToolPath "!_TEMP!\VGhpc0lz"
-    set TEMP=!_TEMP!
-    set TMP=!_TEMP!
+    set TEMP=%_TEMP%
+    set TMP=%_TEMP%
+    set INCLUDE=%_PATH%
+    set LIB=%_PATH%
     
     echo.
     echo *** BUILD ISOLATION ACTIVE ***
     echo To disable isolation mode, set MSBUILD_DISABLEISOLATION=1
     echo PATH     = !PATH!
     echo TEMP/TMP = !TEMP!
+    echo INCLUDE  = !INCLUDE!
+    echo LIB      = !LIB!
     echo ******************************
     exit /b 0
     
 :ReportIsolation
+    rem Check if there are any files in the TEMP location
+    dir /b /s /a:-d "!_TEMP!" > nul 2>&1
+    if errorlevel 1 exit /b 0
+
+    rem There are really files there, let's enumerate them
     dir /b /s /a:-d "!_TEMP!" | "%WINDIR%\System32\findstr.exe" /i /r "^\S*" > nul 2>&1
     if errorlevel 1 echo.
     if errorlevel 0 (

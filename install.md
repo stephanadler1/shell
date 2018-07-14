@@ -34,59 +34,25 @@ The command shortcuts available in Windows (e.g. Windows+R, always requires the 
 
 The folder layout:
 
-<table>
-<tr><th>Path</th>
-    <th>In Search PATH</th>
-    <th>Description</th></tr>
-<tr><td>.\</td>
-    <td>No</td>
-    <td>Contains this file and the installers.</td></tr>
-<tr><td>.\ToolsCache</td>
-    <td>Yes</td>
-    <td>Root path for all tools and invocation scripts for lesser used tools, like openssl.cmd or n.cmd</td></tr>
-<tr><td>.\ToolsCache\ConEmu</td>
-    <td>No</td>
-    <td>My preferred console host on Windows. Still lightyears ahead of the default console, even on Windows 10. Get if from <a href="https://conemu.github.io/">ConEmu</a> and unpack it in this directory.</td></tr>
-<tr><td>.\ToolsCache\Dig</td>
-    <td>No</td>
-    <td>A "better" version of <code>nslookup</code>.</td></tr>
-<tr><td>.\ToolsCache\Git.portable</td>
-    <td>Yes</td>
-    <td>A copy of portable Git, including modifications to the authentication to allow handling of Visual Studio online. Like in a normal Git installation, <code>.\ToolsCache\Git.portable\cmd</code> is added to the PATH.</td></tr>
-<tr><td>.\ToolsCache\Git.portable.prev</td>
-    <td>No</td>
-    <td>A secondary copy of Git, for peer sync software that isn't as quick as a BitTorrent based solution (hello OneDrive!).</td></tr>
-<tr><td>.\ToolsCache\GnuWin32.CoreTools</td>
-    <td>Yes</td>
-    <td>Copy of the GnuWin core tools. <code>.\ToolsCache\GnuWin32.CoreTools\bin</code> is added to the PATH.</td></tr>
-<tr><td>.\ToolsCache\ILSpy</td>
-    <td>No</td>
-    <td>Invoke through ilspy.cmd.</td></tr>
-<tr><td>.\ToolsCache\NAnt</td>
-    <td>No</td>
-    <td>Invoke through nant.cmd.</td></tr>
-<tr><td>.\ToolsCache\NMap</td>
-    <td>No</td>
-    <td>Invoke through nmap.cmd and ncat.cmd.</td></tr>
-<tr><td>.\ToolsCache\npp.7.5.4.bin.x64</td>
-    <td>No</td>
-    <td>Notepad++. Invoke through <code>n.cmd</code>. Get if from <a href="https://notepad-plus-plus.org/">Notepad++</a> and unpack the portable installer in this directory or create a new one and modify <code>n.cmd</code>.</td></tr>
-<tr><td>.\ToolsCache\Nuget</td>
-    <td>No</td>
-    <td>Invoke through <code>nuget.cmd</code>. Get it from <a href="https://www.nuget.org/downloads">Nuget.org</a> or from any Visual Studio Online repository and place it in this directory.</td></tr>
-<tr><td>.\ToolsCache\OpenSSL</td>
-    <td>No</td>
-    <td>Invoke through openssl.cmd.</td></tr>
-<tr><td>.\ToolsCache\Python</td>
-    <td>No</td>
-    <td>Invoke through python.cmd.</td></tr>
-<tr><td>.\ToolsCache\Sysinternals</td>
-    <td>Yes</td>
-    <td>Copy of the Sysinternals suite. Get if from <a href="https://docs.microsoft.com/en-us/sysinternals/">Windows Sysinternals</a> and unpack it in this directory.</td></tr>
-<tr><td>.\ToolsCache\Various</td>
-    <td>Yes</td>
-    <td>Various other tools. Will always be last in PATH.</td></tr>
-</table>
+| Path | In Search `PATH` | Description |
+| --- | --- | --- |
+| .\ | No | Contains this file and the installers. |
+| .\ToolsCache | Yes | Root path for all tools and invocation scripts for lesser used tools, like `openssl.cmd` or `n.cmd`. |
+| \ToolsCache\ConEmu | No | My preferred console host on Windows. Still lightyears ahead of the default console, even on Windows 10. Get if from [ConEmu](https://conemu.github.io/) and unpack it in this directory. |
+| \ToolsCache\Dig | No | A "better" version of `nslookup`. |
+| \ToolsCache\Git.portable | Yes | A copy of portable Git, including modifications to the authentication to allow handling of Visual Studio online. Like in a normal Git installation, `.\ToolsCache\Git.portable\cmd` is added to the `PATH`. |
+| \ToolsCache\Git.portable.prev | No | A secondary copy of Git, for peer sync software that isn't as quick as a BitTorrent based solution (hello OneDrive!). |
+| \ToolsCache\GnuWin32.CoreTools | Yes | Copy of the GnuWin core tools. `.\ToolsCache\GnuWin32.CoreTools\bin` is added to the `PATH`. |
+| \ToolsCache\ILSpy | No | Invoke through `ilspy.cmd`. |
+| \ToolsCache\NAnt | No | Invoke through `nant.cmd`. |
+| \ToolsCache\NMap | No | Invoke through `nmap.cmd` and `ncat.cmd`. |
+| \ToolsCache\npp.7.5.4.bin.x64 | No | Notepad++. Invoke through `n.cmd`. Get if from [Notepad++](https://notepad-plus-plus.org/) and unpack the portable installer in this directory or create a new one and modify `n.cmd`. |
+| \ToolsCache\Nuget | No | Invoke through `nuget.cmd`. Get it from [Nuget.org](https://www.nuget.org/downloads) or from any Visual Studio Online repository and place it in this directory. |
+| \ToolsCache\OpenSSL | No | Invoke through `openssl.cmd`. |
+| \ToolsCache\Python | No | Invoke through `python.cmd`. |
+| \ToolsCache\Sysinternals | Yes | Copy of the Sysinternals suite. Get if from [Windows Sysinternals](https://docs.microsoft.com/en-us/sysinternals/) and unpack it in this directory. |
+| \ToolsCache\Various | Yes | Various other tools. Will always be last in `PATH`. |
+
 
 
 ## License and Copyright

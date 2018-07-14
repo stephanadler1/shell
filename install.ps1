@@ -363,6 +363,8 @@ Write-Host "Configuring global Git settings for '$(GetUserName)'..."
 ConfigureGitGlobally $gitPath 'user.name' $(GetUserName)
 ConfigureGitGlobally $gitPath 'alias.br' 'branch'
 ConfigureGitGlobally $gitPath 'alias.co' 'checkout'
+ConfigureGitGlobally $gitPath 'alias.com' 'checkout master'
+ConfigureGitGlobally $gitPath 'alias.cod' 'checkout develop'
 ConfigureGitGlobally $gitPath 'alias.hist' "log --pretty=format:'%C(yellow)%h %Cred%ad%Creset | %s%d %Cblue[%an]' --graph --date=short"
 ConfigureGitGlobally $gitPath 'alias.lol' 'log --graph --oneline'
 ConfigureGitGlobally $gitPath 'alias.nb' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git checkout -b dev/$un/$bn origin/master; git push --set-upstream origin dev/$un/$bn; }; f'

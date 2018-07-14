@@ -21,7 +21,7 @@ param(
     [string] $option,
 
     [Parameter(Mandatory = $false)]
-    [string] $relativePath
+    [string] $relativePath = ''
 )
 
 begin {
@@ -68,18 +68,22 @@ process {
 
         try {
             # Subversion
-            $svnOutput = & svn info .
+            & svn info . 2>&1 | Out-Null
             if ($LASTEXITCODE -eq 0)
             {
-                $regEx = New-Object System.Text.RegularExpressions.Regex('Working Copy Root Path: (.*?)URL:')
-                $match = $regEx.Match($svnOutput)
-                if ($match.Success -and ($match.Groups.Count -ge 1))
+                $svnOutput = & svn info .
+                if ($LASTEXITCODE -eq 0)
                 {
-                    $path = $match.Groups[1].Value.TrimEnd(' ')
-                    return $path
-                }
+                    $regEx = New-Object System.Text.RegularExpressions.Regex('Working Copy Root Path: (.*?)URL:')
+                    $match = $regEx.Match($svnOutput)
+                    if ($match.Success -and ($match.Groups.Count -ge 1))
+                    {
+                        $path = $match.Groups[1].Value.TrimEnd(' ')
+                        return $path
+                    }
 
-                return ''
+                    return ''
+                }
             }
         }
         catch {
@@ -130,6 +134,9 @@ process {
 
     #Write-Host "*** ChangeTo=$changeTo"
 
+    $relativePath = $relativePath.TrimEnd('\')
+    #Write-Host "*** RelativePath=$relativePath"
+
     if (-not ([System.String]::IsNullOrWhitespace($relativePath)))
     {
         $changeToSub = [System.IO.Path]::Combine($changeTo, $relativePath)
@@ -147,9 +154,10 @@ process {
         $switchTo = $changeTo
     }
 
-    if (-not ([System.IO.Directory]::GetCurrentDirectory().Equals($switchTo, [System.StringComparison]::OrdinalIgnoreCase)))
+    #Write-Host "*** SwitchTo=$switchTo"
+    #Write-Host "*** GetCurrentDirectory=$([System.IO.Directory]::GetCurrentDirectory())"
+    if (-not ([System.IO.Directory]::GetCurrentDirectory().Equals($switchTo, [System.StringComparison]::OrdinalIgnoreCase) -eq $true))
     {
-        #Write-Host "*** SwitchTo=$switchTo"
         Set-Location -Path $switchTo | Out-Null
         Write-Output $switchTo
         return
