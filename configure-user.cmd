@@ -20,3 +20,5 @@
 
 rem https://www.askvg.com/how-to-change-menu-position-from-left-to-right-in-windows-vista/
 call explorer shell:::{80F3F1D5-FECA-45F3-BC32-752C152E456E}
+call explorer "%APPDATA%\Microsoft\Windows\Start Menu"
+if exist "%SYSTEMDRIVE%\Default\AppData\Roaming\Microsoft\Windows\Start Menu" call explorer "%SYSTEMDRIVE%\Default\AppData\Roaming\Microsoft\Windows\Start Menu"
