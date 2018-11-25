@@ -6,9 +6,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,7 @@
 <#
 .SYNOPSIS
 This script configures the host operating system usable for me (Stephan Adler).
- 
+
 .DESCRIPTION
 The script configures the host operating system in a way that makes it consistent across all
 my computers. It assumes that the system is partitioned into 2 drives/partitions:
@@ -50,7 +50,7 @@ The following TOOLS are being installed into the $env:PATH and their own environ
 * $toolsRootPath - is the root of the tools cache. It is being added to $env:PATH and $env:TOOLS. It contains many *.cmd files that hook up lesser used tools, like OpenSSL, Python, NMap, MSBuild, NuGet, Notepad++. This provides an easy way to extend the tools coverage without overloading $env:PATH and adversely affecting the system's performance.
 * Sysinternals are installed into $env:PATH and $env:TOOLS_SYSINTERNALS.
 * Gnu Tools are installed into $env:PATH and $env:TOOLS_GNUWINCORETOOLS.
-* Git is installed into $env:PATH and $env:TOOLS_GIT. 
+* Git is installed into $env:PATH and $env:TOOLS_GIT.
 * Various tools located in $toolsRootPath\Various are installed into $env:PATH and $env:TOOLS_VARIOUS.
 
 The global GIT configuration is adjusted to
@@ -69,7 +69,10 @@ The DEBUG SYMBOL CACHE is setup up
 
 * in folder $symbolCacheDirectory
 * and symbol servers are configured in $env:_NT_SYMBOL_PATH.
-#> 
+
+.LINK
+https://github.com/stephanadler1/shell/blob/master/install.md
+#>
 
 param(
     # Provide a drive letter where you want to place your user data. D: is used if writeable otherwise $env:SYSTEMDRIVE is used.
@@ -99,7 +102,7 @@ $script:icaclsAddUser = @(
 
 $script:icaclsUserOnly = @(
     '/grant:r', "NT AUTHORITY\SYSTEM:(OI)(CI)(F)",
-    '/grant:r', "BUILTIN\Administrators:(OI)(CI)(F)" 
+    '/grant:r', "BUILTIN\Administrators:(OI)(CI)(F)"
     '/grant:r', "$($env:USERDOMAIN)\$($env:USERNAME):(OI)(CI)(F)",
     '/inheritance:r')
 
@@ -147,7 +150,7 @@ if ([string]::IsNullOrEmpty($dataDrive) -eq $true)
             [System.IO.File]::Delete($tempFileName)
         }
     }
-	
+
     if ([string]::IsNullOrEmpty($dataDrive) -eq $true)
     {
         # Auto-detection didn't work, assume the $env:SystemDrive, usually C:
@@ -193,6 +196,28 @@ CreateOrUpdateFolder $sourceCodeFolder $iconLego 'Source code folder. Environmen
 & icacls $sourceCodeFolder $icaclsAddUser | Out-Null
 [System.Environment]::SetEnvironmentVariable('SOURCES_ROOT', $sourceCodeFolder, $enviromentUserScope)
 
+# Copy directory.build.(props|targets) files into the source code folders to detect poorly written code
+$directoryBuildFile = [System.IO.Path]::Combine($sourceCodeFolder, 'directory.build.props')
+if ([System.IO.File]::Exists($directoryBuildFile) -ne $true)
+{
+    Copy-Item ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\directory.build.props.template.xml')) -Destination $directoryBuildFile -Force
+    & attrib +R "$directoryBuildFile" | Out-Null
+}
+
+$directoryBuildFile = [System.IO.Path]::Combine($sourceCodeFolder, 'directory.build.targets')
+if ([System.IO.File]::Exists($directoryBuildFile) -ne $true)
+{
+    Copy-Item ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\directory.build.targets.template.xml')) -Destination $directoryBuildFile -Force
+    & attrib +R "$directoryBuildFile" | Out-Null
+}
+
+$editorConfigFile = [System.IO.Path]::Combine($sourceCodeFolder, '.editorconfig')
+if ([System.IO.File]::Exists($editorConfigFile) -ne $true)
+{
+    Copy-Item ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\editorconfig.template.ini')) -Destination $editorConfigFile -Force
+    & attrib +R "$editorConfigFile" | Out-Null
+}
+
 
 # -----------------------------------------------------------------------
 # Secondary User Folder
@@ -203,7 +228,7 @@ if (-not ($dataDrive.StartsWith($env:SystemDrive, [System.StringComparison]::Ord
     # Only create a new user folder if it is not the SYSTEMDRIVE!
     $script:secondaryUsersFolder = [System.IO.Path]::Combine($dataDrive, 'Users')
     CreateOrUpdateFolder $secondaryUsersFolder $iconGroup 'Secondary user profile folder.'
-    
+
     $secondaryUserFolder = [System.IO.Path]::Combine($secondaryUsersFolder, $env:USERNAME)
     if ([System.IO.Directory]::Exists($secondaryUserFolder) -ne $true)
     {
@@ -252,7 +277,7 @@ if ([System.Environment]::OSVersion.Version.Major -ge 10)
 {
     [System.Environment]::SetEnvironmentVariable('PROMPT', '$E[m$E[32m$T$S$E[92m$P$E[90m$_$E[90m$G$E[m$S$E]9;12$E\', $enviromentUserScope)
 }
-else 
+else
 {
     # This is the original Windows command prompt
     [System.Environment]::SetEnvironmentVariable('PROMPT', '$P$G$S', $enviromentUserScope)
@@ -269,14 +294,14 @@ if ([System.IO.File]::Exists([System.Environment]::ExpandEnvironmentVariables($c
     Write-Host 'Set ConEmu Desktop shortcuts...'
     # AddDesktopShortcut 'Command Shell' $conEmuPath @('-run', "`"$env:COMSPEC`"") 'Command Processor in ConEmu64' 'd:\dev'
     # AddDesktopShortcut 'Developer Shell' $conEmuPath @('-run', "`"$env:COMSPEC`"", '/k', "`"$rootPath\initdev.cmd`"") 'Developer Command Processor in ConEmu64' 'd:\dev'
-    AddDesktopShortcut 'Command Shell' $conEmuPath @('-run', '%COMSPEC%', '/d', '/k', "`"title Command Prompt`"") 'Command Processor in ConEmu64' "$env:HOMEDRIVE\$env:HOMEPATH"
-    AddDesktopShortcut 'Developer Shell' $conEmuPath @('-run', '%COMSPEC%', '/d', '/s', '/k', "`"`"$rootPath\initdev.cmd`"`"") 'Developer Command Processor in ConEmu64' "$($dataDrive)dev"
+    AddDesktopShortcut 'Command Shell' $conEmuPath @('-run', '`"%COMSPEC%`"', '/d', '/k', "`"title Command Prompt`"") 'Command Processor in ConEmu64' "$env:HOMEDRIVE\$env:HOMEPATH"
+    AddDesktopShortcut 'Developer Shell' $conEmuPath @('-run', '`"%COMSPEC%`"', '/d', '/s', '/k', "`"`"$rootPath\initdev.cmd`"`"") 'Developer Command Processor in ConEmu64' "$($dataDrive)dev"
     AddDesktopShortcut 'PowerShell Shell' $conEmuPath @('-run', 'powershell.exe') 'PowerShell in ConEmu64' 'd:\dev'
     AddDesktopShortcut 'Developer Shell (PS)' $conEmuPath @('-run', 'powershell.exe', '-NoLogo', '-NoExit', '-Mta', '-ExecutionPolicy RemoteSigned', '-File', "`"$rootPath\initdev.ps1`"") 'Developer Command Processor (PS) in ConEmu64' 'd:\dev'
 }
-else 
+else
 {
-    Write-Host "Unable to find ConEmu at '$conEmuPath'."    
+    Write-Host "Unable to find ConEmu at '$conEmuPath'."
 }
 
 # https://www.tenforums.com/tutorials/77458-rundll32-commands-list-windows-10-a.html
@@ -289,7 +314,7 @@ AddDesktopShortcut 'Lock Computer' '%WINDIR%\System32\rundll32.exe' @('user32.dl
 # -----------------------------------------------------------------------
 
 $script:symbolCacheDirectory = [System.IO.Path]::Combine($dataDrive, 'Symbols')
-Write-Host "Configure Symbol cache to be $symbolCacheDirectory..." 
+Write-Host "Configure Symbol cache to be $symbolCacheDirectory..."
 [System.IO.Directory]::CreateDirectory($symbolCacheDirectory) | Out-Null
 
 # Compress the folder, prevent indexing, give current user full access
@@ -308,7 +333,7 @@ SetSymbolServers $defaultSymbolPath $enviromentUserScope
 
 SpecificDeveloperMachineSetup
 
-Write-Host "Enable minimal builds in Visual Studio for specific source repositories..." 
+Write-Host "Enable minimal builds in Visual Studio for specific source repositories..."
 [System.Environment]::SetEnvironmentVariable('MINIMAL_VS_BUILD', '1', $enviromentUserScope)
 
 
@@ -318,7 +343,7 @@ Write-Host "Enable minimal builds in Visual Studio for specific source repositor
 
 if ($packageCacheRoot -ne $null)
 {
-    Write-Host "Configure package root to be $packageCacheRoot..." 
+    Write-Host "Configure package root to be $packageCacheRoot..."
     [System.IO.Directory]::CreateDirectory($packageCacheRoot) | Out-Null
     # Compress the folder, prevent indexing, give current user full access
     & compact /c "$packageCacheRoot" | Out-Null
@@ -326,19 +351,18 @@ if ($packageCacheRoot -ne $null)
     & icacls $packageCacheRoot $icaclsAddUser | Out-Null
 }
 
-Write-Host "Configure Nuget cache to be $nugetCacheDirectory..." 
-[System.IO.Directory]::CreateDirectory($nugetCacheDirectory) | Out-Null
-[System.Environment]::SetEnvironmentVariable('NugetMachineInstallRoot', $nugetCacheDirectory, $enviromentUserScope)
-
-if ($packageCacheRoot -eq $null)
+if ($nugetCacheDirectory -ne $null)
 {
+    Write-Host "Configure Nuget cache to be $nugetCacheDirectory..."
+    [System.IO.Directory]::CreateDirectory($nugetCacheDirectory) | Out-Null
+    [System.Environment]::SetEnvironmentVariable('NugetMachineInstallRoot', $nugetCacheDirectory, $enviromentUserScope)
     # Compress the folder, prevent indexing, give current user full access
     & compact /c "$nugetCacheDirectory" | Out-Null
     & attrib +I "$nugetCacheDirectory" /s /d | Out-Null
     & icacls $nugetCacheDirectory $icaclsAddUser | Out-Null
 }
 
-# Configure NuGet for the source code folder base on template file
+# Configure NuGet for the source code folder based on template file
 $nugetConfigFile = [System.IO.Path]::Combine($sourceCodeFolder, 'NuGet.config')
 if ([System.IO.File]::Exists($nugetConfigFile) -ne $true)
 {
@@ -361,10 +385,12 @@ Write-Host "Configuring global Git settings for '$(GetUserName)'..."
 # http://haacked.com/archive/2014/07/28/github-flow-aliases/
 # http://durdn.com/blog/2012/11/22/must-have-git-aliases-advanced-examples/
 ConfigureGitGlobally $gitPath 'user.name' $(GetUserName)
+ConfigureGitGlobally $gitPath 'user.email' $(GetEmailAddress)
 ConfigureGitGlobally $gitPath 'alias.br' 'branch'
 ConfigureGitGlobally $gitPath 'alias.co' 'checkout'
 ConfigureGitGlobally $gitPath 'alias.com' 'checkout master'
 ConfigureGitGlobally $gitPath 'alias.cod' 'checkout develop'
+ConfigureGitGlobally $gitPath 'alias.gh' '!f() { cid=$(git rev-parse head); echo $cid; echo $cid | clip; }; f'
 ConfigureGitGlobally $gitPath 'alias.hist' "log --pretty=format:'%C(yellow)%h %Cred%ad%Creset | %s%d %Cblue[%an]' --graph --date=short"
 ConfigureGitGlobally $gitPath 'alias.lol' 'log --graph --oneline'
 ConfigureGitGlobally $gitPath 'alias.nb' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git checkout -b dev/$un/$bn origin/master; git push --set-upstream origin dev/$un/$bn; }; f'
@@ -377,8 +403,7 @@ ConfigureGitGlobally $gitPath 'alias.wipe' "!f() { git add -A; git commit -qm '*
 ConfigureGitGlobally $gitPath 'alias.pause' "!f() { git add -A; git commit -m '*** SAVEPOINT ***. Use git start to resume work.'; }; f"
 ConfigureGitGlobally $gitPath 'alias.start' 'reset HEAD~1 --mixed'
 # ConfigureGitGlobally $gitPath 'alias.nw' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git worktree add --track -b dev/$un/$bn \dev\$bn master; git branch --set-upstream-to origin dev/$un/$bn; }; f'
-ConfigureGitGlobally $gitPath 'user.email' $(GetEmailAddress)
 
 
-Write-Host 'Done.' 
+Write-Host 'Done.'
 

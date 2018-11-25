@@ -19,7 +19,7 @@ The command shortcuts available in Windows (e.g. Windows+R, always requires the 
 - `dig`: Invokes Bind Dig tool.
 - `e`: Opens the Windows Explorer from the current location, or any other location with `e path`.
 - `ilspy`: Invokes ILSpy.
-- `n`, `nn`: Invokes Notepad++, to open a file use `n file1 [file2...]`
+- `n`, `nn`, `npp`: Invokes Notepad++, to open a file use `n file1 [file2...]`
 - `nant`: Invokes NAnt.
 - `ncat`: Invokes NCat.
 - `nmap`: Invokes NMap.
@@ -53,7 +53,17 @@ The folder layout:
 | \ToolsCache\Sysinternals | Yes | Copy of the Sysinternals suite. Get if from [Windows Sysinternals](https://docs.microsoft.com/en-us/sysinternals/) and unpack it in this directory. |
 | \ToolsCache\Various | Yes | Various other tools. Will always be last in `PATH`. |
 
+User environment variables being set:
 
+- \_NT\_SYMBOL_PATH
+- SOURCES\_ROOT 
+- TOOLS.
+- TOOLS\_GNUWINCORETOOLS
+- TOOLS\_GIT
+- TOOLS\_SYSINTERNALS
+- TOOLS\_URL\_GITHUB
+- TOOLS\_URL\_VSO
+- TOOLS\_VARIOUS
 
 ## License and Copyright
 

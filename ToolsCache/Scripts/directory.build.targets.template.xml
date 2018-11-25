@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="BuildBreak" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+  [Customize your build](https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build)
+  Directory.Build.targets is imported from Microsoft.Common.targets after importing .targets files from NuGet packages.
+  So, it can be used to override properties and targets defined in most of the build logic, but at times it may be
+  necessary to do customizations within the project file after the final import.
+  -->
+  <Target Name="BuildBreak" BeforeTargets="Clean;Build;Rebuild;Restore">
+    <ItemGroup>
+      <_AccessedFile Condition=" '$(MSBuildCustomizationPropsFailure)' != '' " Include="$(MSBuildThisFileDirectory)directory.build.props" />
+      <_AccessedFile Include="$(MSBuildThisFileFullPath)" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <_Message>This build accessed build files outside its repository (@(_AccessedFile -> '%27%(Identity)%27', ' and ')). This can happen if the build is not set up properly. With the recent introduction of build customization through 'directory.build.props' and 'directory.build.targets' (please read https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build) it is strongly recommended to place empty files in the root of every repository to prevent this from happening.</_Message>
+    </PropertyGroup>
+
+    <Warning
+      Condition=" '$(MSBUILD_DISABLEISOLATION)' != '' "
+      Code="BUILD-CONTAINMENT-VIOLATION"
+      File="@(_AccessedFile)"
+      Text="$(_Message)"/>
+    <Error
+      Condition=" '$(MSBUILD_DISABLEISOLATION)' == '' "
+      Code="BUILD-CONTAINMENT-VIOLATION"
+      File="@(_AccessedFile)"
+      Text="$(_Message)"/>
+  </Target>
+</Project>

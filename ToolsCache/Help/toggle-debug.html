@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>toggle-debug(1)</title>
+        <meta name="author" content="Stephan Adler" />
+        <link rel="icon" href="../Scripts/FolderIcon-Lego.ico">
+        <link rel="stylesheet" href="./help.css" />
+    </head>
+    <body>
+        <h1>toggle-debug(1) Manual Page</h1>
+
+        <h2>Name</h2>
+        <p><b>toggle-debug</b> &ndash; Toggles between debug logging on and off.</p>
+
+        <h2>Synopsis</h2>
+        <p><code>toggle-debug</code></p>
+
+        <h2 id="Description">Description</h2>
+        <p>Debug logging in all scripts is controlled by the environment variable <code>_DEBUG</code> being
+            set (logging is on) and not set (logging is off). This command switches between the two states
+            such that subsequent commands emit logging.</p>
+
+        <h2>Environment</h2>
+        <dl>
+            <dt>_DEBUG</dt>
+            <dd>If defined enables diagnostic output of shell scripts. All shell scripts should have
+                <code>@if not defined _DEBUG echo off</code> as their first line.</dd>
+        </dl>
+    </body>
+</html>

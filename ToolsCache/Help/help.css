@@ -1,0 +1,11 @@
+body {
+    font-family: 'Open Sans', 'Segoe UI', sans-serif;
+    margin-left: 35pt;
+    margin-right: 5pt;
+}
+
+h1, h2, h3, h4 {
+    font-weight: normal;
+    color: green;
+    margin-left: -30pt;
+}

@@ -1,0 +1,16 @@
+# See https://editorconfig.org/
+# Install the plug-in in VS Code: https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig
+# Visual Studio, see https://docs.microsoft.com/en-us/visualstudio/ide/create-portable-custom-editor-options
+
+
+root = true
+
+[**]
+charset = utf-8
+end_of_file = crlf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+max_line_length = 120
+trim_trailing_whitespace = true
+

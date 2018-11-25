@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>md5(1), sha1(1), sha256(1)</title>
+        <meta name="author" content="Stephan Adler" />
+        <link rel="icon" href="../Scripts/FolderIcon-Lego.ico">
+        <link rel="stylesheet" href="./help.css" />
+        <!--
+            http://www.schweikhardt.net/man_page_howto.html
+        -->
+    </head>
+    <body>
+        <h1>md5(1), sha1(1), sha256(1) Manual Page</h1>
+
+        <h2>Name</h2>
+        <p>Various command calculating file hashes:</p>
+        <ul>
+            <li><b>md5</b> &ndash; Calculates the MD5 hash value for the file.</li>
+            <li><b>sha1</b> &ndash; Calculates the SHA-1 128 bit hash value for the file.</li>
+            <li><b>sha256</b> &ndash; Calculates the SHA-2 256 bit hash value for the file.</li>
+        </ul>
+
+        <h2>Synopsis</h2>
+        <p><code>md5 File</code></p>
+        <p><code>sha1 File</code></p>
+        <p><code>sha2 File [ExpectedHash]</code></p>
+
+        <h2>Description</h2>
+        <p>Calculates the specified hash value for the <em>File</em>. For <code>sha256</code> when a
+        <em>ExpectedHash</em> is specified it is compared to the calculated hash value.</p>
+
+        <h2>See Also</h2>
+        <ul>
+            <li><a href="https://en.wikipedia.org/wiki/MD5">MD5</a></li>
+            <li><a href="https://en.wikipedia.org/wiki/SHA-1">SHA-1</a></li>
+            <li><a href="https://en.wikipedia.org/wiki/SHA-2">SHA-2</a></li>
+        </ul>
+    </body>
+</html>
