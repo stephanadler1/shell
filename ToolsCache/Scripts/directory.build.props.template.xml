@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+  [Customize your build](https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build)
+  Directory.Build.props is imported very early in Microsoft.Common.props, so properties defined later are 
+  unavailable to it. So, avoid referring to properties that are not yet defined (and will thus evaluate to empty).
+  -->
+
+  <PropertyGroup>
+    <MSBuildCustomizationPropsFailure>true</MSBuildCustomizationPropsFailure>
+  </PropertyGroup>
+</Project>

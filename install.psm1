@@ -6,9 +6,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,7 +26,7 @@ function script:ConvertPathToRegExpandSz
     $path = $rk.GetValue($pathEnvVar, $null, [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
     $rk.DeleteValue($pathEnvVar, $false)
 
-    if ($path -eq $null)
+    if ($path)
     {
         $path = ''
     }
@@ -37,14 +37,14 @@ function script:ConvertPathToRegExpandSz
 function script:AddPath2
 {
     param([string] $pathEnvVar, [string] $enviromentUserScope, [string] $path, [string] $environmentVariable, [string] $comment)
-    
+
     # Expand the path and check if it is valid
     $expandedPath = [System.Environment]::ExpandEnvironmentVariables($path)
     if ([System.IO.Directory]::Exists($expandedPath) -eq $false)
     {
-        return  
+        return
     }
-    
+
     Write-Host " * $comment from '$expandedPath'..."
     $rk = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey('Environment')
     $rk.DeleteValue($environmentVariable, $false)
@@ -88,18 +88,18 @@ function script:AddPath
     # and user variables in Computer\HKEY_CURRENT_USER\Environment.
     # PATH for system is REG_EXPAND_SZ, in user it's REG_SZ, which will prevent expansion
     # of user added path. Unfortunately no API to interact with environment variables directly
-    # allows to specify the underlying storage type. 
-    
+    # allows to specify the underlying storage type.
+
     # Expand the path and check if it is valid
     $expandedPath = [System.Environment]::ExpandEnvironmentVariables($path)
     if ([System.IO.Directory]::Exists($expandedPath) -eq $false)
     {
-        return  
+        return
     }
 
     Write-Host " * $comment from '$expandedPath'..."
     [System.Environment]::SetEnvironmentVariable($environmentVariable, $path, $enviromentUserScope)
-    
+
     # PATH environment variable works on expanded path. Check if it is already
     # present and remove if so. Split the existing PATH into it's components and re-assemble
     # the parts that aren't equivalent to $expandedPath.
@@ -149,7 +149,7 @@ function script:ScanThreats
 
     Write-Host "Scanning the '$path' to ensure no known threats..."
     $script:scanArgs = @(
-        '-scan', 
+        '-scan',
         '-disableremediation',
         '-scantype', '3',
         '-timeout', '1',
@@ -202,14 +202,14 @@ function script:CreateOrUpdateFolder
     param([string] $folderPath, [string] $folderIconFile, [string] $infoTip, [Array] $folderAttributes = $null)
 
     Write-Host "Setting up folder $folderPath..."
-    
+
     # https://msdn.microsoft.com/en-us/library/windows/desktop/cc144102(v=vs.85).aspx
     $desktopIniFileContents = @(
         '[ViewState]', 'Mode=', 'Vid=', 'FolderType=Generic',
         '[.ShellClassInfo]', 'ConfirmFileOp=1')
     $desktopIniFilePath = [System.IO.Path]::Combine($folderPath, 'desktop.ini')
     $folderAttributes += @('+S', '+R')
-    
+
     # Create folder and set SYSTEM + READONLY
     [System.IO.Directory]::CreateDirectory($folderPath) | Out-Null
     & attrib $folderAttributes "$folderPath" | Out-Null
@@ -246,13 +246,13 @@ function script:CreateOrUpdateFolder
 
 function script:IsSystemDriveOnSsd
 {
-    $ssd = Get-CimInstance -Class Win32_LogicalDisk -Filter "DeviceID='$env:SystemDrive'" -KeyOnly | 
-        Get-CimAssociatedInstance -ResultClassName Win32_DiskPartition -KeyOnly | 
-        Get-CimAssociatedInstance -ResultClassName Win32_DiskDrive | 
+    $ssd = Get-CimInstance -Class Win32_LogicalDisk -Filter "DeviceID='$env:SystemDrive'" -KeyOnly |
+        Get-CimAssociatedInstance -ResultClassName Win32_DiskPartition -KeyOnly |
+        Get-CimAssociatedInstance -ResultClassName Win32_DiskDrive |
         Where-Object { ($_.Caption.IndexOf('NVMe', [System.StringComparison]::OrdinalIgnoreCase) -ge 0) -or
             ($_.Caption.IndexOf('SSD', [System.StringComparison]::OrdinalIgnoreCase) -ge 0) -or
             ($_.Caption.IndexOf('MZFLV256HCHP-000MV', [System.StringComparison]::OrdinalIgnoreCase) -ge 0 <# Surface Book #> ) }
-    if ($ssd -ne $null)
+    if (!$ssd)
     {
         return $true
     }
@@ -260,18 +260,44 @@ function script:IsSystemDriveOnSsd
     return $false
 }
 
-function script:GetADUserFullName
+function script:GetActiveDirectoryUser
 {
-    $user = Get-CimInstance -Class Win32_UserAccount -Filter "Name='$env:USERNAME'"
-    if ($user -ne $null)
+    param([string][ValidateNotNullOrEmpty()] $samAccountName)
+    [Reflection.Assembly]::LoadWithPartialName('System.DirectoryServices.AccountManagement') | Out-Null
+    [System.DirectoryServices.AccountManagement.PrincipalContext] $context = $null
+    [System.DirectoryServices.AccountManagement.UserPrincipal] $user = $null
+    try
     {
-        Write-Debug "User name from AD is '$($user.FullName)'."
-        return $user.FullName
-    }
+        Write-Host "Querying Active Directory for '$samAccountName'..."
+        $context = New-Object -TypeName 'System.DirectoryServices.AccountManagement.PrincipalContext' -ArgumentList @([System.DirectoryServices.AccountManagement.ContextType]::Domain)
+        $user = [System.DirectoryServices.AccountManagement.UserPrincipal]::FindByIdentity($context, [System.DirectoryServices.AccountManagement.IdentityType]::SamAccountName, $samAccountName)
+        if ($null -ne $user)
+        {
+            Write-Host "Found Active Directory entry for '$samAccountName': $($user.DisplayName)."
+            return $user
+        }
 
-    throw "User not found."
+        throw "User not found."
+    } 
+    finally 
+    {
+        if ($null -ne $context)
+        {
+            #$context.Dispose()
+        }
+
+        if ($null -ne $user)
+        {
+            #$user.Dispose()
+        }
+    }
 }
 
+function script:GetADUserFullName
+{
+    $user = GetActiveDirectoryUser($env:USERNAME)
+    return $user.DisplayName
+}
 
 function script:GetEmailAddress
 {
@@ -296,7 +322,7 @@ function script:GetNugetCacheDirectory
 function script:SetSymbolServers
 {
     param([string] $defaultSymbolPath, [string] $enviromentUserScope)
-    
+
     [System.Environment]::SetEnvironmentVariable('_NT_SYMBOL_PATH', $defaultSymbolPath, $enviromentUserScope)
 }
 

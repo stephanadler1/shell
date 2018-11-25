@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>b(1), bcc(1), bdiag(1), msb(1), nr(1)</title>
+        <meta name="author" content="Stephan Adler" />
+        <link rel="icon" href="../Scripts/FolderIcon-Lego.ico">
+        <link rel="stylesheet" href="./help.css" />
+    </head>
+    <body>
+        <h1>b(1), bcc(1), bdiag(1), msb(1), nr(1), slngen(1) Manual Page</h1>
+
+        <h2>Name</h2>
+        <p>Various commands to invoke <code>msbuild.exe</code>:</p>
+        <ul>
+            <li><b>b</b> &ndash; Runs an incremental build in the current directory.</li>
+            <li><b>bcc</b> &ndash; Runs an full rebuild in the current directory.</li>
+            <li><b>bdiag</b> &ndash; Runs a diagnostics build in the current directory.</li>
+            <li><b>msb</b> &ndash; Runs an incremental build in the current directory with minimal console output.</li>
+            <li><b>nr</b> &ndash; Runs a NuGet restore (msbuild /t:Restore) in the current directory.</li>
+            <li><b>slngen</b> &ndash; Runs a MSBuild Solution Generation (msbuild /t:slngen) in the current directory. 
+                Requires <a href="https://github.com/jeffkl/SlnGen">SlnGen</a> to be referenced in the build.</li>
+        </ul>
+
+        <h2>Synopsis</h2>
+        <p><code>b [any arguments being passed to msbuild.exe]</code></p>
+        <p><code>bcc [any arguments being passed to msbuild.exe]</code></p>
+        <p><code>bdiag [any arguments being passed to msbuild.exe]</code></p>
+        <p><code>msb [any arguments being passed to msbuild.exe]</code></p>
+        <p><code>nr [any arguments being passed to msbuild.exe]</code></p>
+        <p><code>slngen [any arguments being passed to msbuild.exe]</code></p>
+
+        <h2 id="Description">Description</h2>
+        <p></p>
+        <p>By default <b>build isolation</b> is enabled. It ensures that <code>PATH</code> and <code>TEMP</code>
+            environment variables are being redirected such that build outputs outside the defined
+            intermediate output and output directories are being detected and will fail the build.
+            Redirecting <code>PATH</code> ensures that all build tools need to be specified through their
+            full path and will work across machines.</p>
+
+        <p>By default <b>file logging</b> is disabled. When enabled, file logging creates diagnostic, warning
+            and error log files in the current directory.</p>
+
+        <p>The default options always passed into <code>msbuild.exe</code> are</p>
+        <ul>
+            <li><code>/m</code>: Concurrent processing turned on.</li>
+            <li><code>/nr:false</code>: Node reuse is turned off, meaning after the build completes all instances are shut down.</li>
+        </ul>
+
+        <h2>Environment</h2>
+        <dl>
+            <dt>_DEBUG</dt>
+            <dd>If defined it enables diagnostic output of the shell scripts.</dd>
+
+            <dt>MSBUILD</dt>
+            <dd>If defined points to an alternate location of <code>msbuild.exe</code>.</dd>
+
+            <dt>MSBUILD_ARGS</dt>
+            <dd>User-defined default arguments passed into <code>msbuild.exe</code>.</dd>
+
+            <dt>MSBUILD_DISABLEISOLATION</dt>
+            <dd>If defined disables the build isolation, see <a href="#Description">description</a>.</dd>
+
+            <dt>MSBUILD_ENABLELOGGING</dt>
+            <dd>If defined enables file logging of diagnostics output, warnings and errors in the current directory, see <a href="#Description">description</a>.</dd>
+        </dl>
+
+        <h2>See Also</h2>
+        <ul>
+            <li><a href="https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference">msbuild.exe(1)</a></li>
+            <li><a href="toggle-msbuildisolation.html">toggle-msbuildisolation(1)</a></li>
+            <li><a href="toggle-msbuildlogging.html">toggle-msbuildlogging(1)</a></li>
+        </ul>
+    </body>
+</html>

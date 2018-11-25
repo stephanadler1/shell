@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>github(1), so(1), vso(1)</title>
+        <meta name="author" content="Stephan Adler" />
+        <link rel="icon" href="../Scripts/FolderIcon-Lego.ico">
+        <link rel="stylesheet" href="./help.css" />
+    </head>
+    <body>
+        <h1>github(1), so(1), vso(1) Manual Page</h1>
+
+        <h2>Name</h2>
+        <p>Various commands to open software development oriented web sites and their subpages.</p>
+        <ul>
+            <li><b>github</b> &ndash; Opens Github or a subpage in it.</li>
+            <li><b>so</b> &ndash; Opens Stackoverflow or a subpage in it.</li>
+            <li><b>vso</b> &ndash; Opens Azure DevOps (fka. Visual Studio Online) or a subpage in it.</li>
+        </ul>
+
+        <h2>Synopsis</h2>
+        <p><code>github [reponame]</code></p>
+        <p><code>github [/username[/reponame]]</code></p>
+        <p><code>so [tagname]</code></p>
+        <p><code>vso [reponame]</code></p>
+
+        <h2>Description</h2>
+        <p>Let's assume the environment variable TOOLS_URL_GITHUB is defined as
+            <a href="https://github.com/grpc/">https://github.com/grpc/</a>.
+            When using <b>github</b> it opens this page.
+            When calling <b>github grpc</b> it opens the grpc repository inside that user.
+            When calling <b>github /microsoft</b> it opens the microsoft user page.
+            <b>github /microsoft/vscode</b> takes you to the vscode repository of the microsoft user.</p>
+
+        <p>When calling <b>so</b> it opens the configured default page, which at the moment are questions tagged 'C#'. By using
+            <b>so go</b> you can open Stackoverflow for questions tagged 'go'.</p>
+
+        <p>Let's assume the environment variable TOOLS_URL_VSO is defined as
+            <a href="https://microsoft.visualstudio.com/">https://microsoft.visualstudio.com/</a>.
+            When using <b>vso</b> it opens this page.
+            When calling <b>vso grpc</b> it opens the grpc repository inside that account.</p>
+
+
+        <ul>
+            <li><a target="man_github" href="https://github.com/stephanadler1/">Github</a></li>
+            <li><a target="man_vso" href="https://stephan.visualstudio.com/">Visual Studio Online</a></li>
+        </ul>
+
+        <h2>Environment</h2>
+        <dl>
+            <dt>TOOLS_URL_GITHUB</dt>
+            <dd>If defined enables the <b>github</b> command. This environment variable should contain the most used
+                Github url, e.g. https://github.com/<em>youraccountname</em>/.</dd>
+            <dt>TOOLS_URL_VSO</dt>
+            <dd>If defined enables the <b>vso</b> command. This environment variable should contain the most used
+                Visual Studio Online url, e.g. https://<em>youraccountname</em>.visualstudio.com/.</dd>
+        </dl>
+    </body>
+</html>

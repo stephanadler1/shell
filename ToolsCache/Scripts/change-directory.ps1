@@ -6,9 +6,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,7 +35,7 @@ process {
 
     function DeveloperHomePath
     {
-        if ($env:_NTDEVELOPER -ne $null)
+        if (-not ([System.String]::IsNullOrWhitespace($env:_NTDEVELOPER)))
         {
             if ([System.IO.Directory]::Exists($env:_NTDEVELOPER))
             {
@@ -48,6 +48,13 @@ process {
 
     function WorkingCopyRootPath
     {
+        if (-not ([System.String]::IsNullOrWhitespace($env:INETROOT)))
+        {
+            # CoreXT. Even though the rarest, checking the value of an environment
+            # variable is still the fastest.
+            return ($env:INETROOT)
+        }
+
         try {
             # Git
             & git rev-parse 2>&1 | Out-Null
@@ -98,12 +105,6 @@ process {
             }
         }
         catch {
-        }
-
-        if (-not ([System.String]::IsNullOrWhitespace($env:INETROOT)))
-        {
-            # CoreXT
-            return ($env:INETROOT)
         }
 
         return ''
