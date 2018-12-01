@@ -316,7 +316,7 @@ function script:GetPackageCacheRoot
 
 function script:GetNugetCacheDirectory
 {
-    return $nugetCacheDirectory
+    return $nugetCacheRoot
 }
 
 function script:SetSymbolServers

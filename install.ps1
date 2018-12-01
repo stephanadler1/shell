@@ -39,7 +39,10 @@ The following DESKTOP SHORTCUTS are being created
 The following FOLDERS are being created
 
 * $dataDrive\dev                 - folder containing source code ($sourceCodeFolder)
-* $dataDrive\packages\nuget      - the local NuGet package cache folder ($nugetCacheDirectory)
+* $dataDrive\packages            - the local package cache root folder ($packageCacheRoot)
+* $dataDrive\packages\n          - the local NuGet package cache root folder ($nugetCacheRoot)
+* $dataDrive\packages\n\r        - the local NuGet repository folder ($nugetRepositoryDirectory)
+* $dataDrive\packages\n\g        - the local NuGet global cache folder ($nugetGlobalCacheDirectory)
 * $dataDrive\Symbols             - is setup as the cache folder for debug symbols ($symbolCacheDirectory)
 * $dataDrive\users               - secondary folder for user profile data ($secondaryUsersFolder)
 * $dataDrive\users\$env:USERNAME - the secondary $env:USERPROFILE folder for the current user, including ACL'ing consistent with $env:USERPROFILE ($secondaryUserFolder).
@@ -164,7 +167,7 @@ $dataDrive = ($dataDrive.TrimEnd('\') + '\')
 $script:sourceCodeFolder = [System.IO.Path]::Combine($dataDrive, 'dev')
 $script:secondaryUsersFolder = $null
 $script:packageCacheRoot = [System.IO.Path]::Combine($dataDrive, 'packages')
-$script:nugetCacheDirectory = [System.IO.Path]::Combine($packageCacheRoot, 'nuget')
+$script:nugetCacheRoot = [System.IO.Path]::Combine($packageCacheRoot, 'n')
 
 
 # -----------------------------------------------------------------------
@@ -178,7 +181,9 @@ if ([System.IO.File]::Exists("$rootPath\install.$env:USERDOMAIN.psm1"))
 }
 
 $packageCacheRoot = $(GetPackageCacheRoot)
-$nugetCacheDirectory = $(GetNugetCacheDirectory)
+$nugetCacheRoot = $(GetNugetCacheDirectory)
+$script:nugetRepositoryDirectory = [System.IO.Path]::Combine($nugetCacheRoot, 'r')
+$script:nugetGlobalCacheDirectory = [System.IO.Path]::Combine($nugetCacheRoot, 'g')
 
 
 # -----------------------------------------------------------------------
@@ -333,9 +338,6 @@ SetSymbolServers $defaultSymbolPath $enviromentUserScope
 
 SpecificDeveloperMachineSetup
 
-Write-Host "Enable minimal builds in Visual Studio for specific source repositories..."
-[System.Environment]::SetEnvironmentVariable('MINIMAL_VS_BUILD', '1', $enviromentUserScope)
-
 
 # -----------------------------------------------------------------------
 # Setup NuGet cache directory
@@ -351,15 +353,14 @@ if ($packageCacheRoot -ne $null)
     & icacls $packageCacheRoot $icaclsAddUser | Out-Null
 }
 
-if ($nugetCacheDirectory -ne $null)
+if ($nugetCacheRoot -ne $null)
 {
-    Write-Host "Configure Nuget cache to be $nugetCacheDirectory..."
-    [System.IO.Directory]::CreateDirectory($nugetCacheDirectory) | Out-Null
-    [System.Environment]::SetEnvironmentVariable('NugetMachineInstallRoot', $nugetCacheDirectory, $enviromentUserScope)
+    Write-Host "Configure Nuget cache to be $nugetCacheRoot..."
+    [System.IO.Directory]::CreateDirectory($nugetCacheRoot) | Out-Null
     # Compress the folder, prevent indexing, give current user full access
-    & compact /c "$nugetCacheDirectory" | Out-Null
-    & attrib +I "$nugetCacheDirectory" /s /d | Out-Null
-    & icacls $nugetCacheDirectory $icaclsAddUser | Out-Null
+    & compact /c "$nugetCacheRoot" | Out-Null
+    & attrib +I "$nugetCacheRoot" /s /d | Out-Null
+    & icacls $nugetCacheRoot $icaclsAddUser | Out-Null
 }
 
 # Configure NuGet for the source code folder based on template file
@@ -370,8 +371,10 @@ if ([System.IO.File]::Exists($nugetConfigFile) -ne $true)
 }
 
 # Set cache paths
+Write-Host "Configure Nuget repository to be $nugetRepositoryDirectory..."
+Write-Host "Configure Nuget global package folder to be $nugetGlobalCacheDirectory..."
 & attrib -R "$nugetConfigFile" | Out-Null
-& "$toolsRootPathExpanded\nuget.cmd" config -set "repositoryPath=$nugetCacheDirectory\r" -set "globalPackagesFolder=$nugetCacheDirectory\g"  -configFile $nugetConfigFile
+& "$toolsRootPathExpanded\nuget.cmd" config -set "repositoryPath=$nugetRepositoryDirectory" -set "globalPackagesFolder=$nugetGlobalCacheDirectory"  -configFile $nugetConfigFile
 & attrib +R "$nugetConfigFile" | Out-Null
 
 
@@ -390,6 +393,7 @@ ConfigureGitGlobally $gitPath 'alias.br' 'branch'
 ConfigureGitGlobally $gitPath 'alias.co' 'checkout'
 ConfigureGitGlobally $gitPath 'alias.com' 'checkout master'
 ConfigureGitGlobally $gitPath 'alias.cod' 'checkout develop'
+ConfigureGitGlobally $gitPath 'alias.cl' 'clean -fdxq'
 ConfigureGitGlobally $gitPath 'alias.gh' '!f() { cid=$(git rev-parse head); echo $cid; echo $cid | clip; }; f'
 ConfigureGitGlobally $gitPath 'alias.hist' "log --pretty=format:'%C(yellow)%h %Cred%ad%Creset | %s%d %Cblue[%an]' --graph --date=short"
 ConfigureGitGlobally $gitPath 'alias.lol' 'log --graph --oneline'
