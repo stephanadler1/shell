@@ -20,6 +20,6 @@ if "%~1" neq "" (
 )
 
 echo.
-more "%~dp0Help\index.txt"
+call more < "%~dp0Help\index.txt"
 
 goto :EOF

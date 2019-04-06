@@ -27,113 +27,23 @@ param(
 begin {
     Set-StrictMode -Version Latest
     $ErrorActionPreference = 'Stop'
+    if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
+    {
+        $DebugPreference = 'Continue'
+    } 
+
+    Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psm1')
 }
 
 process {
     $script:changeTo = ''
     $script:changeToSub = ''
 
-    function DeveloperHomePath
-    {
-        if (-not ([System.String]::IsNullOrWhitespace($env:_NTDEVELOPER)))
-        {
-            if ([System.IO.Directory]::Exists($env:_NTDEVELOPER))
-            {
-                return $env:_NTDEVELOPER
-            }
-        }
+    if ($option -eq 'self') { $changeTo = Get-DeveloperHomePath }
+    if ($option -eq 'root') { $changeTo = Get-WorkingCopyRootPath }
+    if ($option -eq 'dev')  { $changeTo = Get-SourceCodeRootPath }
 
-        return $env:USERPROFILE
-    }
-
-    function WorkingCopyRootPath
-    {
-        if (-not ([System.String]::IsNullOrWhitespace($env:INETROOT)))
-        {
-            # CoreXT. Even though the rarest, checking the value of an environment
-            # variable is still the fastest.
-            return ($env:INETROOT)
-        }
-
-        try {
-            # Git
-            & git rev-parse 2>&1 | Out-Null
-            if ($LASTEXITCODE -eq 0)
-            {
-                $rootDir = & git rev-parse --show-cdup
-                if ([System.String]::IsNullOrWhitespace($rootDir))
-                {
-                    $rootDir = '.'
-                }
-
-                $rootDir = [System.IO.Path]::GetFullPath($rootDir)
-                return $rootDir
-            }
-        }
-        catch {
-        }
-
-        try {
-            # Subversion
-            & svn info . 2>&1 | Out-Null
-            if ($LASTEXITCODE -eq 0)
-            {
-                $svnOutput = & svn info .
-                if ($LASTEXITCODE -eq 0)
-                {
-                    $regEx = New-Object System.Text.RegularExpressions.Regex('Working Copy Root Path: (.*?)URL:')
-                    $match = $regEx.Match($svnOutput)
-                    if ($match.Success -and ($match.Groups.Count -ge 1))
-                    {
-                        $path = $match.Groups[1].Value.TrimEnd(' ')
-                        return $path
-                    }
-
-                    return ''
-                }
-            }
-        }
-        catch {
-        }
-
-        try {
-            # Mercurial
-            & hg root 2>&1 | Out-Null
-            if ($LASTEXITCODE -eq 0)
-            {
-                return ''
-            }
-        }
-        catch {
-        }
-
-        return ''
-    }
-
-    function SourceCodeRootPath
-    {
-        if (-not ([System.String]::IsNullOrWhitespace($env:SOURCES_ROOT)))
-        {
-            return $env:SOURCES_ROOT
-        }
-        elseif ([System.IO.Directory]::Exists('d:\dev'))
-        {
-            return 'd:\dev'
-        }
-        elseif ([System.IO.Directory]::Exists("$env:SYSTEMDRIVE\dev"))
-        {
-            return "$env:SYSTEMDRIVE\dev"
-        }
-
-        return ''
-    }
-
-
-    if ($option -eq 'self') { $changeTo = DeveloperHomePath }
-    if ($option -eq 'root') { $changeTo = WorkingCopyRootPath }
-    if ($option -eq 'dev')  { $changeTo = SourceCodeRootPath }
-
-    #Write-Host "*** ChangeTo=$changeTo"
+    #Write-Debug "*** ChangeTo=$changeTo"
 
     $relativePath = $relativePath.TrimEnd('\')
     #Write-Host "*** RelativePath=$relativePath"

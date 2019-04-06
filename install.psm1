@@ -163,11 +163,17 @@ function script:ScanThreats
 
 function script:AddDesktopShortcut
 {
-    param([string] $shortcutName, [string] $targetPath, [string[]] $arguments, [string] $description, [string] $workingDirectory = $null, [string] $iconLocation = $null)
+    param([string] $shortcutName, [string] $targetPath, [string[]] $arguments, [string] $description, [string] $workingDirectory = $null, [string] $iconLocation = $null, [bool] $minimized = $false)
 
     if ([System.String]::IsNullOrWhiteSpace($workingDirectory) -eq $true)
     {
         $workingDirectory = '%USERPROFILE%'
+    }
+
+    $windowStyle = 4
+    if ($minimized)
+    {
+        $windowStyle = 7
     }
 
     $wshShell = New-Object -ComObject WScript.Shell
@@ -177,6 +183,7 @@ function script:AddDesktopShortcut
     $shortcut.Arguments = [string]::Join(' ', $arguments)
     $shortcut.Description = $description
     $shortcut.WorkingDirectory = $workingDirectory
+    $shortcut.WindowStyle = $windowStyle
 
     if ([System.String]::IsNullOrWhiteSpace($iconLocation) -ne $true)
     {

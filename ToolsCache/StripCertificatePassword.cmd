@@ -6,4 +6,6 @@ if /i "%~1" neq "/?" (
         echo Exit code ^> 0 doesn't indicate success.
         exit /b 1
     )
+) else (
+    call powershell -nologo -noprofile -executionPolicy RemoteSigned -outputFormat Text -mta -command "get-help '%~dp0scripts\%~n0.ps1' -detailed"
 )

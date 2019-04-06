@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------
-# <copyright file="change-directory.ps1" company="Stephan Adler">
+# <copyright file="windows-version.ps1" company="Stephan Adler">
 # Copyright (c) Stephan Adler. All Rights Reserved.
 # </copyright>
 #
@@ -16,14 +16,6 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
-param(
-    [Parameter(Mandatory = $true)]
-    [string] $url,
-
-    [Parameter(Mandatory = $false)]
-    [string] $relativePath = ''
-)
-
 begin {
     Set-StrictMode -Version Latest
     $ErrorActionPreference = 'Stop'
@@ -34,8 +26,19 @@ begin {
 }
 
 process {
-    [System.Uri] $script:baseUri = New-Object -TypeName System.Uri -ArgumentList @($url, [System.UriKind]::Absolute)
-    [System.Uri] $script:uri = New-Object -TypeName System.Uri -ArgumentList @($baseUri, $relativePath)
 
-    Start-Process $uri
+    Write-Host
+    Write-Host 'Windows Version Information'
+    Write-Host '---------------------------'
+    Write-Host
+    Write-Host '... based on registry information.'
+    Write-Host 'The list of ReleaseId values is at [Windows 10 - Release information](https://docs.microsoft.com/en-us/windows/windows-10/release-information).'
+    Write-Host 'The list of InstallationType values can be found at [Determining Whether Server Core Is Running](https://msdn.microsoft.com/en-us/library/ee391629(v=vs.85).aspx)'
+
+    Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | Format-List *
+    Get-CimInstance Win32_OperatingSystem | Format-List *
+
+    Write-Host 'Use the windows command "systeminfo" and "msinfo32" to get more detailed information about the running operating system.'
+
+    Get-CimInstance Win32_ComputerSystem | Format-List *
 }

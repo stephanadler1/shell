@@ -32,6 +32,10 @@ param(
 begin {
     Set-StrictMode -Version Latest
     $ErrorActionPreference = 'Stop'
+    if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
+    {
+        $DebugPreference = 'Continue'
+    } 
 
     if ([System.IO.File]::Exists($in) -eq $false)
     {
@@ -52,5 +56,6 @@ process {
 
     Write-Host "Done. The new file is at '$out'."
 
+    $host.SetShouldExit(0)
     [System.Environment]::Exit(0)
 }

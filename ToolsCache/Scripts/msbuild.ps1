@@ -57,6 +57,12 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
+{
+    $DebugPreference = 'Continue'
+} 
+
+Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psm1')
 
 # Get the initial MSBuild location from the environment.
 [string] $script:msbuildTool = $env:MSBUILD
@@ -72,10 +78,13 @@ $ErrorActionPreference = 'Stop'
 # Check if build isolation is requested. 
 [bool] $script:isIsolationEnabled = ([System.String]::IsNullOrEmpty($env:MSBUILD_DISABLEISOLATION) -eq $true)
 
+# Check if debug logging is enabled.
+[bool] $script:isDebugEnabled = ([System.String]::IsNullOrEmpty($env:_DEBUG) -eq $false)
+
 # The default arguments always passed into msbuild.exe.
 # /m - multi-processor build
 # /nr:false - turn off node re-use
-[string] $script:defaultArgs = "/m:$parallalism /nr:false"
+[string] $script:defaultArgs = "/m:$parallalism /nr:false $env:MSBUILD_ARGS"
 
 # Logging file path prefix
 [string] $script:loggingFilePath = [System.IO.Path]::Combine($currentDirectory, 'msbuild-')
@@ -87,26 +96,10 @@ if ($lowerPriority)
     $priorityClass = [System.Diagnostics.ProcessPriorityClass]::BelowNormal
 }
 
+#Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psm1')
 
 Write-Host
 Write-Host 'Started' ([System.DateTime]::Now)
-
-function CheckFileExists
-{
-    param([string] $file)
-
-    if ([System.String]::IsNullOrEmpty($file) -eq $true)
-    {
-        return $null
-    }
-
-    if ([System.IO.File]::Exists($file) -eq $false)
-    {
-        return $null
-    }
-
-    return $file
-}
 
 function SetupIsolation
 { 
@@ -157,22 +150,31 @@ function ReportIsolation
 }
 
 
-$msbuildTool = CheckFileExists($msbuildTool)
+$msbuildTool = Test-FileExists($msbuildTool)
 if ([System.String]::IsNullOrEmpty($msbuildTool) -eq $true)
 {
-    $msbuildTools = & where.exe msbuild.exe
+    $msbuildTools = & where.exe msbuild
     if ($LASTEXITCODE -ne 0)
     {
         Write-Error 'msbuild.exe was not found on the system. Either make it part of the PATH environment variable or create an environment variable MSBUILD to point to the version you wish to use.'
         [System.Environment]::Exit(-1)
     }
 
-    $msbuildTool = CheckFileExists($msbuildTools[0])
+    if ($msbuildTools -is [array])
+    {
+        $msbuildTool = $msbuildTools[0]
+    }
+    else 
+    {
+        $msbuildTool = $msbuildTools
+    }
+
+    $msbuildTool = Test-FileExists($msbuildTool)
 }
 
 if (([System.String]::IsNullOrEmpty($msbuildTool) -eq $false) -and $prefer64Bit)
 {
-    $msbuildTool64 = CheckFileExists([System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($msbuildTool), 'amd64', [System.IO.Path]::GetFileName($msbuildTool)))
+    $msbuildTool64 = Test-FileExists([System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($msbuildTool), 'amd64', [System.IO.Path]::GetFileName($msbuildTool)))
     if ([System.String]::IsNullOrEmpty($msbuildTool64) -eq $false)
     {
         $msbuildTool = $msbuildTool64
@@ -244,7 +246,8 @@ if ($script:isIsolationEnabled)
 }
 
 
-
+Write-Host
 Write-Host 'Ended' ([System.DateTime]::Now)
 
+$host.SetShouldExit($msbuildExitCode)
 [System.Environment]::Exit($msbuildExitCode)

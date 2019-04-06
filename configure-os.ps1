@@ -35,7 +35,7 @@ $ErrorActionPreference = 'Stop'
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] 'Administrator'))
 {
     Write-Host 'Elevating to administrative privileges required to re-configure the operating system...'
-    $arg = "-file `"$($script:MyInvocation.MyCommand.Path)`""
+    $arg = "-nologo -noprofile -executionPolicy RemoteSigned -outputFormat Text -mta -file `"$($script:MyInvocation.MyCommand.Path)`""
     Start-Process "$psHome\powershell.exe" -Verb Runas -ArgumentList $arg -wait
     exit
 }

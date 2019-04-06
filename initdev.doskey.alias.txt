@@ -3,4 +3,3 @@
 ....=pushd "..\..\..\$1"
 .....=pushd "..\..\..\..\$1"
 bb=popd
-n=IF DEFINED TOOLS ( "%TOOLS%\n.cmd" $* ) ELSE ( ECHO You should really run install.cmd on %COMPUTERNAME% )
