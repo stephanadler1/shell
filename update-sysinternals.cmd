@@ -22,6 +22,8 @@ echo You are in '%CD%'.
 robocopy . "%_TARGETDIR%" /MIR /DST /R:5
 echo Last updated: %DATE% %TIME% > "%_TARGETDIR%\_LastUpdated.txt"
 
+call "%ProgramFiles%\Windows Defender\MpCmdRun.exe" -scan -disableremediation -scantype 3 -timeout 1 -file "%~dp0."
+
 rem Restart the apps that should be running
 start /d "%_TARGETDIR%" /min procexp -accepteula
 

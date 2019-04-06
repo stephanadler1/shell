@@ -1,14 +1,14 @@
 # -----------------------------------------------------------------------
-# <copyright file="functions-collection.ps1" company="Stephan Adler">
+# <copyright file="base64-decoder.ps1" company="Stephan Adler">
 # Copyright (c) Stephan Adler. All Rights Reserved.
 # </copyright>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#
+# 
 #     http://www.apache.org/licenses/LICENSE-2.0
-#
+# 
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,35 +16,31 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
+<#
+.SYNOPSIS
+Decodes base64 encoded strings into HEX and strings.
+ 
+.DESCRIPTION
+Decodes base64 encoded strings into HEX and strings. Make sure you use double quotes for the base64 encoded string if it terminates with '='.
+#> 
+
+param(
+    # The base64 encode string.
+    [Parameter(Mandatory = $true)]
+    [ValidateNotNull()]
+    [string] $base64
+)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-
-
-function Validate-Certificate
+if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
-    param([System.Security.Cryptography.X509Certificates.X509Certificate][ValidateNotNull()] $certificate)
+    $DebugPreference = 'Continue'
+} 
 
+$ba = [System.Convert]::FromBase64String($base64)
+$hexString = [System.BitConverter]::ToString($ba)
+$string = [System.Text.Encoding]::Default.GetString($ba)
 
-}
-
-function Remove-Newline
-{
-    param([string] $data)
-
-    return $data.Replace([System.Environment]::NewLine, ' ')
-}
-
-$storeName = 'My'
-$storeLocation = 'CurrentUser'
-
-$script:certStore = New-Object -TypeName 'System.Security.Cryptography.X509Certificates.X509Store' @($storeName, $storeLocation)
-
-$certStore.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::ReadOnly)
-
-foreach($certificate in $certStore.Certificates)
-{
-    Write-Host $(Remove-Newline($certificate))
-    Write-Host
-}
-
-$certStore.Close()
+Write-Host 'hex.....:' $hexString
+Write-Host 'string..:' $string

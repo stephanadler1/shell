@@ -80,16 +80,24 @@ https://github.com/stephanadler1/shell/blob/master/install.md
 param(
     # Provide a drive letter where you want to place your user data. D: is used if writeable otherwise $env:SYSTEMDRIVE is used.
     [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
     [ValidateScript({[System.IO.Directory]::Exists($_) -eq $true})]
     [string] $script:dataDrive = $null,
 
     # The default user name used for Git.
     [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
     [string] $script:userName = 'Stephan Adler',
 
     # The default email address used for Git.
     [Parameter(Mandatory = $false)]
-    [string] $script:emailAddress = 'dev@example.com'
+    [ValidateNotNullOrEmpty()]
+    [string] $script:emailAddress = 'dev@example.com',
+
+    # Name of the folder holding source code/enlistments.
+    [Parameter(Mandatory = $false)]
+    [ValidateNotNullOrEmpty()]
+    [string] $script:sourceCodeFolderName = 'dev'
 )
 
 Set-StrictMode -Version Latest
@@ -110,6 +118,7 @@ $script:icaclsUserOnly = @(
     '/inheritance:r')
 
 $iconLockScreen = '%WINDIR%\System32\Shell32.dll,47'
+$iconLogoff = '%WINDIR%\System32\Shell32.dll,27'
 #$iconLego = ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\FolderIcon-Lego.ico'))
 #$iconGroup = ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\FolderIcon-Group.ico'))
 $iconLego = "$env:WINDIR\System32\Shell32.dll,80"
@@ -164,14 +173,23 @@ if ([string]::IsNullOrEmpty($dataDrive) -eq $true)
 # Make sure the drive ends with \
 $dataDrive = ($dataDrive.TrimEnd('\') + '\')
 
-$script:sourceCodeFolder = [System.IO.Path]::Combine($dataDrive, 'dev')
+[string] $script:sourceCodeFolder = '*** NOT DEFINED ***'
+if ([string]::IsNullOrEmpty($env:SOURCES_ROUT))
+{
+    $sourceCodeFolder = [System.IO.Path]::Combine($dataDrive, $sourceCodeFolderName)
+}
+else 
+{
+    $sourceCodeFolder = $env:SOURCES_ROOT
+}
+
 $script:secondaryUsersFolder = $null
 $script:packageCacheRoot = [System.IO.Path]::Combine($dataDrive, 'packages')
 $script:nugetCacheRoot = [System.IO.Path]::Combine($packageCacheRoot, 'n')
 
 
 # -----------------------------------------------------------------------
-# Import Business Machine
+# Import Customization Script
 # -----------------------------------------------------------------------
 
 Import-Module "$rootPath\install.psm1" -Scope Local
@@ -184,6 +202,24 @@ $packageCacheRoot = $(GetPackageCacheRoot)
 $nugetCacheRoot = $(GetNugetCacheDirectory)
 $script:nugetRepositoryDirectory = [System.IO.Path]::Combine($nugetCacheRoot, 'r')
 $script:nugetGlobalCacheDirectory = [System.IO.Path]::Combine($nugetCacheRoot, 'g')
+
+
+# -----------------------------------------------------------------------
+# Print standard configuration
+# -----------------------------------------------------------------------
+
+Write-Host
+Write-Host 'Configuration'
+Write-Host "  Tools Root.........: $toolsRootPath"
+Write-Host "  Data Drive.........: $dataDrive"
+Write-Host "  Source Code Folder.: $sourceCodeFolder"
+Write-Host "  Package Cache Root.: $packageCacheRoot"
+Write-Host "  Nuget Cache Root...: $nugetCacheRoot"
+Write-Host "    Repository cache.: $nugetRepositoryDirectory"
+Write-Host "    Global Cache.....: $nugetGlobalCacheDirectory"
+Write-Host "  User name..........: $(GetUserName)"
+Write-Host "  Email address......: $(GetEmailAddress)"
+Write-Host
 
 
 # -----------------------------------------------------------------------
@@ -311,7 +347,8 @@ else
 
 # https://www.tenforums.com/tutorials/77458-rundll32-commands-list-windows-10-a.html
 # rundll32.exe user32.dll, LockWorkStation
-AddDesktopShortcut 'Lock Computer' '%WINDIR%\System32\rundll32.exe' @('user32.dll,LockWorkStation') -iconLocation $iconLockScreen
+AddDesktopShortcut 'Lock Computer' '%WINDIR%\System32\rundll32.exe' @('user32.dll,LockWorkStation') -iconLocation $iconLockScreen -minimized $true
+AddDesktopShortcut 'Sign Out Computer' '%WINDIR%\System32\logoff.exe' @('') -iconLocation $iconLogoff -minimized $true
 
 
 # -----------------------------------------------------------------------
@@ -343,7 +380,7 @@ SpecificDeveloperMachineSetup
 # Setup NuGet cache directory
 # -----------------------------------------------------------------------
 
-if ($packageCacheRoot -ne $null)
+if ($null -ne $packageCacheRoot)
 {
     Write-Host "Configure package root to be $packageCacheRoot..."
     [System.IO.Directory]::CreateDirectory($packageCacheRoot) | Out-Null
@@ -353,7 +390,7 @@ if ($packageCacheRoot -ne $null)
     & icacls $packageCacheRoot $icaclsAddUser | Out-Null
 }
 
-if ($nugetCacheRoot -ne $null)
+if ($null -ne $nugetCacheRoot)
 {
     Write-Host "Configure Nuget cache to be $nugetCacheRoot..."
     [System.IO.Directory]::CreateDirectory($nugetCacheRoot) | Out-Null

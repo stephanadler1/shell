@@ -1,62 +1,64 @@
 For more information on a specific command, type DHELP command-name.
 
-..             Up one directory.
-...            Up two directories.
-....           Up three directories.
-.....          Up four directories.
-ALIAS          Prints all aliases defined in the command shell.
-B              Calls MSBuild.exe.
-BB             Calls POPD.
-BENCHMARK      Opens a folder with various benchmarking tools or help if none
+ ..            Up one directory.
+ ...           Up two directories.
+ ....          Up three directories.
+ .....         Up four directories.
+ ALIAS         Prints all aliases defined in the command shell.
+ B             Calls MSBuild.exe.
+ BASE64-DECODE Decodes base64 encoded data into it's hex and string representation.
+ BB            Calls POPD.
+ BENCHMARK     Opens a folder with various benchmarking tools or help if none
                are available.
-BCC            Clean build.
-BDIAG          Diagnostic build.
-CODE           Opens VS Code in the specified directory.
-DC             Developer Console. Frequently used management console snap-ins.
-DEV            Like CD, but from the root of the development directory
-DHELP          This help.
-DIG            Bind Dig tool.
-E              Start Windows Explorer in the current directory (SOURCES_ROOT).
-GIT            Opens the Git documentation.
-GITHUB         Opens the Github web site.
-HG             Opens the Mercurial documentation.
-ILSPY          Starts ILSpy.
-MD5            Calculates a MD5 hash for the specified file.
-MSB            Calls MSBuild.exe in the current directory or with additional
+ BCC           Clean build.
+ BDIAG         Diagnostic build.
+ CODE          Opens VS Code in the specified directory.
+ DC            Developer Console. Frequently used management console snap-ins.
+ DEV           Like CD, but from the root of the development directory
+ DHELP         This help.
+ DIG           Bind Dig tool.
+ E             Start Windows Explorer in the current directory (SOURCES_ROOT).
+ GIT           Opens the Git documentation.
+ GITHUB        Opens the Github web site.
+ HG            Opens the Mercurial documentation.
+ ILSPY         Starts ILSpy.
+ MD5           Calculates a MD5 hash for the specified file.
+ MSB           Calls MSBuild.exe in the current directory or with additional
                arguments.
-N              Invokes Notepad++, to open a file use `n file1 [file2...]`
-NANT           Invokes NAnt.
-NCAT           Invokes NCat.
-NMAP           Invokes NMap. Network mapping tool.
-NN             Invokes Notepad++, to open a file use `nn file1 [file2...]`
-NPP            Invokes Notepad++, to open a file use `nn file1 [file2...]`
-NR             Calls MSBuild.exe to restore NuGet packages.
-NUGET          Invokes NuGet command line client.
-OPEN           Opens Visual Studio in the current directory.
-OPENSSL        Invokes OpenSSL.
-ORCA           Microsoft Orca - MSI Editor.
-PYTHON         Invokes Python.
-RAR            Calls WinRAR command line.
-ROOT           Like CD, but from the root of the enlistment.
-SELF           Opens the user profile of the system or the enlistment.
-SHA1           Calculates a SHA1 hash for the specified file.
-SHA256         Calculates a SHA256 hash for the specified file.
-SHOW-TOOLS     Enumerates all tools available: Gnu CoreTools, Sysinternals and
+ N             Invokes Notepad++, to open a file use `n file1 [file2...]`
+ NANT          Invokes NAnt.
+ NCAT          Invokes NCat.
+ NMAP          Invokes NMap. Network mapping tool.
+ NN            Invokes Notepad++, to open a file use `nn file1 [file2...]`
+ NPP           Invokes Notepad++, to open a file use `npp file1 [file2...]`
+ NR            Calls MSBuild.exe to restore NuGet packages.
+ NUGET         Invokes NuGet command line client.
+ OPEN          Opens Visual Studio in the current directory.
+ OPENSSL       Invokes OpenSSL.
+ ORCA          Microsoft Orca - MSI Editor.
+ PYTHON        Invokes Python.
+ RAR           Calls WinRAR command line.
+ ROOT          Like CD, but from the root of the enlistment.
+ SELF          Opens the user profile of the system or the enlistment.
+ SHA1          Calculates a SHA1 hash for the specified file.
+ SHA256        Calculates a SHA256 hash for the specified file.
+ SHA512        Calculates a SHA512 hash for the specified file.
+ SHOW-TOOLS    Enumerates all tools available: Gnu CoreTools, Sysinternals and
                Various.
-SLNGEN         Calls MSBuild.exe in the current directory to generate a .sln file.
-SO             Opens the C# page of Stackoverflow.com. Use `so tagname` to
+ SLNGEN        Calls MSBuild.exe in the current directory to generate a .sln file.
+ SO            Opens the C# page of Stackoverflow.com. Use `so tagname` to
                open any other tag.
-STRIPCERTIFICATEPASSWORD
+ STRIPCERTIFICATEPASSWORD
                Removes the password protection from the specified .PFX file.
-SVN            Opens the Subversion documentation.
-TOGGLE-DEBUG   Toggles between turning debug logging on and off.
-TOGGLE-MSBUILDISOLATION
+ SVN           Opens the Subversion documentation.
+ TOGGLE-DEBUG  Toggles between turning debug logging on and off.
+ TOGGLE-MSBUILDISOLATION
                Toggles between turning MSBuild build isolation on and off.
-TOGGLE-MSBUILDLOGGING
+ TOGGLE-MSBUILDLOGGING
                Toggles between turning MSBuild file logging on and off.
-TOOLS          Opens the tools directory in Visual Studio Code.
-VS             Opens Visual Studio in the current directory.
-VSO            Opens the Visual Studio Online web site.
-WINMERGE       Starts WinMerge.
+ TOOLS         Opens the tools directory in Visual Studio Code.
+ VS            Opens Visual Studio in the current directory.
+ VSO           Opens the Visual Studio Online web site.
+ WINMERGE      Starts WinMerge.
 
 Use dhelp <command> to get more details.

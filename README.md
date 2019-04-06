@@ -1,6 +1,6 @@
 # Setting Up Developer Workstations
 
-Copyright &copy; 2009-2018 Stephan Adler. All Rights Reserved.
+Copyright &copy; 2009-2019 Stephan Adler. All Rights Reserved.
 
 License: [Apache-2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
@@ -8,3 +8,4 @@ These collection of scripts is a solution for a common problem: How do I setup a
 
 For details see [Install.md](install.md) and [Install.ps1](install.ps1).
 
+Topics: 

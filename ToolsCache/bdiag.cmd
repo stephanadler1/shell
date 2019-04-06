@@ -1,9 +1,9 @@
 @if not defined _DEBUG echo off
-
+setlocal
+set MSBUILD_ENABLELOGGING=1
 if "%~1" equ "/?" (
     call "%~dp0Scripts\msbuild.cmd" "/?"
 ) else (
-    call "%~dp0Scripts\msbuild.cmd" /t:rebuild "/pp:%CD%\msb-pp.xml" /consoleloggerparameters:verbosity=normal %* < nul
-    echo.
-    call "%~dp0Scripts\msbuild.cmd" /t:rebuild /fileLogger1 "/fileLoggerParameters1:LogFile=%CD%\msb-diag.txt;Verbosity=diagnostic;Encoding=UTF-8" /consoleloggerparameters:verbosity=normal %* < nul
+    call "%~dp0msb.cmd" /t:rebuild "/pp:%CD%\msb-pp.xml" %* < nul
+    call "%~dp0bcc.cmd" %* < nul
 )
