@@ -1,0 +1,1 @@
+@call "certutil.exe" -gmt -asn "%~1"

@@ -19,7 +19,7 @@ if "%~1" neq "" (
     )
 )
 
-echo.
+echo:
 call more < "%~dp0Help\index.txt"
 
 goto :EOF
