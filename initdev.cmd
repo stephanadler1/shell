@@ -23,19 +23,19 @@ set _WORKINGDIR=%CD%
 rem Disable isolation until .NET Standard 2.0 problem is solved
 set MSBUILD_DISABLEISOLATION=1
 
-for %%v in ("Microsoft Visual Studio\2017" "Microsoft Visual Studio 14.0" "Microsoft Visual Studio 12.0" "Microsoft Visual Studio 11.0") do (
+for %%v in ("Microsoft Visual Studio\2019" "Microsoft Visual Studio\2017" "Microsoft Visual Studio 14.0" "Microsoft Visual Studio 12.0" "Microsoft Visual Studio 11.0") do (
     for %%e in (Enterprise Community .) do (
         if exist "%ProgramFiles(x86)%\%%~v\%%~e\Common7\Tools\VsDevCmd.bat" (
-            echo Initializing developer command prompt %%~v...
-            echo.
+            echo Initializing developer command prompt %%~v %%~e...
+            echo:
             call "%ProgramFiles(x86)%\%%~v\%%~e\Common7\Tools\VsDevCmd.bat"
-            echo.
+            echo:
             goto LoadAliases
         ) 
     )
 )
 echo No developer command prompt found.
-echo.
+echo:
 
 if not defined TOOLS (echo TOOLS missing.)
 :LoadAliases
@@ -45,10 +45,10 @@ if exist "%~dp0%~n0.doskey.powershell.txt" doskey /MACROFILE="%~dp0%~n0.doskey.p
 echo COMMAND SHELL ALIASES
 echo ---------------------
 doskey /macros | sort
-echo.
+echo:
 if "%TOOLS%" neq "" echo GLOBAL TOOLS && echo ------------ && dir /w "%TOOLS%\*.cmd"
 
-echo.
+echo:
 if "%TOOLS_GIT%" neq "" echo GLOBAL GIT ALIASES && echo ------------------ && git config --global --get-regexp alias. | sort
 
 

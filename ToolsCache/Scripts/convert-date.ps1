@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------
-# <copyright file="base64-decode.ps1" company="Stephan Adler">
+# <copyright file="convert-time.ps1" company="Stephan Adler">
 # Copyright (c) Stephan Adler. All Rights Reserved.
 # </copyright>
 #
@@ -26,9 +26,8 @@ Decodes base64 encoded strings into HEX and strings. Make sure you use double qu
 
 param(
     # The base64 encode string.
-    [Parameter(Mandatory = $true)]
-    [ValidateNotNull()]
-    [string] $base64
+    [Parameter(Mandatory = $false)]
+    [string] $timeString
 )
 
 Set-StrictMode -Version Latest
@@ -38,21 +37,18 @@ if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
     $DebugPreference = 'Continue'
 } 
 
-$ba = [System.Convert]::FromBase64String($base64)
-$hexString = [System.BitConverter]::ToString($ba)
-$string = [System.Text.Encoding]::Default.GetString($ba)
-$stringUtf8 = [System.Text.Encoding]::UTF8.GetString($ba)
-$stringAscii = [System.Text.Encoding]::ASCII.GetString($ba)
+Write-Host
+
+$date = [System.DateTimeOffset]::Now
+if (-not ([System.String]::IsNullOrWhitespace($timeString)))
+{
+    $date = [System.DateTimeOffset]::Parse($timeString)
+    Write-Host 'Parsed as............:' $date
+}
+
+Write-Host 'Local time...........:' $date.ToLocalTime()
+Write-Host 'UTC..................:' $date.ToUniversalTime() # .ToString('s', [CultureInfo]::InvariantCulture)
+Write-Host 'Unix Time (seconds)..:' $date.ToUnixTimeSeconds()
 
 Write-Host
-Write-Host 'Hexadecimal Representations'
-Write-Host 'length (bytes)....:' $ba.length
-Write-Host 'hex 1.............:' $hexString
-Write-Host 'hex 2.............:' $hexString.Replace('-', '')
-Write-Host 'hex 3.............:' $hexString.Replace('-', ':')
-
-Write-Host
-Write-Host 'String Representations'
-Write-Host 'Default encoding..:' $string
-Write-Host 'UTF-8.............:' $stringUtf8
-Write-Host 'ASCII.............:' $stringAscii
+Write-Host 'Time zones on a world map is available at https://www.timeanddate.com/time/map/, and as a table at https://everytimezone.com/.'

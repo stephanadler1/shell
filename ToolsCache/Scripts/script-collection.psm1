@@ -72,6 +72,14 @@ function Get-SourceCodeRootPath
     {
         return "$env:SYSTEMDRIVE\dev"
     }
+    elseif ([System.IO.Directory]::Exists('d:\src'))
+    {
+        return 'd:\src'
+    }
+    elseif ([System.IO.Directory]::Exists("$env:SYSTEMDRIVE\src"))
+    {
+        return "$env:SYSTEMDRIVE\src"
+    }
 
     return ''
 }

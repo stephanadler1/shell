@@ -109,13 +109,15 @@ $script:pathEnvVar = 'PATH'
 $script:enviromentUserScope = 'User'
 
 $script:icaclsAddUser = @(
-    '/grant', "$($env:USERDOMAIN)\$($env:USERNAME):(OI)(CI)(F)")
+    '/grant', "$($env:USERDOMAIN)\$($env:USERNAME):(OI)(CI)(F)",
+    '/c')
 
 $script:icaclsUserOnly = @(
     '/grant:r', "NT AUTHORITY\SYSTEM:(OI)(CI)(F)",
     '/grant:r', "BUILTIN\Administrators:(OI)(CI)(F)"
     '/grant:r', "$($env:USERDOMAIN)\$($env:USERNAME):(OI)(CI)(F)",
-    '/inheritance:r')
+    '/inheritance:r',
+    '/c')
 
 $iconLockScreen = '%WINDIR%\System32\Shell32.dll,47'
 $iconLogoff = '%WINDIR%\System32\Shell32.dll,27'
@@ -305,6 +307,31 @@ if ([System.IO.Directory]::Exists([System.Environment]::ExpandEnvironmentVariabl
 }
 
 AddPath2 $pathEnvVar $enviromentUserScope $gitPath 'TOOLS_GIT' 'Git'
+
+# Installing Node.js
+$script:nodePath = [System.IO.Path]::Combine($toolsRootPath, 'node')
+if ([System.IO.Directory]::Exists([System.Environment]::ExpandEnvironmentVariables($nodePath)) -eq $true)
+{
+    AddPath2 $pathEnvVar $enviromentUserScope $nodePath 'TOOLS_NODE' 'Node.js'
+}
+
+# Installing Java Runtime Environment
+$script:javaPath = [System.IO.Path]::Combine($toolsRootPath, 'Java\bin')
+if ([System.IO.Directory]::Exists([System.Environment]::ExpandEnvironmentVariables($javaPath)) -eq $true)
+{
+    AddPath2 $pathEnvVar $enviromentUserScope $javaPath 'TOOLS_JAVA' 'Java Runtime Environment'
+
+    $script:javaRootPath = [System.IO.Path]::GetFullPath([System.Environment]::ExpandEnvironmentVariables([System.IO.Path]::Combine($javaPath, '..')))
+    [System.Environment]::SetEnvironmentVariable('JAVA_HOME', $javaRootPath, $enviromentUserScope)
+    [System.Environment]::SetEnvironmentVariable('JRE_HOME', $javaRootPath, $enviromentUserScope)
+}
+
+# Installing GraphViz
+$script:graphVizPath = [System.Environment]::ExpandEnvironmentVariables([System.IO.Path]::Combine($toolsRootPath, 'GraphViz\bin\dot.exe'))
+if ([System.IO.File]::Exists($graphVizPath) -eq $true)
+{
+    [System.Environment]::SetEnvironmentVariable('GRAPHVIZ_DOT', $graphVizPath, $enviromentUserScope)
+}
 
 
 # -----------------------------------------------------------------------
