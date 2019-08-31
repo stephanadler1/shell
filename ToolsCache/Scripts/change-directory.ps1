@@ -18,6 +18,7 @@
 
 param(
     [Parameter(Mandatory = $true)]
+	[ValidateSet('self', 'root', 'dev', 'shortcut')]
     [string] $option,
 
     [Parameter(Mandatory = $false)]
@@ -33,6 +34,17 @@ begin {
     } 
 
     Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psm1')
+
+    class GitRepository
+    {
+        [ValidateNotNullOrEmpty()][string] $repository_uri
+        $shortcuts
+    }
+    
+    class DirectoryShortcutSettings
+    {
+        [GitRepository[]] $git_repositories
+    }
 }
 
 process {
@@ -42,6 +54,57 @@ process {
     if ($option -eq 'self') { $changeTo = Get-DeveloperHomePath }
     if ($option -eq 'root') { $changeTo = Get-WorkingCopyRootPath }
     if ($option -eq 'dev')  { $changeTo = Get-SourceCodeRootPath }
+
+    if ($option -eq 'shortcut') 
+    { 
+        $settingsFile = [System.IO.Path]::Combine($(Get-SourceCodeRootPath), 'directory.shortcuts.json')
+        Write-Debug "Assuming settings file is at '$settingsFile'."
+
+        if ([System.IO.File]::Exists($settingsFile) -eq $true)
+        {
+            $target = $relativePath
+            $relativePath = ''
+
+            $repoUri = & git remote get-url origin 2>&1 
+            if ($LASTEXITCODE -eq 0)
+            {
+                Write-Debug "Current repo is '$repoUri'"
+
+                # Load and parse the settings file
+                [DirectoryShortcutSettings] $settings = Get-Content -Path $settingsFile | ConvertFrom-Json
+            
+                # Do not change to foreach, since it's semantics are different!
+                for($i = 0; $i -lt $settings.git_repositories.Count; $i++)
+                {
+                    $r = $settings.git_repositories[$i]
+                    if ($r.repository_uri -eq $repoUri) 
+                    {
+                        Write-Debug "Found repo '$repoUri' in settings file."
+
+                        if (-not [System.String]::IsNullOrWhiteSpace($target) -eq $true)
+                        {
+                            try 
+                            {
+                                Write-Debug "Navigate to '$($r.shortcuts.$target)'."
+                                $path = [System.IO.Path]::Combine($(Get-WorkingCopyRootPath), $r.shortcuts.$target)
+                                $changeTo = $path
+                            }
+                            catch 
+                            {
+                            }
+                        }
+                        else 
+                        {
+                            Write-Host 'The following shortcuts are defined for this repository:'
+                            $r.shortcuts | Format-List
+                        }
+
+                        break
+                    }
+                }
+            }
+        }
+    }
 
     #Write-Debug "*** ChangeTo=$changeTo"
 
@@ -76,4 +139,3 @@ process {
 
     Write-Output ''
 }
-

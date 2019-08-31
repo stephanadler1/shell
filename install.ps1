@@ -43,6 +43,7 @@ The following FOLDERS are being created
 * $dataDrive\packages\n          - the local NuGet package cache root folder ($nugetCacheRoot)
 * $dataDrive\packages\n\r        - the local NuGet repository folder ($nugetRepositoryDirectory)
 * $dataDrive\packages\n\g        - the local NuGet global cache folder ($nugetGlobalCacheDirectory)
+* $dataDrive\packages\npm        - the local NPM package cache root folder ($npmCacheRoot)
 * $dataDrive\Symbols             - is setup as the cache folder for debug symbols ($symbolCacheDirectory)
 * $dataDrive\users               - secondary folder for user profile data ($secondaryUsersFolder)
 * $dataDrive\users\$env:USERNAME - the secondary $env:USERPROFILE folder for the current user, including ACL'ing consistent with $env:USERPROFILE ($secondaryUserFolder).
@@ -121,6 +122,8 @@ $script:icaclsUserOnly = @(
 
 $iconLockScreen = '%WINDIR%\System32\Shell32.dll,47'
 $iconLogoff = '%WINDIR%\System32\Shell32.dll,27'
+#$iconStatus = '%WINDIR%\System32\Shell32.dll,265' # clock icon
+$iconStatus = '%WINDIR%\System32\Shell32.dll,238' # recycle icon
 #$iconLego = ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\FolderIcon-Lego.ico'))
 #$iconGroup = ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\FolderIcon-Group.ico'))
 $iconLego = "$env:WINDIR\System32\Shell32.dll,80"
@@ -141,7 +144,6 @@ if ([string]::IsNullOrWhiteSpace($toolsRootPathExpanded) -eq $true)
     Write-Error '$toolsRootPathExpanded is empty.'
     return 1
 }
-
 
 if ([string]::IsNullOrEmpty($dataDrive) -eq $true)
 {
@@ -188,6 +190,7 @@ else
 $script:secondaryUsersFolder = $null
 $script:packageCacheRoot = [System.IO.Path]::Combine($dataDrive, 'packages')
 $script:nugetCacheRoot = [System.IO.Path]::Combine($packageCacheRoot, 'n')
+$script:npmCacheRoot = [System.IO.Path]::Combine($packageCacheRoot, 'npm')
 
 
 # -----------------------------------------------------------------------
@@ -204,6 +207,7 @@ $packageCacheRoot = $(GetPackageCacheRoot)
 $nugetCacheRoot = $(GetNugetCacheDirectory)
 $script:nugetRepositoryDirectory = [System.IO.Path]::Combine($nugetCacheRoot, 'r')
 $script:nugetGlobalCacheDirectory = [System.IO.Path]::Combine($nugetCacheRoot, 'g')
+$npmCacheRoot = $(GetNpmCacheDirectory)
 
 
 # -----------------------------------------------------------------------
@@ -216,6 +220,7 @@ Write-Host "  Tools Root.........: $toolsRootPath"
 Write-Host "  Data Drive.........: $dataDrive"
 Write-Host "  Source Code Folder.: $sourceCodeFolder"
 Write-Host "  Package Cache Root.: $packageCacheRoot"
+Write-Host "  NPM Cache Root.....: $npmCacheRoot"
 Write-Host "  Nuget Cache Root...: $nugetCacheRoot"
 Write-Host "    Repository cache.: $nugetRepositoryDirectory"
 Write-Host "    Global Cache.....: $nugetGlobalCacheDirectory"
@@ -251,6 +256,13 @@ $directoryBuildFile = [System.IO.Path]::Combine($sourceCodeFolder, 'directory.bu
 if ([System.IO.File]::Exists($directoryBuildFile) -ne $true)
 {
     Copy-Item ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\directory.build.targets.template.xml')) -Destination $directoryBuildFile -Force
+    & attrib +R "$directoryBuildFile" | Out-Null
+}
+
+$directoryBuildFile = [System.IO.Path]::Combine($sourceCodeFolder, 'directory.shortcuts.json')
+if ([System.IO.File]::Exists($directoryBuildFile) -ne $true)
+{
+    Copy-Item ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\directory.shortcuts.json.template.json')) -Destination $directoryBuildFile -Force
     & attrib +R "$directoryBuildFile" | Out-Null
 }
 
@@ -322,7 +334,11 @@ if ([System.IO.Directory]::Exists([System.Environment]::ExpandEnvironmentVariabl
     AddPath2 $pathEnvVar $enviromentUserScope $javaPath 'TOOLS_JAVA' 'Java Runtime Environment'
 
     $script:javaRootPath = [System.IO.Path]::GetFullPath([System.Environment]::ExpandEnvironmentVariables([System.IO.Path]::Combine($javaPath, '..')))
+    
+    # Path of the JDK (Java Development Kit), always part of the SE downloads
     [System.Environment]::SetEnvironmentVariable('JAVA_HOME', $javaRootPath, $enviromentUserScope)
+
+    # Path of the JRE (Java Runtime Environment), always part of the SE downloads
     [System.Environment]::SetEnvironmentVariable('JRE_HOME', $javaRootPath, $enviromentUserScope)
 }
 
@@ -374,8 +390,9 @@ else
 
 # https://www.tenforums.com/tutorials/77458-rundll32-commands-list-windows-10-a.html
 # rundll32.exe user32.dll, LockWorkStation
-AddDesktopShortcut 'Lock Computer' '%WINDIR%\System32\rundll32.exe' @('user32.dll,LockWorkStation') -iconLocation $iconLockScreen -minimized $true
-AddDesktopShortcut 'Sign Out Computer' '%WINDIR%\System32\logoff.exe' @('') -iconLocation $iconLogoff -minimized $true
+AddDesktopShortcut 'Lock Computer' '"%WINDIR%\System32\rundll32.exe"' @('user32.dll,LockWorkStation') -iconLocation $iconLockScreen -minimized $true
+AddDesktopShortcut 'Sign Out Computer' '"%WINDIR%\System32\logoff.exe"' @('') -iconLocation $iconLogoff -minimized $true
+AddDesktopShortcut 'Update Status' '"%COMSPEC%"' @('/q', '/d', '/c', "`"$toolsRootPath\toggle-status.cmd`"") -iconlocation $iconStatus -minimized $true
 
 
 # -----------------------------------------------------------------------
@@ -443,6 +460,25 @@ Write-Host "Configure Nuget global package folder to be $nugetGlobalCacheDirecto
 
 
 # -----------------------------------------------------------------------
+# Setup NPM cache directory
+# -----------------------------------------------------------------------
+
+if ($null -ne $npmCacheRoot)
+{
+    # See https://docs.npmjs.com/misc/config
+
+    Write-Host "Configure NPM cache to be $npmCacheRoot..."
+    [System.IO.Directory]::CreateDirectory($npmCacheRoot) | Out-Null
+    # Compress the folder, prevent indexing, give current user full access
+    & compact /c "$npmCacheRoot" | Out-Null
+    & attrib +I "$npmCacheRoot" /s /d | Out-Null
+    & icacls $npmCacheRoot $icaclsAddUser | Out-Null
+
+    [System.Environment]::SetEnvironmentVariable('NPM_CONFIG_CACHE', $npmCacheRoot, $enviromentUserScope)
+}
+
+
+# -----------------------------------------------------------------------
 # Configure Git
 # -----------------------------------------------------------------------
 
@@ -465,6 +501,7 @@ ConfigureGitGlobally $gitPath 'alias.nb' '!f() { bn=${1-zzz_temp$RANDOM}; un=${U
 # ConfigureGitGlobally $gitPath 'alias.nb' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git checkout -b dev/$un/$bn master; git branch --set-upstream-to origin dev/$un/$bn; }; f'
 ConfigureGitGlobally $gitPath 'alias.nf' '!f() { bn=${1-zzz_temp$RANDOM}; git checkout -b feature/$bn origin/master; git push --set-upstream origin feature/$bn; }; f'
 # ConfigureGitGlobally $gitPath 'alias.nf' '!f() { bn=${1-zzz_temp$RANDOM}; git checkout -b feature/$bn master; git branch --set-upstream-to origin feature/$bn; }; f'
+ConfigureGitGlobally $gitPath 'alias.nr' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git push origin --delete dev/$un/$bn; git branch -d dev/$un/$bn; }; f'
 ConfigureGitGlobally $gitPath 'alias.st' 'status'
 ConfigureGitGlobally $gitPath 'alias.up' "!f() { git pull --rebase --prune $@; git submodule update --init --recursive; }; f"
 ConfigureGitGlobally $gitPath 'alias.wipe' "!f() { git add -A; git commit -qm '*** WIPED SAVEPOINT ***. Use git reflog to restore.'; git reset HEAD~1 --hard; }; f"

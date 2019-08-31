@@ -1,6 +1,6 @@
-@echo off
+@if not defined _DEBUG echo off
 setlocal
-set __EXEPATH=%~dp0%~n0\bin\%~n0.exe
+set "__EXEPATH=%~dp0%~n0\bin\%~n0.exe"
 
 if not exist "%__EXEPATH%" (
     echo "%~n0" is not installed at "%__EXEPATH%". Abort.

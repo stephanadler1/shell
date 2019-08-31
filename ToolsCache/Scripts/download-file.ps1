@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------
-# <copyright file="base64-decode.ps1" company="Stephan Adler">
+# <copyright file="download-file.ps1" company="Stephan Adler">
 # Copyright (c) Stephan Adler. All Rights Reserved.
 # </copyright>
 #
@@ -18,17 +18,20 @@
 
 <#
 .SYNOPSIS
-Decodes base64 encoded strings into HEX and strings.
+Downloads a file.
  
 .DESCRIPTION
-Decodes base64 encoded strings into HEX and strings. Make sure you use double quotes for the base64 encoded string if it terminates with '='.
+Downloads a file from internet sources and stores it on the local file system.
 #> 
 
 param(
-    # The base64 encode string.
+    # The URI from where to download the file.
     [Parameter(Mandatory = $true)]
     [ValidateNotNull()]
-    [string] $base64
+    [System.Uri] $address,
+
+    [Parameter(Mandatory = $false)]
+    [string] $filePath = $null
 )
 
 Set-StrictMode -Version Latest
@@ -38,21 +41,17 @@ if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
     $DebugPreference = 'Continue'
 } 
 
-$ba = [System.Convert]::FromBase64String($base64)
-$hexString = [System.BitConverter]::ToString($ba)
-$string = [System.Text.Encoding]::Default.GetString($ba)
-$stringUtf8 = [System.Text.Encoding]::UTF8.GetString($ba)
-$stringAscii = [System.Text.Encoding]::ASCII.GetString($ba)
+if (([String]::IsNullOrWhitespace($filePath)) -and ($address.Segments.Count -ge 1)) {
+    $filePath = [System.Net.WebUtility]::UrlDecode($address.Segments[$address.Segments.Count - 1])
+}
 
-Write-Host
-Write-Host 'Hexadecimal Representations'
-Write-Host 'length (bytes)....:' $ba.length
-Write-Host 'hex 1.............:' $hexString
-Write-Host 'hex 2.............:' $hexString.Replace('-', '')
-Write-Host 'hex 3.............:' $hexString.Replace('-', ':')
+Write-Host "Downloading file `"$filePath`" from `"$address`"."
 
-Write-Host
-Write-Host 'String Representations'
-Write-Host 'Default encoding..:' $string
-Write-Host 'UTF-8.............:' $stringUtf8
-Write-Host 'ASCII.............:' $stringAscii
+$script:webClient = New-Object -TypeName 'System.Net.WebClient'
+
+# Fake a web browser (e.g. Chrome), to bypass server checks that could otherwise throw 404 errors at you
+$webClient.Headers.Add('user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36')
+
+$webClient.DownloadFile($address, $filePath)
+
+Write-Host 'Done.'

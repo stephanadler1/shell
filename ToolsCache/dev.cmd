@@ -3,8 +3,8 @@ for /f "usebackq tokens=*" %%o in (`powershell -nologo -noprofile -executionPoli
     if "%%~o" neq "" (pushd "%%~o" & call :SetTitle "%%~o")
 )
 
-exit /b 0
+goto :EOF
 
 :SetTitle
     if /i "%~1" neq "" (title %~nx1 - Developer Shell)
-    exit /b 0
+    goto :EOF

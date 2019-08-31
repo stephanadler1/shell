@@ -2,8 +2,8 @@
 setlocal
 setlocal enabledelayedexpansion
 
-set __EXEPATH=%ProgramFiles(x86)%\WinMerge
-set __EXETOOL=WinMergeU.exe
+set "__EXEPATH=%ProgramFiles(x86)%\WinMerge"
+set "__EXETOOL=WinMergeU.exe"
 
 if not exist "!__EXEPATH!\%__EXETOOL%" (
 

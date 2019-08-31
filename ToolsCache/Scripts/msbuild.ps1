@@ -130,9 +130,16 @@ function ReportIsolation
     $files = Get-ChildItem -Path $env:TEMP -Recurse -File
     if ($files)
     {
+        try {
+            $count = $files.Count + ' files'
+        }
+        catch {
+            $count = '1 file'
+        }
+
         Write-Host
         Write-Host '*** FILES HAVE BEEN WRITTEN OUTSIDE OF BUILD OUTPUT ***' -ForegroundColor Red
-        Write-Host $files.Count 'files have been found.' -ForegroundColor Red
+        Write-Host $count 'have been found.' -ForegroundColor Red
         Write-Host 'Use the following command to list them:'
         Write-Host "  dir /b /s /a:-d `"$env:TEMP`""
 
