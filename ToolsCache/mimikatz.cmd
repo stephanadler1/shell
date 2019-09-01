@@ -1,7 +1,7 @@
 @echo off
 setlocal
-set __RUNDIR=%TEMP%\%~n0
-set __EXEPATH=%TEMP%\%~n0\x64\%~n0.exe
+set "__RUNDIR=%TEMP%\9f1493b7-22ca-4a75-bb7a-a6f39a5dd76e\%~n0"
+set "__EXEPATH=%__RUNDIR%\x64\%~n0.exe"
 
 if not exist "%__EXEPATH%" (
     md "%__RUNDIR%"  > nul 2>&1
@@ -16,5 +16,14 @@ if /i "%~1" equ "/?" (
 
 if errorlevel 1 (
     echo:
-    echo Exclude the folder "%__RUNDIR%" from AntiVirus/Malware scanning.
+    echo Exclude the folder "%__RUNDIR%" from AntiVirus/Malware scanning. Run
+    echo:
+    echo    powershell -nologo -noprofile -executionPolicy RemoteSigned -command "Set-MpPreference -ExclusionPath '%__RUNDIR%'" 
+    echo:
+    echo  or
+    echo:
+    echo    Set-MpPreference -ExclusionPath '%__RUNDIR%'
+    echo Set-MpPreference -ExclusionPath '%__RUNDIR%' | clip > nul 2>&1
+    echo:
+    echo from an elevated command prompt to configure Windows Defender.
 )

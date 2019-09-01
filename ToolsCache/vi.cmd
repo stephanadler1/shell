@@ -1,0 +1,1 @@
+@call "%~dp0vim.cmd" %*

@@ -1,7 +1,7 @@
 @if not defined _DEBUG echo off
 setlocal
 
-set "__EXEPATH=%~dp0jre1.8.0_211\bin"
+if defined TOOLS_JAVA set "__EXEPATH=%TOOLS_JAVA%" 
 if defined JAVA_HOME set "__EXEPATH=%JAVA_HOME%\bin"
 if defined JRE_HOME set "__EXEPATH=%JRE_HOME%\bin"
 
@@ -12,12 +12,22 @@ if not exist "%__EXEPATH%" (
     exit /b -1
 )
 
-if /i "%ConEmuANSI%" equ "ON" echo [93m^> %__EXEPATH%[0m
-if /i "%ConEmuANSI%" neq "ON" echo ^> %__EXEPATH%
+echo:
+if /i "%PROMPT:~0,4%" equ "$E[m" (
+rem if /i "%ConEmuANSI%" equ "ON" (
+    echo [93m^> "%__EXEPATH%"[0m
+) else (
+    echo ^> "%__EXEPATH%"
+)
 
 echo:
 if /i "%~1" equ "/?" (
     call "%__EXEPATH%" "/?"
+    exit /b %ERRORLEVEL%
 ) else (
     call "%__EXEPATH%" %*
+    exit /b %ERRORLEVEL%
 )
+
+goto :EOF
+

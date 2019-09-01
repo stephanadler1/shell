@@ -5,33 +5,39 @@ For more information on a specific command, type DHELP command-name.
  ....          Up three directories.
  .....         Up four directories.
  ALIAS         Prints all aliases defined in the command shell.
- ASN1-PARSE    Parses the provided file with OpenSSL asn1parse. Use with `asn1-parse file`.
  B             Calls MSBuild.exe.
- BASE64-DECODE Decodes base64 encoded data into it's hex and string representation.
  BB            Calls POPD.
- BENCHMARK     Opens a folder with various benchmarking tools or help if none
-               are available.
- BCC           Clean build.
+ BENCHMARK     Opens a folder with various benchmarking tools or help if none are available.
+ BCC           Clean build (build -cC).
+ BCZ           Clean build (build -cZ).
  BDIAG         Diagnostic build.
+ C             Change to directory.
+ CHELP         Shows the component help of the closes component definition in folder hierarchy.
  CODE          Opens VS Code in the specified directory.
+ DECODE-BASE64 Decodes base64 encoded data into it's hex and string representation.
+ DECODE-JWT    Decodes a JSON Web Token.
+ DOWNLOAD-FILE Downloads a file from the given internet source.
  DC            Developer Console. Frequently used management console snap-ins.
  DEV           Like CD, but from the root of the development directory
  DHELP         This help.
  DIG           Bind Dig tool.
  E             Start Windows Explorer in the current directory (SOURCES_ROOT).
+ ENCODE-BASE64 Encodes a string into UTF-8 and ASCII base64.
  GIT           Opens the Git documentation.
  GITHUB        Opens the Github web site.
+ GPA           Invokes GNU Privacy Guard Assistant.
+ GPG           Invokes GNU Privacy Guard command line.
  HG            Opens the Mercurial documentation.
  ILSPY         Starts ILSpy.
  JAVA          Starts the Java Runtime Environment.
  MD5           Calculates a MD5 hash for the specified file.
  MIMIKATZ      Invokes Mimikatz.
- MSB           Calls MSBuild.exe in the current directory or with additional
-               arguments.
+ MSB           Calls MSBuild.exe in the current directory or with additional arguments.
  N             Invokes Notepad++, to open a file use `n file1 [file2...]`
  NANT          Invokes NAnt.
  NCAT          Invokes NCat.
  NMAP          Invokes NMap. Network mapping tool.
+ NPING         Invokes NPing.
  NN            Invokes Notepad++, to open a file use `nn file1 [file2...]`
  NODE          Invokes Node.js.
  NPM           Invokes the NPM package manager.
@@ -41,28 +47,31 @@ For more information on a specific command, type DHELP command-name.
  OPEN          Opens Visual Studio in the current directory.
  OPENSSL       Invokes OpenSSL.
  ORCA          Microsoft Orca - MSI Editor.
+ PARSE-ASN1    Parses the provided file with OpenSSL asn1parse. Use with `asn1-parse file`.
+ PLANTUML      PlantUML documentation.
  PYTHON        Invokes Python.
+ RANDOM        Generates random bytes of the requested length.
  RAR           Calls WinRAR command line.
  ROOT          Like CD, but from the root of the enlistment.
  SELF          Opens the user profile of the system or the enlistment.
  SHA1          Calculates a SHA1 hash for the specified file.
  SHA256        Calculates a SHA256 hash for the specified file.
  SHA512        Calculates a SHA512 hash for the specified file.
- SHOW-TOOLS    Enumerates all tools available: Gnu CoreTools, Sysinternals and
-               Various.
+ SHOW-TOOLS    Enumerates all tools available: Gnu CoreTools, Sysinternals and Various.
  SLNGEN        Calls MSBuild.exe in the current directory to generate a .sln file.
- SO            Opens the C# page of Stackoverflow.com. Use `so tagname` to
-               open any other tag.
- STRIPCERTIFICATEPASSWORD
-               Removes the password protection from the specified .PFX file.
+ SO            Opens the C# page of Stackoverflow.com. Use `so tagname` to open any other tag.
+ STATUS        Sets the specified color on an Embrava Blynclight.
+ STRIPCERTIFICATEPASSWORD  Removes the password protection from the specified .PFX file.
  SVN           Opens the Subversion documentation.
  SRC           Like CD, but from the root of the development directory
  TOGGLE-DEBUG  Toggles between turning debug logging on and off.
- TOGGLE-MSBUILDISOLATION
-               Toggles between turning MSBuild build isolation on and off.
- TOGGLE-MSBUILDLOGGING
-               Toggles between turning MSBuild file logging on and off.
+ TOGGLE-MSBUILDISOLATION  Toggles between turning MSBuild build isolation on and off.
+ TOGGLE-MSBUILDLOGGING  Toggles between turning MSBuild file logging on and off.
+ TOGGLE-STATUS Toggles the Embrava Blynclight between red and green.
  TOOLS         Opens the tools directory in Visual Studio Code.
+ TOR           Invokes the Tor Browser, when installed.
+ VI            Invokes VIM, to open a file use `vi file1 [file2...]`.
+ VIM           Invokes VIM, to open a file use `vim file1 [file2...]`.
  VS            Opens Visual Studio in the current directory.
  VSO           Opens the Visual Studio Online web site.
  WINMERGE      Starts WinMerge.

@@ -326,6 +326,11 @@ function script:GetNugetCacheDirectory
     return $nugetCacheRoot
 }
 
+function script:GetNpmCacheDirectory
+{
+    return $npmCacheRoot
+}
+
 function script:SetSymbolServers
 {
     param([string] $defaultSymbolPath, [string] $enviromentUserScope)

@@ -2,12 +2,37 @@
 <html>
     <head>
         <title>git(1)</title>
-        <link rel="stylesheet" href="./help.css" />
+        <meta name="author" content="Stephan Adler" />
         <link rel="icon" href="../Scripts/FolderIcon-Lego.ico">
-        <meta http-equiv="refresh" content="5; https://git-scm.com/docs" />
+        <link rel="stylesheet" href="./help.css" />
     </head>
-    <body onload="window.location = 'https://git-scm.com/docs'">
+    <body>
         <h1>git(1) Manual Page</h1>
-        <p>Redirecting to the <a href="https://git-scm.com/docs">Git web site</a> in 5 seconds.</p>
+
+        <h2>Name</h2>
+        <p>Various git aliases added for the developer shell.</p>
+        <ul>
+            <li><b>git br</b> &ndash; Shortcut for <code>git branch</code>.</li>
+            <li><b>git co</b> &ndash; Shortcut for <code>git checkout</code>.</li>
+            <li><b>git com</b> &ndash; Shortcut for <code>git checkout master</code>.</li>
+            <li><b>git cod</b> &ndash; Shortcut for <code>git checkout develop</code>.</li>
+            <li><b>git cl</b> &ndash; Shortcut for <code>git clean</code>.</li>
+            <li><b>git gh</b> &ndash; <u>G</u>et the <u>h</u>ead commit of the current branch and copy it into the clipboard.</li>
+            <li><b>git hist</b> &ndash; Gets the <u>hist</u>ory of the current branch.</li>
+            <li><b>git lol</b> &ndash; Brief version of <code>git log</code>.</li>
+            <li><b>git nb</b> &ndash; Creates a <u>n</u>ew development <u>b</u>ranch and sets the upstream.</li>
+            <li><b>git nf</b> &ndash; Creates a <u>n</u>ew <u>f</u>eature branch and sets the upstream.</li>
+            <li><b>git nr</b> &ndash; Removes a fully merged development branch locally and remote.</li>
+            <li><b>git pause</b> &ndash; Creates a save point commit in the current branch to save the current work. Similar to a stash.</li>
+            <li><b>git st</b> &ndash; Shortcut for <code>git status</code>.</li>
+            <li><b>git up</b> &ndash; Updates the current branch from its remote incl. submodules.</li>
+            <li><b>git wipe</b> &ndash; Removes a save point.</li>
+            <li><b>git start</b> &ndash; Removes the head commit (assuming it is a save point) to resume the work.</li>
+        </ul>
+
+        <h2>See Also</h2>
+        <ul>
+            <li><a href="https://git-scm.com/docs">Git documentation</a></li>
+        </ul>
     </body>
 </html>

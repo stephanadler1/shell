@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>random(1)</title>
+        <meta name="author" content="Stephan Adler" />
+        <link rel="icon" href="../Scripts/FolderIcon-Lego.ico">
+        <link rel="stylesheet" href="./help.css" />
+    </head>
+    <body>
+        <h1>random(1) Manual Page</h1>
+
+        <h2>Name</h2>
+        <p><b>random</b> &ndash; Generates cryptographically strong random data of the requested size.</p>
+
+        <h2>Synopsis</h2>
+        <p><code>random number_of_bytes</code></p>
+
+        <h2>Description</h2>
+        <p>Generates cryptographically strong random data using a PRNG. This can be used to generate machine keys for 
+            the <a href="https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-4.0/w8h3skw9(v=vs.100)">machineKey</a>
+            in IIS.</p>
+        <p>By default it uses 1,000,000 iterations to generate the random data.</p>
+
+        <h2>See Also</h2>
+        <ul>
+            <li><a href="https://docs.microsoft.com/en-us/previous-versions/dotnet/netframework-4.0/w8h3skw9(v=vs.100)">machineKey Element (ASP.NET Settings Schema)</a></li>
+            <li><a href="https://docs.microsoft.com/en-us/previous-versions/msp-n-p/ff649308(v=pandp.10)">How To: Configure MachineKey in ASP.NET 2.0</a></li>
+            <li><a href="https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.rngcryptoserviceprovider">RNGCryptoServiceProvider Class</a></li>
+        </ul>
+    </body>
+</html>

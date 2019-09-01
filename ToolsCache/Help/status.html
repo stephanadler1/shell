@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>status(1), toggle-status(1)</title>
+        <meta name="author" content="Stephan Adler" />
+        <link rel="icon" href="../Scripts/FolderIcon-Lego.ico">
+        <link rel="stylesheet" href="./help.css" />
+        <!--
+            http://www.schweikhardt.net/man_page_howto.html
+        -->
+    </head>
+    <body>
+        <h1>status(1), toggle-status(1) Manual Page</h1>
+
+        <h2>Name</h2>
+        <ul>
+            <li><b>status</b> &ndash; sets the color or status of an attached presence light device.</li>
+            <li><b>toggle-status</b> &ndash; toggles the status of an attached presence light device between red (busy) and green (available).</li>
+        </ul>
+
+        <h2>Synopsis</h2>
+        <p><code>status (blue|cyan|green|magenta|orange|red|white|yellow|available|busy|dnd|away|incoming)</code></p>
+        <p><code>status (off|on)</code></p>
+        <p><code>toggle-status</code></p>
+
+        <h2>Description</h2>
+        <p>Both commands either set the presence light device to the specified color or to the color associated with the specified status.</p>
+        <ul>
+            <li><b>available</b> &ndash; green</li>
+            <li><b>busy</b> &ndash; red</li>
+            <li><b>away</b> &ndash; yellow</li>
+            <li><b>dnd</b> &ndash; magenta for do not disturb.</li>
+            <li><b>incoming</b> &ndash; blue for incoming call or incoming IM message.</li>
+        </ul>
+        <p>The command <code>status off</code> turns the presence light off.</p>
+        <p>The command <code>status on</code> returns the presence light to the last status set through <code>toggle-status</code>.</p>
+        <p>The commands support the following presence light devices:</p>
+        <ul>
+            <li><b>Embrava Blynclight.</b> In order to interact with the device the Embrava Connect software is required. It can be downloaded through the link below.</li>
+            <li><b>PLENOM Kuando Busylight.</b> (untested)</li>
+        </ul>
+
+        <h2>Files</h2>
+        <p><code>toggle-status</code> uses a semaphore file in <code>%TEMP%\presence-light-busy.txt</code> to keep track of the current status. If the light is updated by other applications the state of the file might not match the actual state of the light. Using <code>toggle-status</code> multiple times (at most 2 times) will bring the light back into the desired state.</p>
+        <p>In addition to the the command line tool, a shortcut named "Update Status" has been added to the desktop, which will call <code>toggle-status</code> to update the status of the light.</p>
+
+        <h2>See Also</h2>
+        <ul>
+            <li><a href="https://embrava.com/collections/blynclight-series">Embrava Blynclight</a> web page</li>
+            <li><a href="https://embrava.com/pages/software">Embrava Connect</a> download page</li>
+            <li><a href="https://www.plenom.com/products/">PLENOM Kuando Busylight</a> web page</li>
+        </ul>
+    </body>
+</html>

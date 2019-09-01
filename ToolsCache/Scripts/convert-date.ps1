@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------
-# <copyright file="convert-time.ps1" company="Stephan Adler">
+# <copyright file="convert-date.ps1" company="Stephan Adler">
 # Copyright (c) Stephan Adler. All Rights Reserved.
 # </copyright>
 #
@@ -18,14 +18,12 @@
 
 <#
 .SYNOPSIS
-Decodes base64 encoded strings into HEX and strings.
  
 .DESCRIPTION
-Decodes base64 encoded strings into HEX and strings. Make sure you use double quotes for the base64 encoded string if it terminates with '='.
 #> 
 
 param(
-    # The base64 encode string.
+    # The date and time
     [Parameter(Mandatory = $false)]
     [string] $timeString
 )
@@ -42,13 +40,46 @@ Write-Host
 $date = [System.DateTimeOffset]::Now
 if (-not ([System.String]::IsNullOrWhitespace($timeString)))
 {
-    $date = [System.DateTimeOffset]::Parse($timeString)
-    Write-Host 'Parsed as............:' $date
+    [string] $parsingType = '<Unkown>'
+
+    # Try first to see if it is a valid number that can be parsed
+    [System.UInt64] $timeValue = 0
+    if ([System.UInt64]::TryParse($timeString, [System.Globalization.NumberStyles]::HexNumber, $null, [ref] $timeValue))
+    {
+        $parsingType = 'FILETIME'
+        $date = [System.DateTimeOffset]::FromFileTime($timeValue)
+    }
+    else 
+    { 
+        # If it starts with 0x, try parsing it as a number again
+        if ($timeString.StartsWith('0x', [System.StringComparison]::OrdinalIgnoreCase))
+        {
+            if ([System.UInt64]::TryParse($timeString.Substring(2), [System.Globalization.NumberStyles]::HexNumber, $null, [ref] $timeValue))
+            {
+                $parsingType = 'FILETIME'
+                $date = [System.DateTimeOffset]::FromFileTime($timeValue)
+            }
+            else 
+            {
+                throw "Cannot parse $timeString as a hexadecimal number."    
+            }
+        }
+        else 
+        {
+            $parsingType = 'DateTimeOffset'
+            $date = [System.DateTimeOffset]::Parse($timeString)
+        }    
+    }
+
+    Write-Host 'Parsed as............:' $date 'as' $parsingType
 }
 
+$fileTimeString = '{0:X}' -f $date.ToFileTime()
 Write-Host 'Local time...........:' $date.ToLocalTime()
-Write-Host 'UTC..................:' $date.ToUniversalTime() # .ToString('s', [CultureInfo]::InvariantCulture)
+Write-Host 'UTC..................:' $date.ToUniversalTime()
 Write-Host 'Unix Time (seconds)..:' $date.ToUnixTimeSeconds()
+Write-Host "Windows File Time....: 0x$fileTimeString"
+Write-Host 'ISO 8601.............:' $date.ToString('yyyy-MM-ddTHH:mm:ss.fffffffzzz', [CultureInfo]::InvariantCulture) '  see https://en.wikipedia.org/wiki/ISO_8601'
 
 Write-Host
 Write-Host 'Time zones on a world map is available at https://www.timeanddate.com/time/map/, and as a table at https://everytimezone.com/.'

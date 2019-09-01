@@ -1,0 +1,12 @@
+{
+    "git_repositories" : [
+        {
+            "repository_uri": "https://github.com/stephanadler1/shell.git",
+            "shortcuts" : {
+                "tc": "ToolsCache",
+                "help": "ToolsCache\\Help",
+                "scripts": "ToolsCache\\Scripts"
+            }
+        }
+    ]
+}
