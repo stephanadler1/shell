@@ -29,7 +29,13 @@ automatically.
 param(
     # Force the deletion of the not fully merged branch. Uses git branch -D!
     [Parameter(Mandatory = $false)]
-    [switch] $forceBranchDelete = $false
+    [Alias("force")]
+    [switch] $forceBranchDelete = $false,
+
+    # Run GIT GC to cleanup dangling nodes
+    [Parameter(Mandatory = $false)]
+    [Alias("gc")]
+    [switch] $garbageCollection = $false
 )
 
 Set-StrictMode -Version Latest
@@ -71,6 +77,11 @@ $localBranches | ForEach-Object {
 
 if ($removedBranch)
 {
+    Write-Host 'Repositoriy maintenance...'
     & git @('remote', 'prune', 'origin')
-    & git @('gc')
+
+    if ($garbageCollection)
+    {
+        & git @('gc')
+    }
 }

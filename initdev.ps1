@@ -25,7 +25,7 @@ $host.ui.RawUI.WindowTitle = "Developer Shell (PowerShell $($PSVersionTable.PSVe
 
 $env:_WORKINGDIR = (Get-Item -Path '.')
 
-Import-Module -Name "$env:TOOLS\Scripts\developer-console.psm1"
+Import-Module -Name "$env:TOOLS\Scripts\developer-console.psm1" -Force
 
 Write-Host 'GLOBAl TOOLS'
 Write-Host '------------'

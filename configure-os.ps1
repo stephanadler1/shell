@@ -41,7 +41,7 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 
 $script:rootPath = Split-Path $script:MyInvocation.MyCommand.Path -Parent
-Import-Module "$rootPath\install.psm1" -Scope Local
+Import-Module "$rootPath\install.psm1" -Scope Local -Force
 
 $script:rebootRequired = $false
 
@@ -122,7 +122,15 @@ foreach($fileExtension in @('.md'))
 {
     $subKey = $rk.CreateSubKey($fileExtension, $true)
     $subKey.SetValue($null, 'txtfile')
-    $subKey.SetValue('ContentType', 'text/plain')
+    $subKey.SetValue('Content Type', 'text/plain')
+    $subKey.SetValue('PerceivedType', 'text')
+}
+
+foreach($fileExtension in @('.js'))
+{
+    $subKey = $rk.CreateSubKey($fileExtension, $true)
+    $subKey.SetValue($null, 'JSFile')
+    $subKey.SetValue('ContentType', 'application/javascript')
     $subKey.SetValue('PerceivedType', 'text')
 }
 

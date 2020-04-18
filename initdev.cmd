@@ -46,10 +46,19 @@ echo COMMAND SHELL ALIASES
 echo ---------------------
 doskey /macros | sort
 echo:
-if "%TOOLS%" neq "" echo GLOBAL TOOLS && echo ------------ && dir /w "%TOOLS%\*.cmd"
+if "%TOOLS%" neq "" echo GLOBAL TOOLS && echo ------------ && dir /d /l /o /a:-s-h-d "%TOOLS%\*.*"
 
 echo:
-if "%TOOLS_GIT%" neq "" echo GLOBAL GIT ALIASES && echo ------------------ && git config --global --get-regexp alias. | sort
+if "%TOOLS_GIT%" neq "" (
+    echo GLOBAL GIT ALIASES
+    echo ------------------
+    git config --global --get-regexp alias. | sort
+
+    echo:
+    echo GLOBAL GIT USER
+    echo ---------------
+    git config --global --get-regexp user. | sort
+)
 
 
 title Developer Shell

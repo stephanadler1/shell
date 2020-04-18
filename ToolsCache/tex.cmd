@@ -1,0 +1,1 @@
+@call "%~dp0MikTeX\miktex-portable.cmd" %*

@@ -90,17 +90,19 @@ function Get-SourceCodeRootPath
 #>
 function Get-WorkingCopyRootPath
 {
+    # CoreXT. Even though the rarest, checking the value of an environment
+    # variable is still the fastest.
+    if (-not ([System.String]::IsNullOrWhitespace($env:SDROOT)))
+    {
+        return ($env:SDROOT)
+    }
     if (-not ([System.String]::IsNullOrWhitespace($env:INETROOT)))
     {
-        # CoreXT. Even though the rarest, checking the value of an environment
-        # variable is still the fastest.
         return ($env:INETROOT)
     }
 
     try {
-        # Git
-        & git rev-parse 2>&1 | Out-Null
-        if ($LASTEXITCODE -eq 0)
+        if (Test-Git)
         {
             $rootDir = & git rev-parse --show-cdup
             if ([System.String]::IsNullOrWhitespace($rootDir))
@@ -116,9 +118,7 @@ function Get-WorkingCopyRootPath
     }
 
     try {
-        # Subversion
-        & svn info . 2>&1 | Out-Null
-        if ($LASTEXITCODE -eq 0)
+        if (Test-Subversion)
         {
             $svnOutput = & svn info .
             if ($LASTEXITCODE -eq 0)
@@ -139,9 +139,7 @@ function Get-WorkingCopyRootPath
     }
 
     try {
-        # Mercurial
-        & hg root 2>&1 | Out-Null
-        if ($LASTEXITCODE -eq 0)
+        if (Test-Mercurial)
         {
             return ''
         }
@@ -173,9 +171,100 @@ function Test-FileExists
     return $file
 }
 
+
+<#
+.SYNOPSIS
+    Tests if the current directory is part of a SourceDepot repository.
+#>
+function Test-SourceDepot
+{
+    if (-not ([System.String]::IsNullOrWhitespace($env:SDPORT)))
+    {
+        return $true
+    }
+
+    if (-not ([System.String]::IsNullOrWhitespace($env:SDROOT)))
+    {
+        return $true
+    }
+
+    if (-not ([System.String]::IsNullOrWhitespace($env:INETROOT)))
+    {
+        return $true
+    }
+
+    return $false
+}
+
+
+<#
+.SYNOPSIS
+    Tests if the current directory is part of a Git repository.
+#>
+function Test-Git
+{
+    try {
+        & git rev-parse 2>&1 | Out-Null
+        if ($LASTEXITCODE -eq 0)
+        {
+            return $true
+        }
+    }
+    catch {
+    }
+
+    return $false
+}
+
+
+<#
+.SYNOPSIS
+    Tests if the current directory is part of a Subversion repository.
+#>
+function Test-Subversion
+{
+    try {
+        & svn info . 2>&1 | Out-Null
+        if ($LASTEXITCODE -eq 0)
+        {
+            return $true
+        }
+    }
+    catch {
+    }
+
+    return $false
+}
+
+
+<#
+.SYNOPSIS
+    Tests if the current directory is part of a Mercurial repository.
+#>
+function Test-Mercurial
+{
+    try {
+        & hg root 2>&1 | Out-Null
+        if ($LASTEXITCODE -eq 0)
+        {
+            return $true
+        }
+    }
+    catch {
+    }
+
+    return $false
+}
+
+
 Export-ModuleMember -Function Remove-Newline
 
 Export-ModuleMember -Function Get-DeveloperHomePath
 Export-ModuleMember -Function Get-SourceCodeRootPath
 Export-ModuleMember -Function Get-WorkingCopyRootPath
+
 Export-ModuleMember -Function Test-FileExists
+Export-ModuleMember -Function Test-SourceDepot
+Export-ModuleMember -Function Test-Git
+Export-ModuleMember -Function Test-Subversion
+Export-ModuleMember -Function Test-Mercurial

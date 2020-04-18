@@ -3,8 +3,8 @@ if "%~1" equ "/?" (
     call "%~dp0Scripts\msbuild.cmd" "/?"
 ) else (
     if exist "dirs.proj" (
-        call "%~dp0Scripts\msbuild.cmd" /t:slngen /nologo /consoleloggerparameters:verbosity=minimal;nosummary "dirs.proj" %* < nul
+        call "%~dp0Scripts\msbuild32.cmd" /restore:true /t:slngen /nologo /consoleloggerparameters:verbosity=minimal;nosummary "dirs.proj" %* < nul
     ) else (
-        call "%~dp0Scripts\msbuild.cmd" /t:slngen /nologo /consoleloggerparameters:verbosity=minimal;nosummary %* < nul
+        call "%~dp0Scripts\msbuild32.cmd" /restore:true /t:slngen /nologo /consoleloggerparameters:verbosity=minimal;nosummary %* < nul
     )
 )

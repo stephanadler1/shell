@@ -1,6 +1,6 @@
 @if not defined _DEBUG echo off
 setlocal
-set _DIRARGS=/w /l /o /a:-s-h-d
+set _DIRARGS=/d /l /o /a:-s-h-d
 if defined TOOLS                 if exist "%TOOLS%"                 echo: & dir %_DIRARGS% "%TOOLS%\*.*"
 if defined TOOLS_GIT             if exist "%TOOLS_GIT%"             echo: & dir %_DIRARGS% "%TOOLS_GIT%\*.exe"
 if defined TOOLS_GIT             if exist "%TOOLS_GIT%"             echo: & call git config --global --get-regexp alias. | sort

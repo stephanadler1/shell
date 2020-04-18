@@ -24,6 +24,7 @@ For more information on a specific command, type DHELP command-name.
  E             Start Windows Explorer in the current directory (SOURCES_ROOT).
  ENCODE-BASE64 Encodes a string into UTF-8 and ASCII base64.
  GIT           Opens the Git documentation.
+ GIT-BRANCH-CLEANUP  Cleans up Git branches that don't have a remote any longer.
  GITHUB        Opens the Github web site.
  GPA           Invokes GNU Privacy Guard Assistant.
  GPG           Invokes GNU Privacy Guard command line.
@@ -33,6 +34,7 @@ For more information on a specific command, type DHELP command-name.
  MD5           Calculates a MD5 hash for the specified file.
  MIMIKATZ      Invokes Mimikatz.
  MSB           Calls MSBuild.exe in the current directory or with additional arguments.
+ MSBLOG        Calls the MSBuild structured log viewer (.binlog).
  N             Invokes Notepad++, to open a file use `n file1 [file2...]`
  NANT          Invokes NAnt.
  NCAT          Invokes NCat.
@@ -48,6 +50,7 @@ For more information on a specific command, type DHELP command-name.
  OPENSSL       Invokes OpenSSL.
  ORCA          Microsoft Orca - MSI Editor.
  PARSE-ASN1    Parses the provided file with OpenSSL asn1parse. Use with `asn1-parse file`.
+ PARSE-URI     Parses common URIs and extracts their relevant information.
  PLANTUML      PlantUML documentation.
  PYTHON        Invokes Python.
  RANDOM        Generates random bytes of the requested length.

@@ -200,7 +200,7 @@ $script:npmCacheRoot = [System.IO.Path]::Combine($packageCacheRoot, 'npm')
 Import-Module "$rootPath\install.psm1" -Scope Local
 if ([System.IO.File]::Exists("$rootPath\install.$env:USERDOMAIN.psm1"))
 {
-    Import-Module "$rootPath\install.$env:USERDOMAIN.psm1" -Scope Local
+    Import-Module "$rootPath\install.$env:USERDOMAIN.psm1" -Scope Local -Force
 }
 
 $packageCacheRoot = $(GetPackageCacheRoot)
@@ -507,6 +507,10 @@ ConfigureGitGlobally $gitPath 'alias.up' "!f() { git pull --rebase --prune $@; g
 ConfigureGitGlobally $gitPath 'alias.wipe' "!f() { git add -A; git commit -qm '*** WIPED SAVEPOINT ***. Use git reflog to restore.'; git reset HEAD~1 --hard; }; f"
 ConfigureGitGlobally $gitPath 'alias.pause' "!f() { git add -A; git commit -m '*** SAVEPOINT ***. Use git start to resume work.'; }; f"
 ConfigureGitGlobally $gitPath 'alias.start' 'reset HEAD~1 --mixed'
+ConfigureGitGlobally $gitPath 'alias.rbm' '!f() { git fetch --prune --auto-gc; git rebase --no-autostash origin/master;  git submodule update --init --recursive; }; f'
+ConfigureGitGlobally $gitPath 'alias.rbd' '!f() { git fetch --prune --auto-gc; git rebase --no-autostash origin/develop; git submodule update --init --recursive; }; f'
+ConfigureGitGlobally $gitPath 'alias.delete' '!f() { bn=${1-zzz_temp$RANDOM}; git fetch --prune --auto-gc; git checkout master; git branch -d $bn; git push origin --delete $bn; }; f'
+ConfigureGitGlobally $gitPath 'alias.remove' '!f() { bn=${1-zzz_temp$RANDOM}; git fetch --prune --auto-gc; git checkout master; git branch -D $bn; git push origin --delete $bn; }; f'
 # ConfigureGitGlobally $gitPath 'alias.nw' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git worktree add --track -b dev/$un/$bn \dev\$bn master; git branch --set-upstream-to origin dev/$un/$bn; }; f'
 
 

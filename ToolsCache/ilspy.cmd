@@ -11,5 +11,5 @@ if not exist "%__EXEPATH%\%__EXETOOL%" (
 if /i "%~1" equ "/?" (
     start /d "%__EXEPATH%" %__EXETOOL% /?
 ) else (
-    start /d "%__EXEPATH%" %__EXETOOL% %*
+    start /d "%__EXEPATH%" %__EXETOOL% "%CD%\%~1"
 )

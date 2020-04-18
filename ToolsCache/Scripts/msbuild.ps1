@@ -52,7 +52,11 @@ param(
 
     # If defined uses the 64 bit MSBuild image if available.
     [Parameter(Mandatory = $false)]
-    [switch] $prefer64Bit
+    [switch] $prefer64Bit,
+
+    # If defined uses the text-based diagnostic log instead of binary logging.
+    [Parameter(Mandatory = $false)]
+    [switch] $preferTextDiagnosticLog
 )
 
 Set-StrictMode -Version Latest
@@ -62,7 +66,7 @@ if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
     $DebugPreference = 'Continue'
 } 
 
-Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psm1')
+Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psm1') -Scope Local -Force
 
 # Get the initial MSBuild location from the environment.
 [string] $script:msbuildTool = $env:MSBUILD
@@ -96,7 +100,7 @@ if ($lowerPriority)
     $priorityClass = [System.Diagnostics.ProcessPriorityClass]::BelowNormal
 }
 
-#Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psm1')
+#Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psm1') -Scope Local -Force
 
 Write-Host
 Write-Host 'Started' ([System.DateTime]::Now)
@@ -192,10 +196,16 @@ $script:args = $defaultArgs
 
 if ($isLoggingEnabled)
 {
+    if (-not $preferTextDiagnosticLog)
+    {
+        $args += " /bl:LogFile=`"$($loggingFilePath)log.binlog`";ProjectImports=None"
+    }
+
     $args += 
         " /flp:LogFile=`"$($loggingFilePath)diag.txt`";Encoding=UTF-8;Verbosity=Diagnostic" +
         " /flp1:LogFile=`"$($loggingFilePath)errors.txt`";Encoding=UTF-8;ErrorsOnly" +
-        " /flp2:LogFile=`"$($loggingFilePath)warnings.txt`";Encoding=UTF-8;WarningsOnly"
+        " /flp2:LogFile=`"$($loggingFilePath)warnings.txt`";Encoding=UTF-8;WarningsOnly" +
+        " /ds"
 }
 
 $args += " " + $msbuildArgs
@@ -216,6 +226,7 @@ if ([System.String]::IsNullOrEmpty($env:_DEBUG) -eq $false)
 }
 
 Remove-Item -Path "$loggingFilePath*.txt" -Recurse -Force
+Remove-Item -Path "$loggingFilePath*.binlog" -Recurse -Force
 
 if ($script:isIsolationEnabled)
 {

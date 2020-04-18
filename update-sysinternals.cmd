@@ -33,5 +33,7 @@ goto EOF
 
 :ErrorConnect
     echo *** Failed to connect to %_SYSINTERNALSLIVE%.
+    echo *** Try using the Windows explorer to connect first.
+    call explorer.exe "%_SYSINTERNALSLIVE%"
     pause
     exit /b 1
