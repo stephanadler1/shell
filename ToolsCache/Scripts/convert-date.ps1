@@ -44,11 +44,16 @@ if (-not ([System.String]::IsNullOrWhitespace($timeString)))
 
     # Try first to see if it is a valid number that can be parsed
     [System.UInt64] $timeValue = 0
-    if ([System.UInt64]::TryParse($timeString, [System.Globalization.NumberStyles]::HexNumber, $null, [ref] $timeValue))
+    if ([System.UInt64]::TryParse($timeString, [System.Globalization.NumberStyles]::Integer, $null, [ref] $timeValue))
     {
-        $parsingType = 'FILETIME'
-        $date = [System.DateTimeOffset]::FromFileTime($timeValue)
+        $parsingType = 'UNIXTIME'
+        $date = [System.DateTimeOffset]::FromUnixTimeSeconds($timeValue)
     }
+#    if ([System.UInt64]::TryParse($timeString, [System.Globalization.NumberStyles]::HexNumber, $null, [ref] $timeValue))
+#    {
+#        $parsingType = 'FILETIME'
+#        $date = [System.DateTimeOffset]::FromFileTime($timeValue)
+#    }
     else 
     { 
         # If it starts with 0x, try parsing it as a number again

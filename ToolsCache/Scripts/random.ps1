@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------
-# <copyright file="download-file.ps1" company="Stephan Adler">
+# <copyright file="random.ps1" company="Stephan Adler">
 # Copyright (c) Stephan Adler. All Rights Reserved.
 # </copyright>
 #
