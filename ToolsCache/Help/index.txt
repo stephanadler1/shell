@@ -5,7 +5,9 @@ For more information on a specific command, type DHELP command-name.
  ....          Up three directories.
  .....         Up four directories.
  ALIAS         Prints all aliases defined in the command shell.
+ AZCOPY        Redirects to the Microsoft AzCopy web page.
  B             Calls MSBuild.exe.
+ BAZEL         Calls bazel.exe.
  BB            Calls POPD.
  BENCHMARK     Opens a folder with various benchmarking tools or help if none are available.
  BCC           Clean build (build -cC).
@@ -19,7 +21,7 @@ For more information on a specific command, type DHELP command-name.
  DOWNLOAD-FILE Downloads a file from the given internet source.
  DC            Developer Console. Frequently used management console snap-ins.
  DEV           Like CD, but from the root of the development directory
- DHELP         This help.
+ DHELP         This help page.
  DIG           Bind Dig tool.
  E             Start Windows Explorer in the current directory (SOURCES_ROOT).
  ENCODE-BASE64 Encodes a string into UTF-8 and ASCII base64.

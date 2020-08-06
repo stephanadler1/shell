@@ -1,5 +1,7 @@
 set "__GNUPATH=%~dp0..\..\..\Documents\gpg4win.portable"
-if not exist "%__GNUPATH%" set __GNUPATH=%~dp0..\gpg4win.portable
+if not exist "%__GNUPATH%" if defined TOOLS      set "__GNUPATH=%TOOLS%\..\..\Documents\gpg4win.portable"
+if not exist "%__GNUPATH%" if defined TOOLS_ORIG set "__GNUPATH=%TOOLS_ORIG%\..\..\Documents\gpg4win.portable"
+if not exist "%__GNUPATH%" set "__GNUPATH=%~dp0..\gpg4win.portable"
 set "__EXEPATH=%__GNUPATH%\bin"
 
 rem GNUPGHOME environment variable has no impact on portable deployments.

@@ -258,8 +258,9 @@ function script:IsSystemDriveOnSsd
         Get-CimAssociatedInstance -ResultClassName Win32_DiskDrive |
         Where-Object { ($_.Caption.IndexOf('NVMe', [System.StringComparison]::OrdinalIgnoreCase) -ge 0) -or
             ($_.Caption.IndexOf('SSD', [System.StringComparison]::OrdinalIgnoreCase) -ge 0) -or
-            ($_.Caption.IndexOf('MZFLV256HCHP-000MV', [System.StringComparison]::OrdinalIgnoreCase) -ge 0 <# Surface Book #> ) }
-    if (!$ssd)
+            ($_.Caption.IndexOf('MZFLV256HCHP-000MV', [System.StringComparison]::OrdinalIgnoreCase) -ge 0 <# Surface Book #> ) -or
+            ($_.Caption.IndexOf('TOSHIBA MEMORY', [System.StringComparison]::OrdinalIgnoreCase) -ge 0 <# Surface Book #> ) }
+    if ($null -ne $ssd)
     {
         return $true
     }

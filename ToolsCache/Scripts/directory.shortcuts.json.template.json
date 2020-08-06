@@ -1,11 +1,22 @@
 {
     "git_repositories" : [
         {
-            "repository_uri": "https://github.com/stephanadler1/shell.git",
+            "repository_uris": [
+                "https://github.com/stephanadler1/shell.git"
+            ],
             "shortcuts" : {
                 "tc": "ToolsCache",
                 "help": "ToolsCache\\Help",
                 "scripts": "ToolsCache\\Scripts"
+            }
+        }
+    ],
+
+    "sourcedepot_repositories" : [
+        {
+            "repository_port": "SDPORT:1234",
+            "shortcuts" : {
+                "src": "private"
             }
         }
     ]

@@ -1,6 +1,6 @@
 # Setting Up Developer Workstations
 
-Copyright &copy; 2009-2019 Stephan Adler. All Rights Reserved.
+Copyright &copy; 2009-2020 Stephan Adler. All Rights Reserved.
 
 License: [Apache-2.0](http://www.apache.org/licenses/LICENSE-2.0).
 

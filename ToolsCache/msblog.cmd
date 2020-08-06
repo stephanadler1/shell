@@ -1,6 +1,6 @@
 @if not defined _DEBUG echo off
 setlocal
-set "__EXEPATH=%~dp0msbuildlog\app-2.0.112"
+set "__EXEPATH=%~dp0msbuildlog\app-2.1.140"
 set "__EXETOOL=StructuredLogViewer.exe"
 
 set "__OPENFILE=%CD%\%~1"
