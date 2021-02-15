@@ -6,9 +6,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,13 +19,13 @@
 <#
 .SYNOPSIS
 This script configures the host operating system usable for me (Stephan Adler).
- 
+
 .DESCRIPTION
 It makes the following changes:
 
 * Disables hibernate, use use sleep instead.
-* Disables connected standby, not helpful on desktops or notebooks. 
-#> 
+* Disables connected standby, not helpful on desktops or notebooks.
+#>
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -47,12 +47,12 @@ $script:rebootRequired = $false
 
 if (-not (IsSystemDriveOnSsd))
 {
-    Write-Host 'Disable hibernate...'
+    Write-Host 'Disable hibernate, since OS drive is an HDD...'
     & 'powercfg.exe' /Hibernate Off
 }
-else 
+else
 {
-    Write-Host 'Enable hibernate...'
+    Write-Host 'Enable hibernate, since OS drive is an SSD...'
     & 'powercfg.exe' /Hibernate On
 }
 # Write-Host 'Disabe firewall rules...'
@@ -72,7 +72,7 @@ if ($connectedStandbyValue.CsEnabled -ne 0)
 
 $script:registeredOwnerPath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
 # $script:registerdOwnerValue = Get-ItemProperty -path $registeredOwnerPath -name 'RegisteredOwner'
-Set-ItemProperty -path $registeredOwnerPath -Name 'RegisteredOwner' -Value 'Stephan Adler'
+#Set-ItemProperty -path $registeredOwnerPath -Name 'RegisteredOwner' -Value 'Stephan Adler'
 
 if (Get-Command 'Add-MpPreference' -errorAction SilentlyContinue)
 {
@@ -118,12 +118,20 @@ foreach($service in @())
 }
 
 $rk = [Microsoft.Win32.Registry]::ClassesRoot.OpenSubKey($null, $true)
-foreach($fileExtension in @('.md'))
+foreach($fileExtension in @())
 {
     $subKey = $rk.CreateSubKey($fileExtension, $true)
     $subKey.SetValue($null, 'txtfile')
     $subKey.SetValue('Content Type', 'text/plain')
     $subKey.SetValue('PerceivedType', 'text')
+}
+
+foreach($fileExtension in @('.md'))
+{
+    $subKey = $rk.CreateSubKey($fileExtension, $true)
+    $subKey.SetValue($null, 'htmlfile')
+    $subKey.SetValue('Content Type', 'text/html')
+    $subKey.SetValue('PerceivedType', 'html')
 }
 
 foreach($fileExtension in @('.js'))

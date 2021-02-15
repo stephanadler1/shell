@@ -98,14 +98,79 @@ param(
     # Name of the folder holding source code/enlistments.
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string] $script:sourceCodeFolderName = 'dev'
+    [string] $script:sourceCodeFolderName = 'dev',
+
+    #
+    [Parameter(Mandatory = $false)]
+    [string] $script:shortcutPath = $null
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+# -----------------------------------------------------------------------
+# Auto-detecting the data drive
+# -----------------------------------------------------------------------
+
+if ([string]::IsNullOrEmpty($dataDrive) -eq $true)
+{
+    # Trying to auto-detect the data drive on D:
+    if ([System.IO.Directory]::Exists('D:\') -eq $true)
+    {
+        $tempFileName = 'D:\' + [System.Guid]::NewGuid().ToString('N')
+        try
+        {
+            # Check if the drive let's us write to it (DEV-SEAT-1 case with mapped drives from ARCTURUS)
+            [System.IO.File]::WriteAllText($tempFileName, 'test')
+            $dataDrive = 'D:\'
+        }
+        catch
+        {
+            # do nothing
+        }
+        finally
+        {
+            [System.IO.File]::Delete($tempFileName)
+        }
+    }
+
+    if ([string]::IsNullOrEmpty($dataDrive) -eq $true)
+    {
+        # Auto-detection didn't work, assume the $env:SystemDrive, usually C:
+        $dataDrive = $env:SystemDrive
+    }
+}
+
+# Make sure the drive ends with \
+$dataDrive = ($dataDrive.TrimEnd('\') + '\')
+
+
+# -----------------------------------------------------------------------
+# Determine the root path of the tools
+# -----------------------------------------------------------------------
+
 $script:rootPath = Split-Path $script:MyInvocation.MyCommand.Path -Parent
+
+if ([string]::IsNullOrEmpty($shortcutPath))
+{
+    $shortcutPath = [System.IO.Path]::Combine($dataDrive, 'DevTools')
+}
+
+if ([System.IO.Directory]::Exists($shortcutPath) -eq $false)
+{
+    New-Item -ItemType Junction -Path $shortcutPath -Target $rootPath | Out-Null
+}
+
+$script:rootPathOrig = $rootPath
+$rootPath = $shortcutPath
+
+
+# -----------------------------------------------------------------------
+# Set the defaults
+# -----------------------------------------------------------------------
+
 $script:toolsRootPath = ([System.IO.Path]::Combine($rootPath, 'ToolsCache'))
+$script:toolsRootOrigPath = ([System.IO.Path]::Combine($rootPathOrig, 'ToolsCache'))
 $script:pathEnvVar = 'PATH'
 $script:enviromentUserScope = 'User'
 
@@ -145,44 +210,13 @@ if ([string]::IsNullOrWhiteSpace($toolsRootPathExpanded) -eq $true)
     return 1
 }
 
-if ([string]::IsNullOrEmpty($dataDrive) -eq $true)
-{
-    # Trying to auto-detect the data drive on D:
-    if ([System.IO.Directory]::Exists('D:\') -eq $true)
-    {
-        $tempFileName = 'D:\' + [System.Guid]::NewGuid().ToString('N')
-        try
-        {
-            # Check if the drive let's us write to it (DEV-SEAT-1 case with mapped drives from ARCTURUS)
-            [System.IO.File]::WriteAllText($tempFileName, 'test')
-            $dataDrive = 'D:\'
-        }
-        catch
-        {
-            # do nothing
-        }
-        finally
-        {
-            [System.IO.File]::Delete($tempFileName)
-        }
-    }
-
-    if ([string]::IsNullOrEmpty($dataDrive) -eq $true)
-    {
-        # Auto-detection didn't work, assume the $env:SystemDrive, usually C:
-        $dataDrive = $env:SystemDrive
-    }
-}
-
-# Make sure the drive ends with \
-$dataDrive = ($dataDrive.TrimEnd('\') + '\')
 
 [string] $script:sourceCodeFolder = '*** NOT DEFINED ***'
 if ([string]::IsNullOrEmpty($env:SOURCES_ROUT))
 {
     $sourceCodeFolder = [System.IO.Path]::Combine($dataDrive, $sourceCodeFolderName)
 }
-else 
+else
 {
     $sourceCodeFolder = $env:SOURCES_ROOT
 }
@@ -233,7 +267,7 @@ Write-Host
 # Scanning for threats
 # -----------------------------------------------------------------------
 
-ScanThreats $rootPath
+#ScanThreats $rootPath
 
 
 # -----------------------------------------------------------------------
@@ -304,6 +338,8 @@ if (-not ($dataDrive.StartsWith($env:SystemDrive, [System.StringComparison]::Ord
 Write-Host 'Installing tools in PATH...'
 ConvertPathToRegExpandSz $pathEnvVar
 AddPath2 $pathEnvVar $enviromentUserScope $toolsRootPath 'TOOLS' 'Tools'
+[System.Environment]::SetEnvironmentVariable('TOOLS_ORIG', $toolsRootOrigPath, $enviromentUserScope)
+
 AddPath2 $pathEnvVar $enviromentUserScope ([System.IO.Path]::Combine($toolsRootPath, 'Sysinternals')) 'TOOLS_SYSINTERNALS' 'Sysinternals'
 AddPath2 $pathEnvVar $enviromentUserScope ([System.IO.Path]::Combine($toolsRootPath, 'Various')) 'TOOLS_VARIOUS' 'Various Tools'
 AddPath2 $pathEnvVar $enviromentUserScope ([System.IO.Path]::Combine($toolsRootPath, 'GnuWin32.CoreTools\bin')) 'TOOLS_GNUWINCORETOOLS' 'GnuWin 32 Core Tools'
@@ -334,7 +370,7 @@ if ([System.IO.Directory]::Exists([System.Environment]::ExpandEnvironmentVariabl
     AddPath2 $pathEnvVar $enviromentUserScope $javaPath 'TOOLS_JAVA' 'Java Runtime Environment'
 
     $script:javaRootPath = [System.IO.Path]::GetFullPath([System.Environment]::ExpandEnvironmentVariables([System.IO.Path]::Combine($javaPath, '..')))
-    
+
     # Path of the JDK (Java Development Kit), always part of the SE downloads
     [System.Environment]::SetEnvironmentVariable('JAVA_HOME', $javaRootPath, $enviromentUserScope)
 
@@ -509,6 +545,8 @@ ConfigureGitGlobally $gitPath 'alias.pause' "!f() { git add -A; git commit -m '*
 ConfigureGitGlobally $gitPath 'alias.start' 'reset HEAD~1 --mixed'
 ConfigureGitGlobally $gitPath 'alias.rbm' '!f() { git fetch --prune --auto-gc; git rebase --no-autostash origin/master;  git submodule update --init --recursive; }; f'
 ConfigureGitGlobally $gitPath 'alias.rbd' '!f() { git fetch --prune --auto-gc; git rebase --no-autostash origin/develop; git submodule update --init --recursive; }; f'
+ConfigureGitGlobally $gitPath 'alias.rhm' '!f() { git fetch --prune --auto-gc; git reset --hard origin/master;  git submodule update --init --recursive; }; f'
+ConfigureGitGlobally $gitPath 'alias.rhd' '!f() { git fetch --prune --auto-gc; git reset --hard origin/develop; git submodule update --init --recursive; }; f'
 ConfigureGitGlobally $gitPath 'alias.delete' '!f() { bn=${1-zzz_temp$RANDOM}; git fetch --prune --auto-gc; git checkout master; git branch -d $bn; git push origin --delete $bn; }; f'
 ConfigureGitGlobally $gitPath 'alias.remove' '!f() { bn=${1-zzz_temp$RANDOM}; git fetch --prune --auto-gc; git checkout master; git branch -D $bn; git push origin --delete $bn; }; f'
 # ConfigureGitGlobally $gitPath 'alias.nw' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git worktree add --track -b dev/$un/$bn \dev\$bn master; git branch --set-upstream-to origin dev/$un/$bn; }; f'

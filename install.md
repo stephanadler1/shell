@@ -65,6 +65,52 @@ User environment variables being set:
 - TOOLS\_URL\_VSO
 - TOOLS\_VARIOUS
 
+## Integration into Microsoft Terminal
+
+Add the following snippet into file `%USERPROFILE%\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json` in the `profiles/list` section. See [SettingsSchema](https://github.com/microsoft/terminal/blob/master/doc/cascadia/SettingsSchema.md) for more customization options.
+```
+{
+  // https://github.com/microsoft/terminal/blob/master/doc/cascadia/SettingsSchema.md
+  "guid": "{7817925a-5c89-4d2e-a8f4-03f79bb0de8e}",
+  "hidden": false,
+  "name": "Developer Shell",
+  "commandline": "\"%COMSPEC%\" /d /s /k \"\"%TOOLS%\\..\\initdev.cmd\"\"",
+  "startingDirectory": "%SOURCES_ROOT%",
+  "icon": "%TOOLS%\\Scripts\\FolderIcon-Lego.ico",
+  "fontFace": "Consolas",
+  "fontSize": 11,
+  "colorScheme": "DevShell",
+  "useAcrylic": false
+}
+```
+
+and a color scheme matching the one from ConEMU
+
+```
+{
+  "name": "DevShell",
+  "foreground": "#FDF6E3",
+  "background": "#002B36",
+  "cursorColor": "#FFFFFF",
+  "brightBlack": "#93A1A1",
+  "brightBlue": "#268BD2",
+  "brightGreen": "#4FB636",
+  "brightCyan": "#2AA198",
+  "brightRed": "#DC322F",
+  "brightPurple": "#D33682",
+  "brightYellow": "#B58900",
+  "brightWhite": "#FDF6E3",
+  "black": "#002B36",
+  "blue": "#073642",
+  "green": "#008080",
+  "cyan": "#3182A4",
+  "red": "#CB4B16",
+  "purple": "#9C36B6",
+  "yellow": "#859900",
+  "white": "#EEE8D5"
+}
+```
+
 ## License and Copyright
 
 Copyright &copy; Stephan Adler. All Rights Reserved.
