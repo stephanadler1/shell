@@ -26,7 +26,7 @@ It searches for a version of MSBuild in the following locations:
 
  1. In the MSBUILD environment variable
  2. In the directories that the PATH environment variable lists
- 3. In the amd64 subfolder of a found MSBuild installation, if prefer64Bit is set. 
+ 3. In the amd64 subfolder of a found MSBuild installation, if prefer64Bit is set.
 
 If environment variable MSBUILD_ENABLELOGGING is defined, enables file based logging for
 errors, warnings and diagnostics output.
@@ -36,7 +36,8 @@ in isolation mode to detect if the build tries to leverage random executable thr
 PATH environment variables or otherwise tries to break out of a well-defined sandbox.
 #>
 
-param( 
+[CmdletBinding()]
+param(
     # Arguments being passed through to MSBuild.
     [Parameter(Mandatory = $true)]
     [string] $msbuildArgs,
@@ -64,7 +65,7 @@ $ErrorActionPreference = 'Stop'
 if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
     $DebugPreference = 'Continue'
-} 
+}
 
 Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psm1') -Scope Local -Force
 
@@ -79,7 +80,7 @@ Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildP
 # Check if additional logging to files is requested.
 [bool] $script:isLoggingEnabled = ([System.String]::IsNullOrEmpty($env:MSBUILD_ENABLELOGGING) -eq $false)
 
-# Check if build isolation is requested. 
+# Check if build isolation is requested.
 [bool] $script:isIsolationEnabled = ([System.String]::IsNullOrEmpty($env:MSBUILD_DISABLEISOLATION) -eq $true)
 
 # Check if debug logging is enabled.
@@ -106,7 +107,7 @@ Write-Host
 Write-Host 'Started' ([System.DateTime]::Now)
 
 function SetupIsolation
-{ 
+{
     [string] $tempPath = [System.IO.Path]::Combine($env:TEMP, 'wtf')
     [string] $path = [System.IO.Path]::Combine($tempPath, 'VGhpc0lz')
 
@@ -175,7 +176,7 @@ if ([System.String]::IsNullOrEmpty($msbuildTool) -eq $true)
     {
         $msbuildTool = $msbuildTools[0]
     }
-    else 
+    else
     {
         $msbuildTool = $msbuildTools
     }
@@ -201,7 +202,7 @@ if ($isLoggingEnabled)
         $args += " /bl:LogFile=`"$($loggingFilePath)log.binlog`";ProjectImports=None"
     }
 
-    $args += 
+    $args +=
         " /flp:LogFile=`"$($loggingFilePath)diag.txt`";Encoding=UTF-8;Verbosity=Diagnostic" +
         " /flp1:LogFile=`"$($loggingFilePath)errors.txt`";Encoding=UTF-8;ErrorsOnly" +
         " /flp2:LogFile=`"$($loggingFilePath)warnings.txt`";Encoding=UTF-8;WarningsOnly" +
@@ -236,7 +237,7 @@ if ($script:isIsolationEnabled)
 [System.Diagnostics.Process] $process = New-Object -TypeName 'System.Diagnostics.Process'
 [int] $msbuildExitCode = 1
 
-$startInfo = $process.StartInfo 
+$startInfo = $process.StartInfo
 $startInfo.CreateNoWindow = $false
 $startInfo.FileName = $msbuildTool
 $startInfo.UseShellExecute = $false

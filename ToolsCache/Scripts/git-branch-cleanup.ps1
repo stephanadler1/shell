@@ -6,9 +6,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,13 +19,14 @@
 <#
 .SYNOPSIS
 Cleaning up local Git branches that are no longer used.
- 
-.DESCRIPTION
-Cleaning up local Git branches that are no longer needed. It is determined as the remote tracking branch  
-being missing, which usually happens when a pull request is accepted and the remote branch is being removed
-automatically. 
-#> 
 
+.DESCRIPTION
+Cleaning up local Git branches that are no longer needed. It is determined as the remote tracking branch
+being missing, which usually happens when a pull request is accepted and the remote branch is being removed
+automatically.
+#>
+
+[CmdletBinding()]
 param(
     # Force the deletion of the not fully merged branch. Uses git branch -D!
     [Parameter(Mandatory = $false)]
@@ -43,7 +44,7 @@ $ErrorActionPreference = 'Stop'
 if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
     $DebugPreference = 'Continue'
-} 
+}
 
 $branchDeleteArg = '-d'
 if ($forceBranchDelete) {
@@ -58,7 +59,7 @@ $remoteBranches | Write-Debug
 
 $removedBranch = $false
 
-$localBranches | ForEach-Object { 
+$localBranches | ForEach-Object {
     if ($_ -ne 'master') {
         $branch = $_
 
@@ -66,11 +67,11 @@ $localBranches | ForEach-Object {
         {
             Write-Host "Removing local branch '$branch', since its not tracking a remote..."
             & git @('branch', $branchDeleteArg, $branch);
-            Write-Host 
-            
+            Write-Host
+
             $removedBranch = $true
         }
-    } 
+    }
 }
 
 #$list | ForEach-Object { if ($_ -ne 'master') { $branch = $_; Write-Host "Removing branch '$branch'"; & git @('push', 'origin', '--delete', $branch); & git @('branch', '-D', $branch); Write-Host '.';} }

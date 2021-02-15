@@ -6,9 +6,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,10 +18,11 @@
 
 <#
 .SYNOPSIS
- 
-.DESCRIPTION
-#> 
 
+.DESCRIPTION
+#>
+
+[CmdletBinding()]
 param(
     # JWT token
     [Parameter(Mandatory = $false)]
@@ -33,7 +34,7 @@ $ErrorActionPreference = 'Stop'
 if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
     $DebugPreference = 'Continue'
-} 
+}
 
 
 #Add-Type -Path 'D:\Users\Stephan\BTSync\Shared Tools\ToolsCache\Scripts\refs\System.IdentityModel.Tokens.Jwt.dll'
@@ -67,17 +68,17 @@ for($i = 0; $i -lt $tokenParts.Count; $i++)
     {
         Write-Host $tokenParts[$i]
     }
-    else 
+    else
     {
         $text = $null
         $padding = ''
         while($null -eq $text)
         {
-            try 
+            try
             {
                 $text = $([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($tokenParts[$i] + $padding)))
             }
-            catch [System.FormatException] 
+            catch [System.FormatException]
             {
                 $padding += '='
 

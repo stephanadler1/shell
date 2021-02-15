@@ -1,12 +1,18 @@
 @if not defined _DEBUG echo off
 setlocal
 
+call :CompressFolder "%~dp0ToolsCache\Bazel"
+call :CompressFolder "%~dp0ToolsCache\Benchmark"
 call :CompressFolder "%~dp0ToolsCache\Dig"
+call :CompressFolder "%~dp0ToolsCache\glogg"
 call :CompressFolder "%~dp0ToolsCache\GnuWin32.CoreTools"
 call :CompressFolder "%~dp0ToolsCache\GraphViz"
 call :CompressFolder "%~dp0ToolsCache\gvim_8.1.1436_x64"
 call :CompressFolder "%~dp0ToolsCache\ILSpy"
 call :CompressFolder "%~dp0ToolsCache\Java"
+call :CompressFolder "%~dp0ToolsCache\Java.SE.8"
+call :CompressFolder "%~dp0ToolsCache\MiKTeX"
+call :CompressFolder "%~dp0ToolsCache\Mimikatz"
 call :CompressFolder "%~dp0ToolsCache\NAnt"
 call :CompressFolder "%~dp0ToolsCache\NMap"
 call :CompressFolder "%~dp0ToolsCache\OpenSSL"

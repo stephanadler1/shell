@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>aks(1), az(1), k(1), kubectl(1), helm(1)</title>
+        <meta name="author" content="Stephan Adler" />
+        <link rel="icon" href="../Scripts/FolderIcon-Lego.ico">
+        <link rel="stylesheet" href="./help.css" />
+        <!--
+            http://www.schweikhardt.net/man_page_howto.html
+        -->
+    </head>
+    <body>
+        <h1>aks(1), az(1), k(1), kubectl(1), helm(1) Manual Page</h1>
+
+        <h2>Name</h2>
+        <p>Initializes the current command shell for the use with the
+            Azure CLI and KubeCtl command line tools.
+            <code>aks</code> stands for Azure Kubernetes Services.</p>
+
+        <h2>Synopsis</h2>
+        <p><code>aks</code> &ndash; Configures to command line to find Kubernetes tools.</p>
+        <p><code>az</code> &ndash; Azure CLI</p>
+        <p><code>k</code> &ndash; Shortcut for <code>kubectl</code>.</p>
+        <p><code>kubectl</code> &ndash; Kubernetes <code>kubectl</code> CLI.</p>
+        <p><code>helm</code> &ndash; Helm 3</p>
+
+        <h2>Description</h2>
+        <p>Azure CLI is a command line interface to manage Microsoft Azure resources.
+            KubeCtl is a command line tool to manage Kubernetes clusters from the
+            command line.
+        </p>
+
+        <p>To upgrade the installed version of the Azure CLI and KubeCtl run the following commands</p>
+        <p><pre>az upgrade</pre></p>
+        <p><pre>az aks install-cli</pre></p>
+
+        <h2>See Also</h2>
+        <ul>
+            <li><a href="https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest">Azure CLI documentation</a></li>
+            <li><a href="https://kubernetes.io/docs/reference/kubectl/overview/">KubeCtl overview</a></li>
+            <li><a href="https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest">Azure CLI installation</a></li>
+            <li><a href="https://docs.microsoft.com/en-us/azure/aks/tutorial-kubernetes-deploy-cluster#install-the-kubernetes-cli">KubeCtl installation via Azure CLI</a></li>
+            <li><a href="https://docs.microsoft.com/en-us/azure/cloud-shell/quickstart?view=azure-cli-latest">Azure Cloud Shell</a> is an online alternative to Azure CLI and KubeCtl</li>
+            <li><a href="https://helm.sh/">Helm</a> &ndash; Kubernetes Deployments.</li>
+        </ul>
+    </body>
+</html>

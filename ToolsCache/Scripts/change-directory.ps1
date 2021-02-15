@@ -16,9 +16,10 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
+[CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-	[ValidateSet('self', 'root', 'dev', 'shortcut')]
+    [ValidateSet('self', 'root', 'dev', 'shortcut')]
     [string] $option,
 
     [Parameter(Mandatory = $false)]
@@ -31,7 +32,7 @@ begin {
     if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
     {
         $DebugPreference = 'Continue'
-    } 
+    }
 
     Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psm1')
 
@@ -48,9 +49,9 @@ process {
     if ($option -eq 'self') { $changeTo = Get-DeveloperHomePath }
     if ($option -eq 'root') { $changeTo = Get-WorkingCopyRootPath }
     if ($option -eq 'dev')  { $changeTo = Get-SourceCodeRootPath }
-    if (($option -eq 'shortcut') -and ($host.Version.Major -ge 5)) 
-    { 
-        $changeTo = Get-ShortcutsPath($relativePath) 
+    if (($option -eq 'shortcut') -and ($host.Version.Major -ge 5))
+    {
+        $changeTo = Get-ShortcutsPath($relativePath)
     }
 
     #Write-Debug "*** ChangeTo=$changeTo"

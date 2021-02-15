@@ -16,6 +16,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
+[CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
     [string] $url,
@@ -30,7 +31,7 @@ begin {
     if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
     {
         $DebugPreference = 'Continue'
-    } 
+    }
 }
 
 process {
