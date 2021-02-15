@@ -6,9 +6,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,11 +19,12 @@
 <#
 .SYNOPSIS
 Downloads a file.
- 
+
 .DESCRIPTION
 Downloads a file from internet sources and stores it on the local file system.
-#> 
+#>
 
+[CmdletBinding()]
 param(
     # The URI from where to download the file.
     [Parameter(Mandatory = $false)]
@@ -39,10 +40,10 @@ $ErrorActionPreference = 'Stop'
 if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
     $DebugPreference = 'Continue'
-} 
+}
 
-# Enable only TLS 1.2
-[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+# Use TLS 1.2 or 1.3, don't accept anything else.
+[System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12 -bor [System.Net.SecurityProtocolType]::Tls13
 
 # Don't check the SSL certificate, if any
 [System.Net.ServicePointManager]::CheckCertificateRevocationList  = $false

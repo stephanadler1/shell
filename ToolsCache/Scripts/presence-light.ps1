@@ -6,9 +6,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,7 +19,7 @@
 <#
 .SYNOPSIS
 Sets the status of a connected Embrava Blynclight or PLENOM Kuando Busylight device.
- 
+
 .DESCRIPTION
 Provides rudimentary control over an attached presence status light device. The following states (colors) are supported:
 
@@ -40,8 +40,9 @@ In addition the following mappings are available (see https://www.plenom.com/wp-
  * dnd - magenta
  * away - yellow
  * incoming - blue
-#> 
+#>
 
+[CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
     [ValidateNotNull()]
@@ -56,7 +57,7 @@ $ErrorActionPreference = 'Stop'
 if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
     $DebugPreference = 'Continue'
-} 
+}
 
 $script:rootPath = Split-Path $script:MyInvocation.MyCommand.Path -Parent
 
@@ -79,7 +80,7 @@ function Blynclight()
     [int] $numberOfDevices = $controller.InitBlyncDevices()
     if ($numberOfDevices -le 0)
     {
-        Write-Debug 'No connected presence devices found.' 
+        Write-Debug 'No connected presence devices found.'
         #$host.SetShouldExit(1)
         #[System.Environment]::Exit(1)
         return
@@ -120,7 +121,7 @@ function Blynclight()
     #Start-Sleep -seconds 1
     #$controller.StopLightFlash($deviceId) | Out-Null
 
-    $controller.CloseDevices($numberOfDevices) 
+    $controller.CloseDevices($numberOfDevices)
     $controller = $null
 
     $host.SetShouldExit(0)
@@ -191,7 +192,7 @@ $controllers = @(
     ( $([System.IO.Path]::Combine($rootPath, 'devices\kuando\BusylightSDK.dll')),                               { param($i) KuandoBusylight $i $status $dim } )
 )
 
-$controllers | ForEach-Object { 
+$controllers | ForEach-Object {
     if ([System.IO.File]::Exists($_[0]) -eq $true)
     {
         $_[1].Invoke($_[0])

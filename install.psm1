@@ -193,15 +193,27 @@ function script:AddDesktopShortcut
     $shortcut.Save()
 }
 
+function script:ConfigureGit
+{
+    param([string] $scope, [string] $gitPath, [string] $key, [string] $value)
+    $git = [System.Environment]::ExpandEnvironmentVariables("$gitPath\git.exe")
+    $gitConfiguration = & $git 'config' $scope '--get' $key
+    if (-not $gitConfiguration -or $gitConfiguration -ne $value)
+    {
+        & $git 'config' $scope $key $value
+    }
+}
+
 function script:ConfigureGitGlobally
 {
     param([string] $gitPath, [string] $key, [string] $value)
-    $git = [System.Environment]::ExpandEnvironmentVariables("$gitPath\git.exe")
-    $gitConfiguration = & $git 'config' '--global' '--get' $key
-    if (-not $gitConfiguration -or $gitConfiguration -ne $value)
-    {
-        & $git 'config' '--global' $key $value
-    }
+    ConfigureGit '--global' $gitPath $key $value
+}
+
+function script:ConfigureGitSystemWide
+{
+    param([string] $gitPath, [string] $key, [string] $value)
+    ConfigureGit '--system' $gitPath $key $value
 }
 
 function script:CreateOrUpdateFolder
@@ -286,8 +298,8 @@ function script:GetActiveDirectoryUser
         }
 
         throw "User not found."
-    } 
-    finally 
+    }
+    finally
     {
         if ($null -ne $context)
         {

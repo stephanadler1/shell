@@ -16,6 +16,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
+[CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
@@ -35,7 +36,7 @@ begin {
     if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
     {
         $DebugPreference = 'Continue'
-    } 
+    }
 
     if ([System.IO.File]::Exists($in) -eq $false)
     {

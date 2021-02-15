@@ -78,31 +78,32 @@ The DEBUG SYMBOL CACHE is setup up
 https://github.com/stephanadler1/shell/blob/master/install.md
 #>
 
+[CmdletBinding()]
 param(
     # Provide a drive letter where you want to place your user data. D: is used if writeable otherwise $env:SYSTEMDRIVE is used.
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
     [ValidateScript({[System.IO.Directory]::Exists($_) -eq $true})]
-    [string] $script:dataDrive = $null,
+    [string] $dataDrive = $null,
 
     # The default user name used for Git.
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string] $script:userName = 'Stephan Adler',
+    [string] $userName = 'Stephan Adler',
 
     # The default email address used for Git.
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string] $script:emailAddress = 'dev@example.com',
+    [string] $emailAddress = 'dev@example.com',
 
     # Name of the folder holding source code/enlistments.
     [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [string] $script:sourceCodeFolderName = 'dev',
+    [string] $sourceCodeFolderName = 'dev',
 
     #
     [Parameter(Mandatory = $false)]
-    [string] $script:shortcutPath = $null
+    [string] $shortcutPath = $null
 )
 
 Set-StrictMode -Version Latest
@@ -267,7 +268,7 @@ Write-Host
 # Scanning for threats
 # -----------------------------------------------------------------------
 
-#ScanThreats $rootPath
+ScanThreats $rootPath
 
 
 # -----------------------------------------------------------------------
@@ -293,11 +294,16 @@ if ([System.IO.File]::Exists($directoryBuildFile) -ne $true)
     & attrib +R "$directoryBuildFile" | Out-Null
 }
 
-$directoryBuildFile = [System.IO.Path]::Combine($sourceCodeFolder, 'directory.shortcuts.json')
+$directoryBuildFile = [System.IO.Path]::Combine($toolsRootPath, 'directory.shortcuts.json')
 if ([System.IO.File]::Exists($directoryBuildFile) -ne $true)
 {
-    Copy-Item ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\directory.shortcuts.json.template.json')) -Destination $directoryBuildFile -Force
-    & attrib +R "$directoryBuildFile" | Out-Null
+    # no global file exists, so check in the sources root folder
+    $directoryBuildFile = [System.IO.Path]::Combine($sourceCodeFolder, 'directory.shortcuts.json')
+    if ([System.IO.File]::Exists($directoryBuildFile) -ne $true)
+    {
+        Copy-Item ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\directory.shortcuts.json.template.json')) -Destination $directoryBuildFile -Force
+        & attrib +R "$directoryBuildFile" | Out-Null
+    }
 }
 
 $editorConfigFile = [System.IO.Path]::Combine($sourceCodeFolder, '.editorconfig')
@@ -408,7 +414,7 @@ else
 # Create Desktop Shortcuts if ConEmu is available
 # -----------------------------------------------------------------------
 
-$script:conEmuPath = ([System.IO.Path]::Combine($toolsRootPath, 'ConEmu\ConEmu64.exe'))
+$script:conEmuPath = ([System.IO.Path]::Combine($toolsRootOrigPath, 'ConEmu\ConEmu64.exe'))
 if ([System.IO.File]::Exists([System.Environment]::ExpandEnvironmentVariables($conEmuPath)) -eq $true)
 {
     Write-Host 'Set ConEmu Desktop shortcuts...'
@@ -428,7 +434,7 @@ else
 # rundll32.exe user32.dll, LockWorkStation
 AddDesktopShortcut 'Lock Computer' '"%WINDIR%\System32\rundll32.exe"' @('user32.dll,LockWorkStation') -iconLocation $iconLockScreen -minimized $true
 AddDesktopShortcut 'Sign Out Computer' '"%WINDIR%\System32\logoff.exe"' @('') -iconLocation $iconLogoff -minimized $true
-AddDesktopShortcut 'Update Status' '"%COMSPEC%"' @('/q', '/d', '/c', "`"$toolsRootPath\toggle-status.cmd`"") -iconlocation $iconStatus -minimized $true
+AddDesktopShortcut 'Update Status' '"%COMSPEC%"' @('/q', '/d', '/c', "`"$toolsRootOrigPath\toggle-status.cmd`"") -iconlocation $iconStatus -minimized $true
 
 
 # -----------------------------------------------------------------------
@@ -523,19 +529,28 @@ Write-Host "Configuring global Git settings for '$(GetUserName)'..."
 # More aliases to consider
 # http://haacked.com/archive/2014/07/28/github-flow-aliases/
 # http://durdn.com/blog/2012/11/22/must-have-git-aliases-advanced-examples/
+ConfigureGitSystemWide $gitPath 'core.longpaths' 'true'
+ConfigureGitSystemWide $gitPath 'credential.helper' 'manager'
+
 ConfigureGitGlobally $gitPath 'user.name' $(GetUserName)
 ConfigureGitGlobally $gitPath 'user.email' $(GetEmailAddress)
+ConfigureGitGlobally $gitPath 'pull.ff' 'only'
+
+# Dynamically get the default branch of the repository, see
+# https://stackoverflow.com/questions/28666357/git-how-to-get-default-branch
 ConfigureGitGlobally $gitPath 'alias.br' 'branch'
 ConfigureGitGlobally $gitPath 'alias.co' 'checkout'
-ConfigureGitGlobally $gitPath 'alias.com' 'checkout master'
+# ConfigureGitGlobally $gitPath 'alias.com' 'checkout master'
+ConfigureGitGlobally $gitPath 'alias.com' '!f() { db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); git checkout $db; }; f'
 ConfigureGitGlobally $gitPath 'alias.cod' 'checkout develop'
 ConfigureGitGlobally $gitPath 'alias.cl' 'clean -fdxq'
+ConfigureGitGlobally $gitPath 'alias.db' '!f() { db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); echo $db; }; f'
 ConfigureGitGlobally $gitPath 'alias.gh' '!f() { cid=$(git rev-parse head); echo $cid; echo $cid | clip; }; f'
 ConfigureGitGlobally $gitPath 'alias.hist' "log --pretty=format:'%C(yellow)%h %Cred%ad%Creset | %s%d %Cblue[%an]' --graph --date=short"
 ConfigureGitGlobally $gitPath 'alias.lol' 'log --graph --oneline'
-ConfigureGitGlobally $gitPath 'alias.nb' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git checkout -b dev/$un/$bn origin/master; git push --set-upstream origin dev/$un/$bn; }; f'
+ConfigureGitGlobally $gitPath 'alias.nb' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); git checkout -b dev/$un/$bn origin/$db; git push --set-upstream origin dev/$un/$bn; }; f'
 # ConfigureGitGlobally $gitPath 'alias.nb' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git checkout -b dev/$un/$bn master; git branch --set-upstream-to origin dev/$un/$bn; }; f'
-ConfigureGitGlobally $gitPath 'alias.nf' '!f() { bn=${1-zzz_temp$RANDOM}; git checkout -b feature/$bn origin/master; git push --set-upstream origin feature/$bn; }; f'
+ConfigureGitGlobally $gitPath 'alias.nf' '!f() { bn=${1-zzz_temp$RANDOM}; db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); git checkout -b feature/$bn origin/$db; git push --set-upstream origin feature/$bn; }; f'
 # ConfigureGitGlobally $gitPath 'alias.nf' '!f() { bn=${1-zzz_temp$RANDOM}; git checkout -b feature/$bn master; git branch --set-upstream-to origin feature/$bn; }; f'
 ConfigureGitGlobally $gitPath 'alias.nr' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git push origin --delete dev/$un/$bn; git branch -d dev/$un/$bn; }; f'
 ConfigureGitGlobally $gitPath 'alias.st' 'status'
@@ -543,12 +558,12 @@ ConfigureGitGlobally $gitPath 'alias.up' "!f() { git pull --rebase --prune $@; g
 ConfigureGitGlobally $gitPath 'alias.wipe' "!f() { git add -A; git commit -qm '*** WIPED SAVEPOINT ***. Use git reflog to restore.'; git reset HEAD~1 --hard; }; f"
 ConfigureGitGlobally $gitPath 'alias.pause' "!f() { git add -A; git commit -m '*** SAVEPOINT ***. Use git start to resume work.'; }; f"
 ConfigureGitGlobally $gitPath 'alias.start' 'reset HEAD~1 --mixed'
-ConfigureGitGlobally $gitPath 'alias.rbm' '!f() { git fetch --prune --auto-gc; git rebase --no-autostash origin/master;  git submodule update --init --recursive; }; f'
+ConfigureGitGlobally $gitPath 'alias.rbm' '!f() { db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); git fetch --prune --auto-gc; git rebase --no-autostash origin/$db;  git submodule update --init --recursive; }; f'
 ConfigureGitGlobally $gitPath 'alias.rbd' '!f() { git fetch --prune --auto-gc; git rebase --no-autostash origin/develop; git submodule update --init --recursive; }; f'
-ConfigureGitGlobally $gitPath 'alias.rhm' '!f() { git fetch --prune --auto-gc; git reset --hard origin/master;  git submodule update --init --recursive; }; f'
+ConfigureGitGlobally $gitPath 'alias.rhm' '!f() { db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); git fetch --prune --auto-gc; git reset --hard origin/$db;  git submodule update --init --recursive; }; f'
 ConfigureGitGlobally $gitPath 'alias.rhd' '!f() { git fetch --prune --auto-gc; git reset --hard origin/develop; git submodule update --init --recursive; }; f'
-ConfigureGitGlobally $gitPath 'alias.delete' '!f() { bn=${1-zzz_temp$RANDOM}; git fetch --prune --auto-gc; git checkout master; git branch -d $bn; git push origin --delete $bn; }; f'
-ConfigureGitGlobally $gitPath 'alias.remove' '!f() { bn=${1-zzz_temp$RANDOM}; git fetch --prune --auto-gc; git checkout master; git branch -D $bn; git push origin --delete $bn; }; f'
+ConfigureGitGlobally $gitPath 'alias.delete' '!f() { bn=${1-zzz_temp$RANDOM}; db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); git fetch --prune --auto-gc; git checkout $db; git branch -d $bn; git push origin --delete $bn; }; f'
+ConfigureGitGlobally $gitPath 'alias.remove' '!f() { bn=${1-zzz_temp$RANDOM}; db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); git fetch --prune --auto-gc; git checkout $db; git branch -D $bn; git push origin --delete $bn; }; f'
 # ConfigureGitGlobally $gitPath 'alias.nw' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git worktree add --track -b dev/$un/$bn \dev\$bn master; git branch --set-upstream-to origin dev/$un/$bn; }; f'
 
 

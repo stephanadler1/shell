@@ -6,9 +6,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,10 +18,11 @@
 
 <#
 .SYNOPSIS
- 
-.DESCRIPTION
-#> 
 
+.DESCRIPTION
+#>
+
+[CmdletBinding()]
 param(
     # The date and time
     [Parameter(Mandatory = $false)]
@@ -33,7 +34,7 @@ $ErrorActionPreference = 'Stop'
 if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
     $DebugPreference = 'Continue'
-} 
+}
 
 Write-Host
 
@@ -54,8 +55,8 @@ if (-not ([System.String]::IsNullOrWhitespace($timeString)))
 #        $parsingType = 'FILETIME'
 #        $date = [System.DateTimeOffset]::FromFileTime($timeValue)
 #    }
-    else 
-    { 
+    else
+    {
         # If it starts with 0x, try parsing it as a number again
         if ($timeString.StartsWith('0x', [System.StringComparison]::OrdinalIgnoreCase))
         {
@@ -64,16 +65,16 @@ if (-not ([System.String]::IsNullOrWhitespace($timeString)))
                 $parsingType = 'FILETIME'
                 $date = [System.DateTimeOffset]::FromFileTime($timeValue)
             }
-            else 
+            else
             {
-                throw "Cannot parse $timeString as a hexadecimal number."    
+                throw "Cannot parse $timeString as a hexadecimal number."
             }
         }
-        else 
+        else
         {
             $parsingType = 'DateTimeOffset'
             $date = [System.DateTimeOffset]::Parse($timeString)
-        }    
+        }
     }
 
     Write-Host 'Parsed as............:' $date 'as' $parsingType

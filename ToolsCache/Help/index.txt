@@ -4,7 +4,9 @@ For more information on a specific command, type DHELP command-name.
  ...           Up two directories.
  ....          Up three directories.
  .....         Up four directories.
+ AKS           Initializes the command line for the Azure CLI and KubeCtl commands.
  ALIAS         Prints all aliases defined in the command shell.
+ AZ            Azure Command Line Interface (CLI).
  AZCOPY        Redirects to the Microsoft AzCopy web page.
  B             Calls MSBuild.exe.
  BAZEL         Calls bazel.exe.
@@ -16,6 +18,7 @@ For more information on a specific command, type DHELP command-name.
  C             Change to directory.
  CHELP         Shows the component help of the closes component definition in folder hierarchy.
  CODE          Opens VS Code in the specified directory.
+ CONVERT-DATE  Convert various date formats.
  DECODE-BASE64 Decodes base64 encoded data into it's hex and string representation.
  DECODE-JWT    Decodes a JSON Web Token.
  DOWNLOAD-FILE Downloads a file from the given internet source.
@@ -30,9 +33,12 @@ For more information on a specific command, type DHELP command-name.
  GITHUB        Opens the Github web site.
  GPA           Invokes GNU Privacy Guard Assistant.
  GPG           Invokes GNU Privacy Guard command line.
+ HELM          Invokes Helm v3.
  HG            Opens the Mercurial documentation.
  ILSPY         Starts ILSpy.
  JAVA          Starts the Java Runtime Environment.
+ K             Invokes KubeCtl.
+ KUBECTL       Invokes KubeCtl installed via Azure CLI.
  MD5           Calculates a MD5 hash for the specified file.
  MIMIKATZ      Invokes Mimikatz.
  MSB           Calls MSBuild.exe in the current directory or with additional arguments.
@@ -47,6 +53,7 @@ For more information on a specific command, type DHELP command-name.
  NPM           Invokes the NPM package manager.
  NPP           Invokes Notepad++, to open a file use `npp file1 [file2...]`
  NR            Calls MSBuild.exe to restore NuGet packages.
+ NR-DEL        Removes existing packages.lock.json files and calls MSBuild to restore packages.
  NUGET         Invokes NuGet command line client.
  OPEN          Opens Visual Studio in the current directory.
  OPENSSL       Invokes OpenSSL.
@@ -69,11 +76,12 @@ For more information on a specific command, type DHELP command-name.
  STRIPCERTIFICATEPASSWORD  Removes the password protection from the specified .PFX file.
  SVN           Opens the Subversion documentation.
  SRC           Like CD, but from the root of the development directory
+ TERRAFORM     Invokes HashiCorp Terraform.
  TOGGLE-DEBUG  Toggles between turning debug logging on and off.
  TOGGLE-MSBUILDISOLATION  Toggles between turning MSBuild build isolation on and off.
  TOGGLE-MSBUILDLOGGING  Toggles between turning MSBuild file logging on and off.
  TOGGLE-STATUS Toggles the Embrava Blynclight between red and green.
- TOOLS         Opens the tools directory in Visual Studio Code.
+ TOOLS         Opens the tools directory in Visual Studio Code or the Windows Eplorer.
  TOR           Invokes the Tor Browser, when installed.
  VI            Invokes VIM, to open a file use `vi file1 [file2...]`.
  VIM           Invokes VIM, to open a file use `vim file1 [file2...]`.

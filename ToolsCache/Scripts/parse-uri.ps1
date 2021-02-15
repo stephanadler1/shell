@@ -16,6 +16,7 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
+[CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
     [ValidateNotNull()]
@@ -27,7 +28,7 @@ $ErrorActionPreference = 'Stop'
 if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
     $DebugPreference = 'Continue'
-} 
+}
 
 $script:rootPath = Split-Path $script:MyInvocation.MyCommand.Path -Parent
 Add-Type -AssemblyName 'System.Web'
