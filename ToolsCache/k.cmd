@@ -1,11 +1,11 @@
 @if not defined _DEBUG echo off
-where kubectl > nul 2>&1
+call where kubectl > nul 2>&1
 if errorlevel 1 (
     call "%~dp0aks.cmd"
     if errorlevel 1 goto :Error
 )
 
-kubectl %*
+call kubectl %*
 goto :EOF
 
 

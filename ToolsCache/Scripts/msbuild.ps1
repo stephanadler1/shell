@@ -89,7 +89,12 @@ Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildP
 # The default arguments always passed into msbuild.exe.
 # /m - multi-processor build
 # /nr:false - turn off node re-use
-[string] $script:defaultArgs = "/m:$parallalism /nr:false $env:MSBUILD_ARGS"
+# /low:true - Runs MSBuild in at low process priority (instead of $lowerPriority in this script!)
+[array] $script:defaultArgs = @("/m:$parallalism", '/nr:false')
+if ([string]::IsNullOrWhitespace($env:MSBUILD_ARGS) -eq $false)
+{
+    $defaultArgs += $env:MSBUILD_ARGS.Split(' ')
+}
 
 # Logging file path prefix
 [string] $script:loggingFilePath = [System.IO.Path]::Combine($currentDirectory, 'msbuild-')
@@ -165,13 +170,15 @@ function ReportIsolation
 $msbuildTool = Test-FileExists($msbuildTool)
 if ([System.String]::IsNullOrEmpty($msbuildTool) -eq $true)
 {
-    $msbuildTools = & where.exe msbuild
+    & where.exe msbuild /q
     if ($LASTEXITCODE -ne 0)
     {
         Write-Error 'msbuild.exe was not found on the system. Either make it part of the PATH environment variable or create an environment variable MSBUILD to point to the version you wish to use.'
-        [System.Environment]::Exit(-1)
+        [System.Environment]::Exit(1)
+        exit 1
     }
 
+    $msbuildTools = & where.exe msbuild
     if ($msbuildTools -is [array])
     {
         $msbuildTool = $msbuildTools[0]
@@ -184,44 +191,47 @@ if ([System.String]::IsNullOrEmpty($msbuildTool) -eq $true)
     $msbuildTool = Test-FileExists($msbuildTool)
 }
 
-if (([System.String]::IsNullOrEmpty($msbuildTool) -eq $false) -and $prefer64Bit)
+if ([System.String]::IsNullOrEmpty($msbuildTool) -eq $false)
 {
     $msbuildTool64 = Test-FileExists([System.IO.Path]::Combine([System.IO.Path]::GetDirectoryName($msbuildTool), 'amd64', [System.IO.Path]::GetFileName($msbuildTool)))
-    if ([System.String]::IsNullOrEmpty($msbuildTool64) -eq $false)
+    if (([System.String]::IsNullOrEmpty($msbuildTool64) -eq $false) -and $prefer64Bit)
     {
         $msbuildTool = $msbuildTool64
     }
 }
 
-$script:args = $defaultArgs
+$script:arguments = $defaultArgs
 
 if ($isLoggingEnabled)
 {
     if (-not $preferTextDiagnosticLog)
     {
-        $args += " /bl:LogFile=`"$($loggingFilePath)log.binlog`";ProjectImports=None"
+        $arguments += @("/bl:LogFile=`"$($loggingFilePath)log.binlog`";ProjectImports=None")
     }
 
-    $args +=
-        " /flp:LogFile=`"$($loggingFilePath)diag.txt`";Encoding=UTF-8;Verbosity=Diagnostic" +
-        " /flp1:LogFile=`"$($loggingFilePath)errors.txt`";Encoding=UTF-8;ErrorsOnly" +
-        " /flp2:LogFile=`"$($loggingFilePath)warnings.txt`";Encoding=UTF-8;WarningsOnly" +
-        " /ds"
+    $arguments += @(
+        "/flp:LogFile=`"$($loggingFilePath)diag.txt`";Encoding=UTF-8;Verbosity=Diagnostic",
+        "/flp1:LogFile=`"$($loggingFilePath)errors.txt`";Encoding=UTF-8;ErrorsOnly",
+        "/flp2:LogFile=`"$($loggingFilePath)warnings.txt`";Encoding=UTF-8;WarningsOnly",
+        "/ds")
 }
 
-$args += " " + $msbuildArgs
+$arguments += $msbuildArgs.Split(' ');
 
 if ([System.String]::IsNullOrEmpty($env:_DEBUG) -eq $false)
 {
     Write-Host
     Write-Host '*** DEBUG DATA ***'
-    Write-Host 'msbuildTool' $msbuildTool
-    Write-Host 'isLoggingEnabled' $isLoggingEnabled
-    Write-Host 'isIsolationEnabled' $isIsolationEnabled
-    Write-Host 'msbuildTool64' $msbuildTool64
-    Write-Host 'parallalism' $parallalism
-    Write-Host "msbuildargs $msbuildArgs"
-    Write-Host 'currentDirectory' $currentDirectory
+    Write-Host 'msbuildTool.........:' $msbuildTool
+    Write-Host 'msbuildTool64.......:' $msbuildTool64
+    Write-Host 'isLoggingEnabled....:' $isLoggingEnabled
+    Write-Host 'isIsolationEnabled..:' $isIsolationEnabled
+    Write-Host 'parallalism.........:' $parallalism
+    Write-Host 'combined arguments..:' $arguments
+    Write-Host 'msbuildargs.........:' $msbuildArgs
+    Write-Host 'defaultArgs.........:' $defaultArgs
+    Write-Host 'currentDirectory....:' $currentDirectory
+    Write-Host 'Prefer64Bit tool....:' $prefer64Bit
     Write-Host '******************'
 
 }
@@ -241,19 +251,21 @@ $startInfo = $process.StartInfo
 $startInfo.CreateNoWindow = $false
 $startInfo.FileName = $msbuildTool
 $startInfo.UseShellExecute = $false
-$startInfo.Arguments = $args
+$startInfo.Arguments = $arguments
 $startInfo.WorkingDirectory = $currentDirectory
 $startInfo.LoadUserProfile = $false
 
 Write-Host
-Write-Host "> `"$msbuildTool`" $args" -ForegroundColor Yellow
+Write-Host "> `"$msbuildTool`" $arguments" -ForegroundColor Yellow
 Write-Host
 
 $started = $process.Start()
 if ($started)
 {
     $process.PriorityClass = $priorityClass
-    $process.WaitForExit()
+    #$process.WaitForExit()
+    # related to https://github.com/dotnet/msbuild/issues/2269
+    Wait-Process -InputObject $process
     $msbuildExitCode = $process.ExitCode
 }
 
@@ -270,3 +282,4 @@ Write-Host 'Ended' ([System.DateTime]::Now)
 
 $host.SetShouldExit($msbuildExitCode)
 [System.Environment]::Exit($msbuildExitCode)
+exit $msbuildExitCode

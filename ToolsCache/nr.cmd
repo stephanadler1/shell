@@ -4,4 +4,3 @@ if "%~1" equ "/?" (
 ) else (
     call "%~dp0Scripts\msbuild32.cmd" /t:restore %* < nul
 )
-

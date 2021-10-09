@@ -21,7 +21,7 @@ $ErrorActionPreference = 'Stop'
 if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
     $DebugPreference = 'Continue'
-} 
+}
 
 if ($host.Version.Major -lt 5)
 {
@@ -50,7 +50,10 @@ class DirectoryShortcutSettings
 
 function Get-ShortcutsPath()
 {
-    param([string] $relativePath)
+    param(
+        [string] $relativePath,
+        [string] $subFolder
+    )
 
     # Start with a file in the repository root folder, aka. local.
     [string] $settingsFileName = 'directory.shortcuts.json'
@@ -85,11 +88,11 @@ function Get-ShortcutsPath()
         {
             if (Test-Git -and ($null -ne $settings.git_repositories))
             {
-                $repoUri = & git remote get-url origin 2>&1 
+                $repoUri = & git remote get-url origin 2>&1
                 if ($LASTEXITCODE -eq 0)
                 {
                     Write-Host "Current repository is '$repoUri'."
-    
+
                     # Do not change to foreach, since it's semantics are different!
                     for($i = 0; $i -lt $settings.git_repositories.Count; $i++)
                     {
@@ -100,17 +103,18 @@ function Get-ShortcutsPath()
 
                             if (-not [System.String]::IsNullOrWhiteSpace($target) -eq $true)
                             {
-                                try 
+                                try
                                 {
+                                    $env:INETROOT = ''
                                     Write-Debug "Navigate to '$($r.shortcuts.$target)'."
-                                    $path = [System.IO.Path]::Combine($(Get-WorkingCopyRootPath), $r.shortcuts.$target)
+                                    $path = [System.IO.Path]::Combine($(Get-WorkingCopyRootPath), $r.shortcuts.$target, $subFolder)
                                     return ($path)
                                 }
-                                catch 
+                                catch
                                 {
                                 }
                             }
-                            else 
+                            else
                             {
                                 Write-Host 'The following change-directory shortcuts are defined for this repository:'
                                 $r.shortcuts | Format-List | Out-String | ForEach-Object { Write-Host $_ }
@@ -131,23 +135,23 @@ function Get-ShortcutsPath()
                 for($i = 0; $i -lt $settings.sourcedepot_repositories.Count; $i++)
                 {
                     $r = $settings.sourcedepot_repositories[$i]
-                    if ([String]::Equals($r.repository_port, $repoUri, [System.StringComparison]::OrdinalIgnoreCase)) 
+                    if ([String]::Equals($r.repository_port, $repoUri, [System.StringComparison]::OrdinalIgnoreCase))
                     {
                         Write-Debug "Found repository '$repoUri' in settings file."
-                        
+
                         if (-not [System.String]::IsNullOrWhiteSpace($target) -eq $true)
                         {
-                            try 
+                            try
                             {
                                 Write-Debug "Navigate to '$($r.shortcuts.$target)'."
-                                $path = [System.IO.Path]::Combine($(Get-WorkingCopyRootPath), $r.shortcuts.$target)
+                                $path = [System.IO.Path]::Combine($(Get-WorkingCopyRootPath), $r.shortcuts.$target, $subFolder)
                                 return ($path)
                             }
-                            catch 
+                            catch
                             {
                             }
                         }
-                        else 
+                        else
                         {
                             Write-Host 'The following change-directory shortcuts are defined for this repository:'
                             $r.shortcuts | Format-List | Out-String | ForEach-Object { Write-Host $_ }

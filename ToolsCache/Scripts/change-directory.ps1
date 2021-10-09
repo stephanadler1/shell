@@ -23,7 +23,10 @@ param(
     [string] $option,
 
     [Parameter(Mandatory = $false)]
-    [string] $relativePath = ''
+    [string] $relativePath = '',
+
+    [Parameter(Mandatory = $false)]
+    [string] $subFolder = ''
 )
 
 begin {
@@ -51,7 +54,7 @@ process {
     if ($option -eq 'dev')  { $changeTo = Get-SourceCodeRootPath }
     if (($option -eq 'shortcut') -and ($host.Version.Major -ge 5))
     {
-        $changeTo = Get-ShortcutsPath($relativePath)
+        $changeTo = Get-ShortcutsPath $relativePath $subFolder
     }
 
     #Write-Debug "*** ChangeTo=$changeTo"
