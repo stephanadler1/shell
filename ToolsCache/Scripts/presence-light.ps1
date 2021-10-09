@@ -126,6 +126,7 @@ function Blynclight()
 
     $host.SetShouldExit(0)
     [System.Environment]::Exit(0)
+    exit 0
 }
 
 
@@ -173,6 +174,7 @@ function KuandoBusylight()
 
     $host.SetShouldExit(0)
     [System.Environment]::Exit(0)
+    exit 0
 }
 
 # Translate status into colors
@@ -204,3 +206,4 @@ $message = 'Either no presence devices (Embrava Connect or PLENOM Busylight) are
 Write-Error $message
 $host.SetShouldExit(1)
 [System.Environment]::Exit(1)
+exit 0

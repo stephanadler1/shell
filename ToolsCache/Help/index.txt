@@ -4,6 +4,7 @@ For more information on a specific command, type DHELP command-name.
  ...           Up two directories.
  ....          Up three directories.
  .....         Up four directories.
+ AC            Shows the change log of the repository.
  AKS           Initializes the command line for the Azure CLI and KubeCtl commands.
  ALIAS         Prints all aliases defined in the command shell.
  AZ            Azure Command Line Interface (CLI).
@@ -15,6 +16,8 @@ For more information on a specific command, type DHELP command-name.
  BCC           Clean build (build -cC).
  BCZ           Clean build (build -cZ).
  BDIAG         Diagnostic build.
+ BR            Calls MSBuild.exe to trigger a RELEASE build.
+ BROWSE        Opens the repository browser.
  C             Change to directory.
  CHELP         Shows the component help of the closes component definition in folder hierarchy.
  CODE          Opens VS Code in the specified directory.
@@ -64,6 +67,7 @@ For more information on a specific command, type DHELP command-name.
  PYTHON        Invokes Python.
  RANDOM        Generates random bytes of the requested length.
  RAR           Calls WinRAR command line.
+ RG            Shows the revision graph of the repository.
  ROOT          Like CD, but from the root of the enlistment.
  SELF          Opens the user profile of the system or the enlistment.
  SHA1          Calculates a SHA1 hash for the specified file.

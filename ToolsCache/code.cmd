@@ -5,7 +5,7 @@ for %%p in ("%LOCALAPPDATA%\Programs\Microsoft VS Code Insiders\bin\" "%LOCALAPP
         if exist "%%~p%%~a" (
             call "%%~p%%~a" %*
 			exit /b %ERRORLEVEL%
-        ) 
+        )
     )
 )
 

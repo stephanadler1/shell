@@ -4,7 +4,7 @@
 :: it changes the current directory to it instead.
 if not exist "%USERPROFILE%\.kube" goto :EOF
 
-where code > nul 2>&1
+call where code > nul 2>&1
 if errorlevel 1 (
     pushd "%USERPROFILE%\.kube"
     exit /b 1

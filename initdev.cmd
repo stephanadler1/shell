@@ -8,9 +8,9 @@
 :: Licensed under the Apache License, Version 2.0 (the "License");
 :: you may not use this file except in compliance with the License.
 :: You may obtain a copy of the License at
-:: 
+::
 ::     http://www.apache.org/licenses/LICENSE-2.0
-:: 
+::
 :: Unless required by applicable law or agreed to in writing, software
 :: distributed under the License is distributed on an "AS IS" BASIS,
 :: WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,9 +29,10 @@ for %%v in ("Microsoft Visual Studio\2019" "Microsoft Visual Studio\2017" "Micro
             echo Initializing developer command prompt %%~v %%~e...
             echo:
             call "%ProgramFiles(x86)%\%%~v\%%~e\Common7\Tools\VsDevCmd.bat"
+            cd "%SYSTEMDRIVE%\"
             echo:
             goto LoadAliases
-        ) 
+        )
     )
 )
 echo No developer command prompt found.
@@ -46,10 +47,10 @@ echo COMMAND SHELL ALIASES
 echo ---------------------
 doskey /macros | sort
 echo:
-if "%TOOLS%" neq "" echo GLOBAL TOOLS && echo ------------ && dir /d /l /o /a:-s-h-d "%TOOLS%\*.*"
 
-echo:
-if "%TOOLS_GIT%" neq "" (
+if defined TOOLS echo GLOBAL TOOLS && echo ------------ && dir /d /l /o /a:-s-h-d "%TOOLS%\*.*" & echo:
+
+if defined TOOLS_GIT (
     echo GLOBAL GIT ALIASES
     echo ------------------
     git config --global --get-regexp alias. | sort
@@ -58,7 +59,10 @@ if "%TOOLS_GIT%" neq "" (
     echo GLOBAL GIT USER
     echo ---------------
     git config --global --get-regexp user. | sort
+    echo:
 )
+
+if defined SOURCES_ROOT echo REPOSITORIES && echo ------------ && dir /d /l /o /a:d "%SOURCES_ROOT%\*.*" & echo:
 
 
 title Developer Shell

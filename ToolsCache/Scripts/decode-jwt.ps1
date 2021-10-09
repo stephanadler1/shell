@@ -53,7 +53,7 @@ if ([System.String]::IsNullOrWhitespace($jwtToken))
 
 Write-Host
 Write-Host 'DECODING JSON WEB TOKENS' -ForegroundColor yellow
-Write-Host 'Documentation and structure can be found at https://tools.ietf.org/html/rfc7519.' -ForegroundColor yellow
+Write-Host 'Documentation and structure can be found at https://tools.ietf.org/html/rfc7519 (JWT) and https://tools.ietf.org/html/rfc7515 (JWS).' -ForegroundColor yellow
 Write-Host
 
 $tokenParts = $jwtToken.Split(@('.'), 3, [System.StringSplitOptions]::RemoveEmptyEntries)

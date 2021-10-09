@@ -1,6 +1,7 @@
 @if not defined _DEBUG echo off
 setlocal
 call "%~dp0Scripts\node.cmd"
+if errorlevel 1 call "%TOOLS%\Scripts\node.cmd"
 set "__EXEPATH=%__NODEPATH%\%~n0.exe"
 
 if not exist "%__EXEPATH%" (

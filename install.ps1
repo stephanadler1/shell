@@ -420,10 +420,10 @@ if ([System.IO.File]::Exists([System.Environment]::ExpandEnvironmentVariables($c
     Write-Host 'Set ConEmu Desktop shortcuts...'
     # AddDesktopShortcut 'Command Shell' $conEmuPath @('-run', "`"$env:COMSPEC`"") 'Command Processor in ConEmu64' 'd:\dev'
     # AddDesktopShortcut 'Developer Shell' $conEmuPath @('-run', "`"$env:COMSPEC`"", '/k', "`"$rootPath\initdev.cmd`"") 'Developer Command Processor in ConEmu64' 'd:\dev'
-    AddDesktopShortcut 'Command Shell' $conEmuPath @('-run', '"%COMSPEC%"', '/d', '/k', "`"title Command Prompt`"") 'Command Processor in ConEmu64' "$env:HOMEDRIVE\$env:HOMEPATH"
-    AddDesktopShortcut 'Developer Shell' $conEmuPath @('-run', '"%COMSPEC%"', '/d', '/s', '/k', "`"`"$rootPath\initdev.cmd`"`"") 'Developer Command Processor in ConEmu64' "$($dataDrive)dev"
-    AddDesktopShortcut 'PowerShell Shell' $conEmuPath @('-run', 'powershell.exe') 'PowerShell in ConEmu64' 'd:\dev'
-    AddDesktopShortcut 'Developer Shell (PS)' $conEmuPath @('-run', 'powershell.exe', '-NoLogo', '-NoExit', '-Mta', '-ExecutionPolicy RemoteSigned', '-File', "`"$rootPath\initdev.ps1`"") 'Developer Command Processor (PS) in ConEmu64' 'd:\dev'
+    AddDesktopShortcut 'Command Shell' $conEmuPath @('-run', '"%COMSPEC%"', '/d', '/k', "`"title Command Prompt`"") 'Command Processor in ConEmu64' -workingDirectory "$env:HOMEDRIVE\$env:HOMEPATH" -iconLocation "$($conEmuPath),3"
+    AddDesktopShortcut 'Developer Shell' $conEmuPath @('-run', '"%COMSPEC%"', '/d', '/s', '/k', "`"`"$rootPath\initdev.cmd`"`"") 'Developer Command Processor in ConEmu64' -workingDirectory "$($dataDrive)dev" -iconLocation "$($conEmuPath),3"
+    AddDesktopShortcut 'PowerShell Shell' $conEmuPath @('-run', 'powershell.exe') 'PowerShell in ConEmu64' -workingDirectory 'd:\dev' -iconLocation "$($conEmuPath),3"
+    AddDesktopShortcut 'Developer Shell (PS)' $conEmuPath @('-run', 'powershell.exe', '-NoLogo', '-NoExit', '-Mta', '-ExecutionPolicy RemoteSigned', '-File', "`"$rootPath\initdev.ps1`"") 'Developer Command Processor (PS) in ConEmu64' -workingDirectory 'd:\dev' -iconLocation "$($conEmuPath),3"
 }
 else
 {
@@ -538,7 +538,7 @@ ConfigureGitGlobally $gitPath 'pull.ff' 'only'
 
 # Dynamically get the default branch of the repository, see
 # https://stackoverflow.com/questions/28666357/git-how-to-get-default-branch
-ConfigureGitGlobally $gitPath 'alias.br' 'branch'
+ConfigureGitGlobally $gitPath 'alias.br' 'branch -v'
 ConfigureGitGlobally $gitPath 'alias.co' 'checkout'
 # ConfigureGitGlobally $gitPath 'alias.com' 'checkout master'
 ConfigureGitGlobally $gitPath 'alias.com' '!f() { db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); git checkout $db; }; f'

@@ -42,6 +42,7 @@ begin {
     {
         Write-Error "File '$in' not found."
         [System.Environment]::Exit(1)
+        exit 1
     }
 }
 
@@ -59,4 +60,5 @@ process {
 
     $host.SetShouldExit(0)
     [System.Environment]::Exit(0)
+    exit 0
 }

@@ -2,7 +2,7 @@
 
 echo:
 echo Validating Azure CLI is installed...
-where az > nul 2>&1
+call where az > nul 2>&1
 if errorlevel 1 goto ErrorAzureCliOrKubeCtlMissing
 
 echo Ensure Azure CLI is working...
@@ -10,7 +10,7 @@ call az --version > nul 2>&1
 if errorlevel 1 goto ErrorAzureCliOrKubeCtlMissing
 
 echo Validating KubeCtl is installed...
-where kubectl > nul 2>&1
+call where kubectl > nul 2>&1
 if errorlevel 1 (
     rem if it is not already on the path, it's default installation location
     rem when done through Azure CLI is in 'C:\Users\Stephan\.azure-kubectl'.
@@ -21,9 +21,18 @@ if errorlevel 1 (
     set "PATH=%PATH%;%USERPROFILE%\.azure-kubectl"
 )
 
+
 echo Ensure KubeCtl is working...
 call kubectl version --client=true > nul 2>&1
 if errorlevel 1 goto ErrorAzureCliOrKubeCtlMissing
+
+if not defined KUBE_CONFIG_PATH set "KUBE_CONFIG_PATH=%USERPROFILE%\.kube\config"
+
+
+echo Ensure Docker CLI is working...
+call docker version > nul 2>&1
+if errorlevel 1 call :ErrorDockerCliMissing
+
 
 title Azure ^& Kubernetes
 
@@ -54,3 +63,9 @@ goto :EOF
     echo *** https://docs.microsoft.com/en-us/azure/aks/tutorial-kubernetes-deploy-cluster#install-the-kubernetes-cli
     echo:
     exit /b 1
+
+:ErrorDockerCliMissing
+    echo:
+    echo *** Docker CLI not found!
+    echo:
+    goto :EOF
