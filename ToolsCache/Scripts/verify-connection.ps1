@@ -40,6 +40,7 @@ $ErrorActionPreference = 'Stop'
 if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
     $DebugPreference = 'Continue'
+    Write-Debug "PSVersion = $($PSVersionTable.PSVersion); PSEdition = $($PSVersionTable.PSEdition); ExecutionPolicy = $(Get-ExecutionPolicy)"
 }
 
 # Use TLS 1.2 or 1.3, don't accept anything else.

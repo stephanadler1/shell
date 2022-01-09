@@ -34,7 +34,7 @@ call docker version > nul 2>&1
 if errorlevel 1 call :ErrorDockerCliMissing
 
 
-title Azure ^& Kubernetes
+rem title Azure ^& Kubernetes
 
 rem http://www.patorjk.com/software/taag/#p=display&f=Larry%203D&t=Kubernetes
 echo:

@@ -35,6 +35,7 @@ begin {
     if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
     {
         $DebugPreference = 'Continue'
+        Write-Debug "PSVersion = $($PSVersionTable.PSVersion); PSEdition = $($PSVersionTable.PSEdition); ExecutionPolicy = $(Get-ExecutionPolicy)"
     }
 
     Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psm1')

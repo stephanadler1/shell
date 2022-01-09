@@ -23,18 +23,27 @@ set _WORKINGDIR=%CD%
 rem Disable isolation until .NET Standard 2.0 problem is solved
 set MSBUILD_DISABLEISOLATION=1
 
-for %%v in ("Microsoft Visual Studio\2019" "Microsoft Visual Studio\2017" "Microsoft Visual Studio 14.0" "Microsoft Visual Studio 12.0" "Microsoft Visual Studio 11.0") do (
+rem Iterate through various Visual Studio version in priority order.
+for %%v in ("Microsoft Visual Studio\2022" "Microsoft Visual Studio\2019" "Microsoft Visual Studio\2017" "Microsoft Visual Studio 14.0" "Microsoft Visual Studio 12.0" "Microsoft Visual Studio 11.0") do (
+    rem Iterate through various Visual Studio editions in priority order.
     for %%e in (Enterprise Community .) do (
-        if exist "%ProgramFiles(x86)%\%%~v\%%~e\Common7\Tools\VsDevCmd.bat" (
-            echo Initializing developer command prompt %%~v %%~e...
-            echo:
-            call "%ProgramFiles(x86)%\%%~v\%%~e\Common7\Tools\VsDevCmd.bat"
-            cd "%SYSTEMDRIVE%\"
-            echo:
-            goto LoadAliases
+        rem Iterate through deployment folders, prioritize x64 versions over x32.
+        for %%p in ("%ProgramFiles%" "%ProgramFiles(x86)%") do (
+            rem Iterate through Visual Studio command line startup scripts, in case these ever change.
+            for %%t in ("Common7\Tools\VsDevCmd.bat") do (
+                if exist "%%~p\%%~v\%%~e\%%~t" (
+                    echo Initializing developer command prompt %%~v %%~e...
+                    echo:
+                    call "%%~p\%%~v\%%~e\%%~t"
+                    cd "%SYSTEMDRIVE%\"
+                    echo:
+                    goto LoadAliases
+                )
+            )
         )
     )
 )
+
 echo No developer command prompt found.
 echo:
 

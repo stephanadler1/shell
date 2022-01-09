@@ -39,6 +39,13 @@ echo:
 call msbuild -version
 echo:
 echo:
+echo .NET Core
+call dotnet --version
+if errorlevel 1 goto Bazel
+call dotnet --list-sdks
+:Bazel
+echo:
+echo:
 echo Google Bazel:
 call bazel version
 echo:
