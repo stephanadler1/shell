@@ -22,6 +22,7 @@ begin {
     if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
     {
         $DebugPreference = 'Continue'
+        Write-Debug "PSVersion = $($PSVersionTable.PSVersion); PSEdition = $($PSVersionTable.PSEdition); ExecutionPolicy = $(Get-ExecutionPolicy)"
     }
 }
 
@@ -34,7 +35,7 @@ process {
         Where-Object { $_.DestinationPrefix -eq '0.0.0.0/0' } |
         Sort-Object RouteMetric |
         Select-Object NextHop
-    if ($gateways -ne $null)
+    if ($null -ne $gateways)
     {
         try {
             # Sometimes more than one default gateway can be configured, just use the first one.
@@ -52,7 +53,7 @@ process {
         Where-Object { $_.DestinationPrefix -eq '::/0' } |
         Sort-Object RouteMetric |
         Select-Object NextHop
-        if ($gateways -ne $null)
+        if ($null -ne $gateways)
         {
             try {
                 # Sometimes more than one default gateway can be configured, just use the first one.
