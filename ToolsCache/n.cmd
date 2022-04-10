@@ -1,6 +1,6 @@
 @if not defined _DEBUG echo off
 setlocal
-set "__EXEPATH=%~dp0npp.8.2.portable.x64"
+set "__EXEPATH=%~dp0npp"
 set "__EXETOOL=notepad++.exe"
 
 if not exist "%__EXEPATH%\%__EXETOOL%" (

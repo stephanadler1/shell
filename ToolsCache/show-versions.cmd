@@ -42,7 +42,12 @@ echo:
 echo .NET Core
 call dotnet --version
 if errorlevel 1 goto Bazel
+echo:
+echo .NET SDKs:
 call dotnet --list-sdks
+echo:
+echo .NET Runtimes:
+call dotnet --list-runtimes
 :Bazel
 echo:
 echo:
