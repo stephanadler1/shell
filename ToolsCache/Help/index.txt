@@ -24,6 +24,7 @@ For more information on a specific command, type DHELP command-name.
  CONVERT-DATE  Convert various date formats.
  DECODE-BASE64 Decodes base64 encoded data into it's hex and string representation.
  DECODE-JWT    Decodes a JSON Web Token.
+ DOTNET        Help to Microsoft .NET.
  DOWNLOAD-FILE Downloads a file from the given internet source.
  DC            Developer Console. Frequently used management console snap-ins.
  DEV           Like CD, but from the root of the development directory
@@ -67,6 +68,7 @@ For more information on a specific command, type DHELP command-name.
  PYTHON        Invokes Python.
  RANDOM        Generates random bytes of the requested length.
  RAR           Calls WinRAR command line.
+ REMOVE-ALLMETADATA  Removes all meta data information from images. Requires exiftool to be installed.
  RG            Shows the revision graph of the repository.
  ROOT          Like CD, but from the root of the enlistment.
  SELF          Opens the user profile of the system or the enlistment.

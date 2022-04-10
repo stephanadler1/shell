@@ -526,16 +526,23 @@ if ($null -ne $npmCacheRoot)
 
 Write-Host "Configuring global Git settings for '$(GetUserName)'..."
 # Environment variables to consider: https://git-scm.com/book/en/v2/Git-Internals-Environment-Variables
-# More aliases to consider
-# http://haacked.com/archive/2014/07/28/github-flow-aliases/
-# http://durdn.com/blog/2012/11/22/must-have-git-aliases-advanced-examples/
-ConfigureGitSystemWide $gitPath 'core.longpaths' 'true'
-ConfigureGitSystemWide $gitPath 'credential.helper' 'manager'
-
+# Configure Git behavior.
+# - ConfigureGitGlobally will place the configuration into the user profile on the machine.
+# - ConfigureGitSystemWide will place the configuration into the git.exe folder location.
+#
+# Prefer ConfigureGitGlobally for the following reasons:
+# 1. The config is not overwritten by a new git version
+# 2. The configuration can be specific to the context/domain membership of the machine.
+ConfigureGitGlobally $gitPath 'core.longpaths' 'true'
 ConfigureGitGlobally $gitPath 'user.name' $(GetUserName)
 ConfigureGitGlobally $gitPath 'user.email' $(GetEmailAddress)
 ConfigureGitGlobally $gitPath 'pull.ff' 'only'
+ConfigureGitGlobally $gitPath 'credential.helper' 'manager-core'
 
+# More aliases to consider
+# http://haacked.com/archive/2014/07/28/github-flow-aliases/
+# http://durdn.com/blog/2012/11/22/must-have-git-aliases-advanced-examples/
+#
 # Dynamically get the default branch of the repository, see
 # https://stackoverflow.com/questions/28666357/git-how-to-get-default-branch
 ConfigureGitGlobally $gitPath 'alias.br' 'branch -v'

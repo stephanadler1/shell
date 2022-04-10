@@ -38,14 +38,6 @@ if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 }
 
 
-#Add-Type -Path 'D:\Users\Stephan\BTSync\Shared Tools\ToolsCache\Scripts\refs\System.IdentityModel.Tokens.Jwt.dll'
-#[System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler] $handler = New-Object -Type 'System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler'
-#if ($handler.CanReadToken($jwtToken))
-#{
-#    [System.IdentityModel.Tokens.SecurityToken] $token = $handler.ReadJwtToken($jwtToken)
-#    $token | ft
-#}
-
 if ([System.String]::IsNullOrWhitespace($jwtToken))
 {
     $jwtToken = 'eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJJU1MiLCJzY29wZSI6Imh0dHBzOi8vbGFyaW0uZG5zY2UuZG91YW5lL2NpZWxzZXJ2aWNlL3dzIiwiYXVkIjoiaHR0cHM6Ly9kb3VhbmUuZmluYW5jZXMuZ291di5mci9vYXV0aDIvdjEiLCJpYXQiOiJcL0RhdGUoMTQ2ODM2MjU5Mzc4NClcLyJ9'

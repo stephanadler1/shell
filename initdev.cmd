@@ -18,15 +18,15 @@
 :: limitations under the License.
 :: -----------------------------------------------------------------------
 
-set _WORKINGDIR=%CD%
+set "_WORKINGDIR=%CD%"
 
 rem Disable isolation until .NET Standard 2.0 problem is solved
-set MSBUILD_DISABLEISOLATION=1
+set "MSBUILD_DISABLEISOLATION=1"
 
 rem Iterate through various Visual Studio version in priority order.
 for %%v in ("Microsoft Visual Studio\2022" "Microsoft Visual Studio\2019" "Microsoft Visual Studio\2017" "Microsoft Visual Studio 14.0" "Microsoft Visual Studio 12.0" "Microsoft Visual Studio 11.0") do (
     rem Iterate through various Visual Studio editions in priority order.
-    for %%e in (Enterprise Community .) do (
+    for %%e in (Preview Enterprise Community .) do (
         rem Iterate through deployment folders, prioritize x64 versions over x32.
         for %%p in ("%ProgramFiles%" "%ProgramFiles(x86)%") do (
             rem Iterate through Visual Studio command line startup scripts, in case these ever change.
@@ -49,12 +49,12 @@ echo:
 
 if not defined TOOLS (echo TOOLS missing.)
 :LoadAliases
-if exist "%~dp0%~n0.doskey.alias.txt" doskey /MACROFILE="%~dp0%~n0.doskey.alias.txt"
-if exist "%~dp0%~n0.doskey.powershell.txt" doskey /MACROFILE="%~dp0%~n0.doskey.powershell.txt"
+if exist "%~dp0%~n0.doskey.alias.txt" call doskey /MACROFILE="%~dp0%~n0.doskey.alias.txt"
+if exist "%~dp0%~n0.doskey.powershell.txt" call doskey /MACROFILE="%~dp0%~n0.doskey.powershell.txt"
 
 echo COMMAND SHELL ALIASES
 echo ---------------------
-doskey /macros | sort
+call doskey /macros | sort
 echo:
 
 if defined TOOLS echo GLOBAL TOOLS && echo ------------ && dir /d /l /o /a:-s-h-d "%TOOLS%\*.*" & echo:
@@ -62,12 +62,12 @@ if defined TOOLS echo GLOBAL TOOLS && echo ------------ && dir /d /l /o /a:-s-h-
 if defined TOOLS_GIT (
     echo GLOBAL GIT ALIASES
     echo ------------------
-    git config --global --get-regexp alias. | sort
+    call git config --global --get-regexp alias. | sort
 
     echo:
     echo GLOBAL GIT USER
     echo ---------------
-    git config --global --get-regexp user. | sort
+    call git config --global --get-regexp user. | sort
     echo:
 )
 
@@ -76,7 +76,7 @@ if defined SOURCES_ROOT echo REPOSITORIES && echo ------------ && dir /d /l /o /
 
 title Developer Shell
 pushd "%_WORKINGDIR%"
-set _WORKINGDIR=
+set "_WORKINGDIR="
 
 :SetCommandPrompt
 if /i "%CONEMUANSI%" equ "ON" (

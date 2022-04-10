@@ -6,6 +6,10 @@
   So, it can be used to override properties and targets defined in most of the build logic, but at times it may be
   necessary to do customizations within the project file after the final import.
   -->
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
   <Target Name="BuildBreak" BeforeTargets="Clean;Build;Rebuild;Restore">
     <ItemGroup>
       <_AccessedFile Condition=" '$(MSBuildCustomizationPropsFailure)' != '' " Include="$(MSBuildThisFileDirectory)directory.build.props" />
