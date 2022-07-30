@@ -19,6 +19,11 @@
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
+{
+    $DebugPreference = 'Continue'
+    Write-Debug "PSVersion = $($PSVersionTable.PSVersion); PSEdition = $($PSVersionTable.PSEdition); ExecutionPolicy = $(Get-ExecutionPolicy)"
+}
 
 # Set the window title
 $host.ui.RawUI.WindowTitle = "Developer Shell (PowerShell $($PSVersionTable.PSVersion))"

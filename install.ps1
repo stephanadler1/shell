@@ -108,6 +108,11 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
+{
+    $DebugPreference = 'Continue'
+    Write-Debug "PSVersion = $($PSVersionTable.PSVersion); PSEdition = $($PSVersionTable.PSEdition); ExecutionPolicy = $(Get-ExecutionPolicy)"
+}
 
 # -----------------------------------------------------------------------
 # Auto-detecting the data drive
@@ -162,7 +167,13 @@ if ([System.IO.Directory]::Exists($shortcutPath) -eq $false)
     New-Item -ItemType Junction -Path $shortcutPath -Target $rootPath | Out-Null
 }
 
-$script:rootPathOrig = $rootPath
+# retain the original path, if it is already set.
+$script:rootPathOrig = $env:TOOLS_ORIG
+if ([string]::IsNullOrWhiteSpace($env:rootPathOrig) -eq $true)
+{
+    $rootPathOrig = $rootPath
+}
+
 $rootPath = $shortcutPath
 
 
@@ -175,8 +186,9 @@ $script:toolsRootOrigPath = ([System.IO.Path]::Combine($rootPathOrig, 'ToolsCach
 $script:pathEnvVar = 'PATH'
 $script:enviromentUserScope = 'User'
 
+$script:icaclsAddUserCheck = "$($env:USERDOMAIN)\$($env:USERNAME):(OI)(CI)(F)"
 $script:icaclsAddUser = @(
-    '/grant', "$($env:USERDOMAIN)\$($env:USERNAME):(OI)(CI)(F)",
+    '/grant', $icaclsAddUserCheck,
     '/c')
 
 $script:icaclsUserOnly = @(
@@ -252,6 +264,7 @@ $npmCacheRoot = $(GetNpmCacheDirectory)
 Write-Host
 Write-Host 'Configuration'
 Write-Host "  Tools Root.........: $toolsRootPath"
+Write-Host "  Original Tools Root: $toolsRootOrigPath"
 Write-Host "  Data Drive.........: $dataDrive"
 Write-Host "  Source Code Folder.: $sourceCodeFolder"
 Write-Host "  Package Cache Root.: $packageCacheRoot"
@@ -276,7 +289,13 @@ ScanThreats $rootPath
 # -----------------------------------------------------------------------
 
 CreateOrUpdateFolder $sourceCodeFolder $iconLego 'Source code folder. Environment variable SOURCES_ROOT points to it.' @('+I')
-& icacls $sourceCodeFolder $icaclsAddUser | Out-Null
+[string] $script:existingAcls = & icacls $sourceCodeFolder
+if ($existingAcls.Contains($icaclsAddUserCheck) -eq $false)
+{
+	Write-Host 'Re-acling folder $sourceCodeFolder'
+	& icacls $sourceCodeFolder $icaclsAddUser | Out-Null
+}
+
 [System.Environment]::SetEnvironmentVariable('SOURCES_ROOT', $sourceCodeFolder, $enviromentUserScope)
 
 # Copy directory.build.(props|targets) files into the source code folders to detect poorly written code
@@ -448,7 +467,12 @@ Write-Host "Configure Symbol cache to be $symbolCacheDirectory..."
 # Compress the folder, prevent indexing, give current user full access
 & compact /c "$symbolCacheDirectory" | Out-Null
 & attrib +I "$symbolCacheDirectory" /s /d | Out-Null
-& icacls $symbolCacheDirectory $icaclsAddUser | Out-Null
+$existingAcls = & icacls $symbolCacheDirectory
+if (-not $existingAcls.Contains($icaclsAddUserCheck))
+{
+	Write-Host 'Re-acling folder $symbolCacheDirectory'
+	& icacls $symbolCacheDirectory $icaclsAddUser | Out-Null
+}
 
 $script:defaultSymbolPath = "SRV*$symbolCacheDirectory*https://msdl.microsoft.com/download/symbols;SRV*$symbolCacheDirectory*https://referencesource.microsoft.com/symbols"
 # Invalid: ;SRV*$symbolCacheDirectory*http://srv.symbolsource.org/pdb/Public
@@ -538,6 +562,7 @@ ConfigureGitGlobally $gitPath 'user.name' $(GetUserName)
 ConfigureGitGlobally $gitPath 'user.email' $(GetEmailAddress)
 ConfigureGitGlobally $gitPath 'pull.ff' 'only'
 ConfigureGitGlobally $gitPath 'credential.helper' 'manager-core'
+ConfigureGitGlobally $gitPath 'credential.helperselector.selected' 'manager-core'
 
 # More aliases to consider
 # http://haacked.com/archive/2014/07/28/github-flow-aliases/
@@ -547,7 +572,6 @@ ConfigureGitGlobally $gitPath 'credential.helper' 'manager-core'
 # https://stackoverflow.com/questions/28666357/git-how-to-get-default-branch
 ConfigureGitGlobally $gitPath 'alias.br' 'branch -v'
 ConfigureGitGlobally $gitPath 'alias.co' 'checkout'
-# ConfigureGitGlobally $gitPath 'alias.com' 'checkout master'
 ConfigureGitGlobally $gitPath 'alias.com' '!f() { db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); git checkout $db; }; f'
 ConfigureGitGlobally $gitPath 'alias.cod' 'checkout develop'
 ConfigureGitGlobally $gitPath 'alias.cl' 'clean -fdxq'
@@ -556,9 +580,7 @@ ConfigureGitGlobally $gitPath 'alias.gh' '!f() { cid=$(git rev-parse head); echo
 ConfigureGitGlobally $gitPath 'alias.hist' "log --pretty=format:'%C(yellow)%h %Cred%ad%Creset | %s%d %Cblue[%an]' --graph --date=short"
 ConfigureGitGlobally $gitPath 'alias.lol' 'log --graph --oneline'
 ConfigureGitGlobally $gitPath 'alias.nb' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); git checkout -b dev/$un/$bn origin/$db; git push --set-upstream origin dev/$un/$bn; }; f'
-# ConfigureGitGlobally $gitPath 'alias.nb' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git checkout -b dev/$un/$bn master; git branch --set-upstream-to origin dev/$un/$bn; }; f'
 ConfigureGitGlobally $gitPath 'alias.nf' '!f() { bn=${1-zzz_temp$RANDOM}; db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); git checkout -b feature/$bn origin/$db; git push --set-upstream origin feature/$bn; }; f'
-# ConfigureGitGlobally $gitPath 'alias.nf' '!f() { bn=${1-zzz_temp$RANDOM}; git checkout -b feature/$bn master; git branch --set-upstream-to origin feature/$bn; }; f'
 ConfigureGitGlobally $gitPath 'alias.nr' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git push origin --delete dev/$un/$bn; git branch -d dev/$un/$bn; }; f'
 ConfigureGitGlobally $gitPath 'alias.st' 'status'
 ConfigureGitGlobally $gitPath 'alias.up' "!f() { git pull --rebase --prune $@; git submodule update --init --recursive; }; f"
@@ -572,6 +594,9 @@ ConfigureGitGlobally $gitPath 'alias.rhd' '!f() { git fetch --prune --auto-gc; g
 ConfigureGitGlobally $gitPath 'alias.delete' '!f() { bn=${1-zzz_temp$RANDOM}; db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); git fetch --prune --auto-gc; git checkout $db; git branch -d $bn; git push origin --delete $bn; }; f'
 ConfigureGitGlobally $gitPath 'alias.remove' '!f() { bn=${1-zzz_temp$RANDOM}; db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); git fetch --prune --auto-gc; git checkout $db; git branch -D $bn; git push origin --delete $bn; }; f'
 # ConfigureGitGlobally $gitPath 'alias.nw' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git worktree add --track -b dev/$un/$bn \dev\$bn master; git branch --set-upstream-to origin dev/$un/$bn; }; f'
+
+# https://github.blog/2022-04-12-git-security-vulnerability-announced/
+[System.Environment]::SetEnvironmentVariable('GIT_CEILING_DIRECTORIES', '%SOURCES_ROOT%', $enviromentUserScope)
 
 
 Write-Host 'Done.'

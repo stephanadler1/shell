@@ -60,6 +60,9 @@ echo:
 if defined TOOLS echo GLOBAL TOOLS && echo ------------ && dir /d /l /o /a:-s-h-d "%TOOLS%\*.*" & echo:
 
 if defined TOOLS_GIT (
+    rem https://github.blog/2022-04-12-git-security-vulnerability-announced/
+    if not defined GIT_CEILING_DIRECTORIES set "GIT_CEILING_DIRECTORIES=%SOURCES_ROOT%"
+
     echo GLOBAL GIT ALIASES
     echo ------------------
     call git config --global --get-regexp alias. | sort
@@ -82,7 +85,6 @@ set "_WORKINGDIR="
 if /i "%CONEMUANSI%" equ "ON" (
     set PROMPT=$E[m$E[32m$T$S$E[92m$P$E[90m$_$E[90m$G$E[m$S$E]9;12$E\
 )
-
 
 :YourScript
 if "%~1" neq "" (

@@ -1,0 +1,1 @@
+@call "%~dp0.\n.cmd" "%HOMEDRIVE%%HOMEPATH%\.gitconfig" "%TOOLS_GIT%\..\etc\gitconfig"
