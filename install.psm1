@@ -163,7 +163,7 @@ function script:ScanThreats
 
 function script:AddDesktopShortcut
 {
-    param([string] $shortcutName, [string] $targetPath, [string[]] $arguments, [string] $description, [string] $workingDirectory = $null, [string] $iconLocation = $null, [bool] $minimized = $false)
+    param([string] $shortcutName, [string] $targetPath, [string[]] $arguments, [string] $description, [string] $workingDirectory = $null, [string] $iconLocation = $null, [bool] $minimized = $false, $admin = $false)
 
     if ([System.String]::IsNullOrWhiteSpace($workingDirectory) -eq $true)
     {
@@ -191,6 +191,15 @@ function script:AddDesktopShortcut
     }
 
     $shortcut.Save()
+
+    if ($admin)
+    {
+        # mark shortcut as run as admin
+        $bytes = [System.IO.File]::ReadAllBytes($linkFile)
+        $bytes[0x15] = $bytes[0x15] -bor 0x20 # set byte 21 (0x15) bit 6 (0x20) ON
+        [System.IO.File]::WriteAllBytes($linkFile, $bytes)
+    }
+
 }
 
 function script:ConfigureGit

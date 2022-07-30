@@ -29,6 +29,11 @@ It makes the following changes:
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
+{
+    $DebugPreference = 'Continue'
+    Write-Debug "PSVersion = $($PSVersionTable.PSVersion); PSEdition = $($PSVersionTable.PSEdition); ExecutionPolicy = $(Get-ExecutionPolicy)"
+}
 
 
 # If not already running in an elevated command prompt, elevate it now.

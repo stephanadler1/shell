@@ -34,6 +34,7 @@ For more information on a specific command, type DHELP command-name.
  ENCODE-BASE64 Encodes a string into UTF-8 and ASCII base64.
  GIT           Opens the Git documentation.
  GIT-BRANCH-CLEANUP  Cleans up Git branches that don't have a remote any longer.
+ GIT-CONFIGS   Open all Git configuration files in the editor.
  GITHUB        Opens the Github web site.
  GPA           Invokes GNU Privacy Guard Assistant.
  GPG           Invokes GNU Privacy Guard command line.
@@ -47,6 +48,7 @@ For more information on a specific command, type DHELP command-name.
  MIMIKATZ      Invokes Mimikatz.
  MSB           Calls MSBuild.exe in the current directory or with additional arguments.
  MSBLOG        Calls the MSBuild structured log viewer (.binlog).
+ MSBR          Calls MSBuild.exe in the current directory configured for a Release build.
  N             Invokes Notepad++, to open a file use `n file1 [file2...]`
  NANT          Invokes NAnt.
  NCAT          Invokes NCat.

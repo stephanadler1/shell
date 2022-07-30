@@ -7,4 +7,4 @@ if not exist "%__CHANGEDIRTO%" goto end
 pushd "%__CHANGEDIRTO%"
 
 :end
-set __CHANGEDIRTO=
+set "__CHANGEDIRTO="
