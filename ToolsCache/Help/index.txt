@@ -7,57 +7,66 @@ For more information on a specific command, type DHELP command-name.
  AC            Shows the change log of the repository.
  AKS           Initializes the command line for the Azure CLI and KubeCtl commands.
  ALIAS         Prints all aliases defined in the command shell.
+ ANSWER        The answer to everything.
  AZ            Azure Command Line Interface (CLI).
  AZCOPY        Redirects to the Microsoft AzCopy web page.
  B             Calls MSBuild.exe.
  BAZEL         Calls bazel.exe.
  BB            Calls POPD.
- BENCHMARK     Opens a folder with various benchmarking tools or help if none are available.
  BCC           Clean build (build -cC).
  BCZ           Clean build (build -cZ).
  BDIAG         Diagnostic build.
+ BENCHMARK     Opens a folder with various benchmarking tools or help if none are available.
  BR            Calls MSBuild.exe to trigger a RELEASE build.
  BROWSE        Opens the repository browser.
  C             Change to directory.
  CHELP         Shows the component help of the closes component definition in folder hierarchy.
  CODE          Opens VS Code in the specified directory.
+ COFFEE        Get a coffee.
  CONVERT-DATE  Convert various date formats.
+ DC            Developer Console. Frequently used management console snap-ins.
  DECODE-BASE64 Decodes base64 encoded data into it's hex and string representation.
  DECODE-JWT    Decodes a JSON Web Token.
- DOTNET        Help to Microsoft .NET.
- DOWNLOAD-FILE Downloads a file from the given internet source.
- DC            Developer Console. Frequently used management console snap-ins.
  DEV           Like CD, but from the root of the development directory
  DHELP         This help page.
+ DOTNET        Help to Microsoft .NET.
+ DOWNLOAD-FILE Downloads a file from the given internet source.
  DIG           Bind Dig tool.
+ DRAGON        Summon a dragon.
  E             Start Windows Explorer in the current directory (SOURCES_ROOT).
  ENCODE-BASE64 Encodes a string into UTF-8 and ASCII base64.
+ G             Invokes Git.
  GIT           Opens the Git documentation.
  GIT-BRANCH-CLEANUP  Cleans up Git branches that don't have a remote any longer.
  GIT-CONFIGS   Open all Git configuration files in the editor.
  GITHUB        Opens the Github web site.
+ GLOGG         Invokes the Log Explorer.
  GPA           Invokes GNU Privacy Guard Assistant.
  GPG           Invokes GNU Privacy Guard command line.
+ GVIM          Invokes VIM, to open a file use `vim file1 [file2...]`.
  HELM          Invokes Helm v3.
  HG            Opens the Mercurial documentation.
  ILSPY         Starts ILSpy.
  JAVA          Starts the Java Runtime Environment.
  K             Invokes KubeCtl.
+ KCONFIG       Opens the KubeCtl configuration in the editor.
  KUBECTL       Invokes KubeCtl installed via Azure CLI.
  MD5           Calculates a MD5 hash for the specified file.
  MIMIKATZ      Invokes Mimikatz.
  MSB           Calls MSBuild.exe in the current directory or with additional arguments.
  MSBLOG        Calls the MSBuild structured log viewer (.binlog).
  MSBR          Calls MSBuild.exe in the current directory configured for a Release build.
+ MYIP          Shows your external IP address.
  N             Invokes Notepad++, to open a file use `n file1 [file2...]`
  NANT          Invokes NAnt.
  NCAT          Invokes NCat.
  NMAP          Invokes NMap. Network mapping tool.
- NPING         Invokes NPing.
  NN            Invokes Notepad++, to open a file use `nn file1 [file2...]`
  NODE          Invokes Node.js.
+ NPING         Invokes NPing.
  NPM           Invokes the NPM package manager.
  NPP           Invokes Notepad++, to open a file use `npp file1 [file2...]`
+ NPX           Invokes Node NPX.
  NR            Calls MSBuild.exe to restore NuGet packages.
  NR-DEL        Removes existing packages.lock.json files and calls MSBuild to restore packages.
  NUGET         Invokes NuGet command line client.
@@ -67,7 +76,9 @@ For more information on a specific command, type DHELP command-name.
  PARSE-ASN1    Parses the provided file with OpenSSL asn1parse. Use with `asn1-parse file`.
  PARSE-URI     Parses common URIs and extracts their relevant information.
  PLANTUML      PlantUML documentation.
- PYTHON        Invokes Python.
+ PYTHON        Invokes Python 3.
+ PYTHON2       Invokes Python 2.
+ PYTHON3       Invokes Python 3.
  RANDOM        Generates random bytes of the requested length.
  RAR           Calls WinRAR command line.
  REMOVE-ALLMETADATA  Removes all meta data information from images. Requires exiftool to be installed.
@@ -77,7 +88,10 @@ For more information on a specific command, type DHELP command-name.
  SHA1          Calculates a SHA1 hash for the specified file.
  SHA256        Calculates a SHA256 hash for the specified file.
  SHA512        Calculates a SHA512 hash for the specified file.
+ SHOW-STARTUP  Shows the user's startup folder in the Windows Start Menu
  SHOW-TOOLS    Enumerates all tools available: Gnu CoreTools, Sysinternals and Various.
+ SHOW-VERSIONS Shows the versions of various tools and SDKs installed on the system.
+ SHOW-WLANS    Shows the WLANs visible to the system.
  SLNGEN        Calls MSBuild.exe in the current directory to generate a .sln file.
  SO            Opens the C# page of Stackoverflow.com. Use `so tagname` to open any other tag.
  STATUS        Sets the specified color on an Embrava Blynclight.
@@ -85,6 +99,7 @@ For more information on a specific command, type DHELP command-name.
  SVN           Opens the Subversion documentation.
  SRC           Like CD, but from the root of the development directory
  TERRAFORM     Invokes HashiCorp Terraform.
+ TEX           TeX/LaTeX platform.
  TOGGLE-DEBUG  Toggles between turning debug logging on and off.
  TOGGLE-MSBUILDISOLATION  Toggles between turning MSBuild build isolation on and off.
  TOGGLE-MSBUILDLOGGING  Toggles between turning MSBuild file logging on and off.
@@ -95,6 +110,9 @@ For more information on a specific command, type DHELP command-name.
  VIM           Invokes VIM, to open a file use `vim file1 [file2...]`.
  VS            Opens Visual Studio in the current directory.
  VSO           Opens the Visual Studio Online web site.
+ WINDOWS-VERSION  Shows the Windows version information.
  WINMERGE      Starts WinMerge.
+ WINSCP-UI     Starts the UI of WinSCP.
+ ZSTD          Zstandard compression tool.
 
 Use dhelp <command> to get more details.

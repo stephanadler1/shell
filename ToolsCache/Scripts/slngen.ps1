@@ -69,14 +69,20 @@ if (-not [IO.File]::Exists([IO.Path]::Combine($workingCopyRoot, "CloudBuild.json
 
 Write-Debug 'Use SlnGen to create the solution file.'
 
+$private:slnGenTool = [IO.Path]::Combine($env:USERPROFILE, '.dotnet', 'tools', 'slngen.exe')
 $private:slnGenArgs = @(
     '--nologo',
     $projectName
 )
 
-$private:slnGenTool = ([IO.Path]::Combine($scriptPath, '..\slngen\slngen.exe'))
-
 Write-Debug "SlnGen tool path is $slnGenTool"
+
+if (-not [IO.File]::Exists($slnGenTool))
+{
+    # Install SlnGen if its not installed
+    Write-Host "Installing SlnGen..."
+    & 'dotnet.exe' @('tool', 'install', '--global', 'Microsoft.VisualStudio.SlnGen.Tool', '--add-source', 'https://api.nuget.org/v3/index.json', '--ignore-failed-sources')
+}
 
 & $slnGenTool $slnGenArgs
 

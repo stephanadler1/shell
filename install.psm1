@@ -73,7 +73,7 @@ function script:AddPath2
     if ($userPath.IndexOf("%$environmentVariable%", [StringComparison]::OrdinalIgnoreCase) -eq -1)
     {
         $userPath =("$userPath;%$environmentVariable%;")
-        $userPath = $userPath.Replace(';;', ';')
+        $userPath = $userPath.Replace(';;', ';').Trim(';')
         $rk.SetValue($pathEnvVar, $userPath, [Microsoft.Win32.RegistryValueKind]::ExpandString)
     }
 }
@@ -177,7 +177,7 @@ function script:AddDesktopShortcut
     }
 
     $wshShell = New-Object -ComObject WScript.Shell
-    $linkFile = ([System.IO.Path]::Combine("$home\Desktop", $shortcutName + ".lnk"))
+    $linkFile = ([System.IO.Path]::Combine([System.Environment]::GetFolderPath("Desktop"), $shortcutName + ".lnk"))
     $shortcut = $wshShell.CreateShortcut($linkFile)
     $shortcut.TargetPath = $targetPath
     $shortcut.Arguments = [string]::Join(' ', $arguments)
@@ -215,12 +215,14 @@ function script:ConfigureGit
 
 function script:ConfigureGitGlobally
 {
+    # --global: Stored in the user profile.
     param([string] $gitPath, [string] $key, [string] $value)
     ConfigureGit '--global' $gitPath $key $value
 }
 
 function script:ConfigureGitSystemWide
 {
+    # --system: Stored next to the git.exe.
     param([string] $gitPath, [string] $key, [string] $value)
     ConfigureGit '--system' $gitPath $key $value
 }

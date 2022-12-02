@@ -169,7 +169,7 @@ if ([System.IO.Directory]::Exists($shortcutPath) -eq $false)
 
 # retain the original path, if it is already set.
 $script:rootPathOrig = $env:TOOLS_ORIG
-if ([string]::IsNullOrWhiteSpace($env:rootPathOrig) -eq $true)
+if ([string]::IsNullOrWhiteSpace($rootPathOrig) -eq $true)
 {
     $rootPathOrig = $rootPath
 }
@@ -276,7 +276,6 @@ Write-Host "  User name..........: $(GetUserName)"
 Write-Host "  Email address......: $(GetEmailAddress)"
 Write-Host
 
-
 # -----------------------------------------------------------------------
 # Scanning for threats
 # -----------------------------------------------------------------------
@@ -363,7 +362,7 @@ if (-not ($dataDrive.StartsWith($env:SystemDrive, [System.StringComparison]::Ord
 Write-Host 'Installing tools in PATH...'
 ConvertPathToRegExpandSz $pathEnvVar
 AddPath2 $pathEnvVar $enviromentUserScope $toolsRootPath 'TOOLS' 'Tools'
-[System.Environment]::SetEnvironmentVariable('TOOLS_ORIG', $toolsRootOrigPath, $enviromentUserScope)
+[System.Environment]::SetEnvironmentVariable('TOOLS_ORIG', $rootPathOrig, $enviromentUserScope)
 
 AddPath2 $pathEnvVar $enviromentUserScope ([System.IO.Path]::Combine($toolsRootPath, 'Sysinternals')) 'TOOLS_SYSINTERNALS' 'Sysinternals'
 AddPath2 $pathEnvVar $enviromentUserScope ([System.IO.Path]::Combine($toolsRootPath, 'Various')) 'TOOLS_VARIOUS' 'Various Tools'
@@ -594,9 +593,12 @@ ConfigureGitGlobally $gitPath 'alias.rhd' '!f() { git fetch --prune --auto-gc; g
 ConfigureGitGlobally $gitPath 'alias.delete' '!f() { bn=${1-zzz_temp$RANDOM}; db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); git fetch --prune --auto-gc; git checkout $db; git branch -d $bn; git push origin --delete $bn; }; f'
 ConfigureGitGlobally $gitPath 'alias.remove' '!f() { bn=${1-zzz_temp$RANDOM}; db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); git fetch --prune --auto-gc; git checkout $db; git branch -D $bn; git push origin --delete $bn; }; f'
 # ConfigureGitGlobally $gitPath 'alias.nw' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git worktree add --track -b dev/$un/$bn \dev\$bn master; git branch --set-upstream-to origin dev/$un/$bn; }; f'
+ConfigureGitGlobally $gitPath 'alias.pf' 'push --force-with-lease'
 
 # https://github.blog/2022-04-12-git-security-vulnerability-announced/
-[System.Environment]::SetEnvironmentVariable('GIT_CEILING_DIRECTORIES', '%SOURCES_ROOT%', $enviromentUserScope)
+# The ceiling directories are being set in initdev.cmd if they are not yet defined.
+[System.Environment]::SetEnvironmentVariable('GIT_CEILING_DIRECTORIES', $sourceCodeFolder, $enviromentUserScope)
+AddPath2 'GIT_CEILING_DIRECTORIES' $enviromentUserScope '%SOURCES_ROOT%' 'SOURCES_ROOT' 'Git Ceiling directories'
 
 
 Write-Host 'Done.'
