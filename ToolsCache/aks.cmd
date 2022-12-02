@@ -6,6 +6,7 @@ call where az > nul 2>&1
 if errorlevel 1 goto ErrorAzureCliOrKubeCtlMissing
 
 echo Ensure Azure CLI is working...
+
 call az --version > nul 2>&1
 if errorlevel 1 goto ErrorAzureCliOrKubeCtlMissing
 
@@ -18,9 +19,9 @@ if errorlevel 1 (
 
     echo Adding KubeCtl to PATH...
     if not exist "%USERPROFILE%\.azure-kubectl" goto ErrorAzureCliOrKubeCtlMissing
-    set "PATH=%PATH%;%USERPROFILE%\.azure-kubectl"
+    set "PATH=%USERPROFILE%\.azure-kubectl;%PATH%"
+    set "__AZCLIPATHADDED=1"
 )
-
 
 echo Ensure KubeCtl is working...
 call kubectl version --client=true > nul 2>&1

@@ -2,12 +2,12 @@
 setlocal
 setlocal enabledelayedexpansion
 
-set "__EXEPATH=%ProgramFiles(x86)%\WinMerge"
+set "__EXEPATH=%ProgramFiles%\WinMerge"
 set "__EXETOOL=WinMergeU.exe"
 
 if not exist "!__EXEPATH!\%__EXETOOL%" (
 
-    set __EXEPATH=%ProgramFiles%\WinMerge
+    set "__EXEPATH=%ProgramFiles(x86)%\WinMerge"
 
     if not exist "!__EXEPATH!\%__EXETOOL%" (
         echo "%~n0" is not installed at "!__EXEPATH!\%__EXETOOL%". Abort.

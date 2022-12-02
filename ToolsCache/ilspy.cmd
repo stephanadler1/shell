@@ -12,7 +12,7 @@ if /i "%~1" equ "/?" (
     start /d "%__EXEPATH%" %__EXETOOL% /?
 ) else (
     if "%~1" neq "" (
-        start /d "%__EXEPATH%" %__EXETOOL% "%CD%\%~1"
+        start /d "%__EXEPATH%" %__EXETOOL% "%~f1"
     ) else (
         start /d "%__EXEPATH%" %__EXETOOL%
     )
