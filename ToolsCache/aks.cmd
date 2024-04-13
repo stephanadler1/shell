@@ -7,11 +7,11 @@ if errorlevel 1 goto ErrorAzureCliOrKubeCtlMissing
 
 echo Ensure Azure CLI is working...
 
-call az --version > nul 2>&1
+call az --version < nul > nul 2>&1
 if errorlevel 1 goto ErrorAzureCliOrKubeCtlMissing
 
 echo Validating KubeCtl is installed...
-call where kubectl > nul 2>&1
+call where kubectl | call findstr /c:"kubectl.exe" /in | call findstr /c:"1:%USERPROFILE%" /i > nul 2>&1
 if errorlevel 1 (
     rem if it is not already on the path, it's default installation location
     rem when done through Azure CLI is in 'C:\Users\Stephan\.azure-kubectl'.
@@ -20,7 +20,6 @@ if errorlevel 1 (
     echo Adding KubeCtl to PATH...
     if not exist "%USERPROFILE%\.azure-kubectl" goto ErrorAzureCliOrKubeCtlMissing
     set "PATH=%USERPROFILE%\.azure-kubectl;%PATH%"
-    set "__AZCLIPATHADDED=1"
 )
 
 echo Ensure KubeCtl is working...
@@ -29,11 +28,20 @@ if errorlevel 1 goto ErrorAzureCliOrKubeCtlMissing
 
 if not defined KUBE_CONFIG_PATH set "KUBE_CONFIG_PATH=%USERPROFILE%\.kube\config"
 
-
-echo Ensure Docker CLI is working...
-call docker version > nul 2>&1
+echo Validating Docker is installed...
+call where docker.exe > nul 2>&1
 if errorlevel 1 call :ErrorDockerCliMissing
+if errorlevel 0 (
 
+    echo Ensure Docker CLI is working...
+    call docker version > nul 2>&1
+    if errorlevel 1 (
+        if /i "%~1" neq "--version" (
+            echo Starting Docker Desktop...
+            start /min "" "%ProgramFiles%\Docker\Docker\Docker Desktop.exe"
+        )
+    )
+)
 
 rem title Azure ^& Kubernetes
 
@@ -55,18 +63,23 @@ echo:
 echo           IS READY!
 echo:
 
-goto :EOF
+exit /b 0
 
 :ErrorAzureCliOrKubeCtlMissing
-    echo:
-    echo *** YOU NEED TO INSTALL THE AZURE CLI AND KUBECTL
-    echo *** https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest
-    echo *** https://docs.microsoft.com/en-us/azure/aks/tutorial-kubernetes-deploy-cluster#install-the-kubernetes-cli
-    echo:
+    (
+        echo:
+        echo *** YOU NEED TO INSTALL THE AZURE CLI AND KUBECTL
+        echo *** https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest
+        echo *** https://docs.microsoft.com/en-us/azure/aks/tutorial-kubernetes-deploy-cluster#install-the-kubernetes-cli
+        echo *** az aks install-cli
+        echo:
+    ) 1>&2
     exit /b 1
 
 :ErrorDockerCliMissing
-    echo:
-    echo *** Docker CLI not found!
-    echo:
+    (
+        echo:
+        echo *** Docker CLI not found!
+        echo:
+    ) 1>&2
     goto :EOF

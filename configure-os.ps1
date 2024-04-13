@@ -50,29 +50,106 @@ Import-Module "$rootPath\install.psm1" -Scope Local -Force
 
 $script:rebootRequired = $false
 
+# The various power plans and there schema GUIDs are documented in
+# https://winbuzzer.com/2020/11/26/windows-10-power-plans-missing-or-changed-heres-how-to-restore-or-reset-them-xcxwbt
+#
+# Power saver power plan: a1841308-3541-4fab-bc81-f71556f20b4a
+# Balanced power plan: 381b4222-f694-41f0-9685-ff5bb260df2e
+# High Performance power plan: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
+# Ultimate Performance power plan: e9a42b02-d5df-448d-aa00-03f14749eb61
+$script:planHighPerfGuid = '8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c'
+$script:planHighPerfName = 'High performance'
+$script:powerCfgTool = 'powercfg.exe'
+
+# Get current installed plans
+$script:planHighPerfInstalled = $false
+[array] $script:plans = Get-WmiObject -Class 'Win32_PowerPlan' -Namespace 'root\cimv2\power'
+$plans | ForEach-Object {
+
+    $_ | ConvertTo-Json -Depth 1 | Write-Debug
+
+    if ($_.ElementName -ieq $planHighPerfName)
+    {
+        $planHighPerfInstalled = $true
+        Write-Debug "$planHighPerfName is installed."
+    }
+
+    if ($_.ElementName -ieq 'Ultimate Performance')
+    {
+        $planHighPerfInstalled = $true
+        Write-Debug "Ultimate Performance is installed."
+    }
+}
+
+if ($planHighPerfInstalled -eq $false)
+{
+    Write-Host "$planHighPerfName is missing. Creating it..."
+
+    Write-Debug 'Create the plan from it''s schema'
+    $private:powerCfgResult = & $powerCfgTool @('/duplicatescheme', $planHighPerfGuid)
+    if ($LASTEXITCODE -ne 0)
+    {
+        Write-Warning "Installing power plan schema $planHighPerfName failed with exit code $LASTEXITCODE."
+    }
+    else
+    {
+        # Find the GUID of the newly installed plan in the following output string
+        # Power Scheme GUID: 4803388f-bebe-4ebd-9e70-c55002d3bac4  (High performance)
+        [System.Guid] $private:installedPlanGuid = `
+            [System.Guid]::ParseExact($powerCfgResult.Substring(19,36), 'D')
+
+        # Check if the plan is actually visible. Sometimes it will not be despite being installed
+        [array] $script:newlyInstalledPlans = $null
+        try {
+            $newlyInstalledPlans = Get-WmiObject `
+            -Class 'Win32_PowerPlan' `
+            -Namespace 'root\cimv2\power' `
+            -Filter "InstanceID=Microsoft:PowerPlan\\$($installedPlanGuid.ToString('B'))"
+            -ErrorAction SilentlyContinue
+        }
+        catch {
+            Write-Debug "Could not query Wmi with Get-WmiObject. $_"
+            $newlyInstalledPlans = $null
+        }
+        if ($null -eq $newlyInstalledPlans -or $newlyInstalledPlans.Length -le 0)
+            {
+            # One of those systems that require the new plan to be activated
+            # in order to be registered as installed.
+            Write-Debug "New plan with GUID '$installedPlanGuid' wasn't found. Set it to 'active' to make it permanent."
+            & $powerCfgTool @('/setactive', $installedPlanGuid.ToString('D'))
+        }
+    }
+}
+else
+{
+    Write-Host 'Power plans are current. Nothing to do.'
+}
+
 if (-not (IsSystemDriveOnSsd))
 {
     Write-Host 'Disable hibernate, since OS drive is an HDD...'
-    & 'powercfg.exe' /Hibernate Off
+    & $powerCfgTool @('/Hibernate', 'Off')
 }
 else
 {
     Write-Host 'Enable hibernate, since OS drive is an SSD...'
-    & 'powercfg.exe' /Hibernate On
+    & $powerCfgTool @('/Hibernate', 'On')
 }
 # Write-Host 'Disabe firewall rules...'
 # Get-NetFirewallRule
 # Get-NetFirewallRule | ? {  $_.Direction -eq 'Inbound' } | % { $_ } | fl
 
-Write-Host 'Disable connected standby...'
+Write-Host 'Validating connected standby...'
 # http://windowsitpro.com/windows-client/disabling-windows-connected-standby
 $script:connectedStandbyPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Power'
-$script:connectedStandbyValue = Get-ItemProperty -path $connectedStandbyPath -name 'CsEnabled'
-if ($connectedStandbyValue.CsEnabled -ne 0)
+$script:connectedStandbyValue = Get-ItemProperty -path $connectedStandbyPath -name 'CsEnabled' -ErrorAction 'SilentlyContinue'
+if ($null -ne $connectedStandbyValue -and $connectedStandbyValue.CsEnabled -ne 0)
 {
-    Write-Host $connectedStandbyValue.CsEnabled
-    Set-ItemProperty -path $connectedStandbyPath -Name 'CsEnabled' -Value 0
-    $rebootRequired = $true
+    Write-Host 'Would like to disable connected standby... not doing it though!'
+    #Write-Host 'Disable connected standby...'
+    #Write-Host $connectedStandbyValue.CsEnabled
+    #Set-ItemProperty -path $connectedStandbyPath -Name 'CsEnabled' -Value 0
+    #$rebootRequired = $true
 }
 
 $script:registeredOwnerPath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion'
@@ -122,30 +199,48 @@ foreach($service in @())
     Stop-Service -Name $service -ErrorAction SilentlyContinue
 }
 
+$script:updateTypes = @{}
+$updateTypes['.md'] = 'txtfile'
+$updateTypes['.js'] = 'JSFile'
+
 $rk = [Microsoft.Win32.Registry]::ClassesRoot.OpenSubKey($null, $true)
-foreach($fileExtension in @())
-{
-    $subKey = $rk.CreateSubKey($fileExtension, $true)
-    $subKey.SetValue($null, 'txtfile')
-    $subKey.SetValue('Content Type', 'text/plain')
-    $subKey.SetValue('PerceivedType', 'text')
-}
+$updateTypes.Keys | ForEach-Object {
+    Write-Host "Updating registration of '$_' to be '$($updateTypes[$_])'."
 
-foreach($fileExtension in @('.md'))
-{
-    $subKey = $rk.CreateSubKey($fileExtension, $true)
-    $subKey.SetValue($null, 'htmlfile')
-    $subKey.SetValue('Content Type', 'text/html')
-    $subKey.SetValue('PerceivedType', 'html')
-}
+    $private:fileExtension = $_
+    switch ($updateTypes[$fileExtension])
+    {
+        'htmlfile' {
+            $subKey = $rk.CreateSubKey($fileExtension, $true)
+            $subKey.SetValue($null, 'htmlfile')
+            $subKey.SetValue('Content Type', 'text/html')
+            $subKey.SetValue('PerceivedType', 'html')
+        }
 
-foreach($fileExtension in @('.js'))
-{
-    $subKey = $rk.CreateSubKey($fileExtension, $true)
-    $subKey.SetValue($null, 'JSFile')
-    $subKey.SetValue('ContentType', 'application/javascript')
-    $subKey.SetValue('PerceivedType', 'text')
+        'txtfile' {
+            $subKey = $rk.CreateSubKey($fileExtension, $true)
+            $subKey.SetValue($null, 'txtfile')
+            $subKey.SetValue('Content Type', 'text/plain')
+            $subKey.SetValue('PerceivedType', 'text')
+        }
+
+        'JSFile' {
+            $subKey = $rk.CreateSubKey($fileExtension, $true)
+            $subKey.SetValue($null, 'JSFile')
+            $subKey.SetValue('Content Type', 'text/javascript')
+            $subKey.SetValue('PerceivedType', 'text')
+        }
+
+        default {
+            Write-Warning "No definition for '$_' found."
+        }
+    }
 }
+$rk.Close()
+$rk.Dispose()
+
+# Disable RDP over UDP
+# https://superuser.com/questions/1481191/remote-desktop-intermittently-freezing
 
 
 Write-Host 'Done.'
@@ -153,6 +248,6 @@ Write-Host 'Done.'
 if ($rebootRequired -eq $true)
 {
     Write-Host 'Reboot required.'
-    Read-Host
 }
 
+Read-Host

@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>b(1), bcc(1), bdiag(1), br(1), msb(1), nr(1), nr-del(1), slngen(1)</title>
+        <title>b(1), bcc(1), bcz(1), bdiag(1), br(1), msb(1), msblog(1), msbr(1), nr(1), nr-del(1), slngen(1)</title>
         <meta name="author" content="Stephan Adler" />
         <link rel="icon" href="../Scripts/FolderIcon-Lego.ico">
         <link rel="stylesheet" href="./help.css" />
     </head>
     <body>
-        <h1>b(1), bcc(1), bdiag(1), br(1), msb(1), nr(1), nr-del(1), slngen(1) Manual Page</h1>
+        <h1>b(1), bcc(1), bcz(1), bdiag(1), br(1), msb(1), msblog(1), msbr(1), nr(1), nr-del(1), slngen(1) Manual Page</h1>
 
         <h2>Name</h2>
         <p>Various commands to invoke <code>msbuild.exe</code>:</p>
         <ul>
             <li><b>b</b> &ndash; Runs an incremental build in the current directory.</li>
             <li><b>bcc</b> &ndash; Runs an full rebuild in the current directory.</li>
+            <li><b>bcz</b> &ndash; Runs an full rebuild in the current directory.</li>
             <li><b>bdiag</b> &ndash; Runs a diagnostics build in the current directory.</li>
             <li><b>br</b> &ndash; Runs an incremental RELEASE build in the current directory.</li>
             <li><b>msb</b> &ndash; Runs an incremental build in the current directory with minimal console output.</li>
+            <li><b>msblog</b> &ndash; Calls the MSBuild structured log viewer (.binlog) in the current directory.</li>
+            <li><b>msbr</b> &ndash; Runs an incremental build under the Release configuration in the current directory with minimal console output.</li>
             <li><b>nr</b> &ndash; Runs a NuGet restore (msbuild /t:Restore) in the current directory.</li>
             <li><b>nr-del</b> &ndash; Deletes existing <code>packages.lock.json</code> files and runs a NuGet restore (msbuild /t:Restore) in the current directory.</li>
             <li><b>slngen</b> &ndash; Runs a MSBuild Solution Generation (msbuild /t:slngen) in the current directory.
@@ -26,9 +29,12 @@
         <h2>Synopsis</h2>
         <p><code>b [any arguments being passed to msbuild.exe]</code></p>
         <p><code>bcc [any arguments being passed to msbuild.exe]</code></p>
+        <p><code>bcz [any arguments being passed to msbuild.exe]</code></p>
         <p><code>bdiag [any arguments being passed to msbuild.exe]</code></p>
         <p><code>br [any arguments being passed to msbuild.exe]</code></p>
         <p><code>msb [any arguments being passed to msbuild.exe]</code></p>
+        <p><code>msblog [any arguments being passed to structured log viewer]</code></p>
+        <p><code>msbr [any arguments being passed to msbuild.exe]</code></p>
         <p><code>nr [any arguments being passed to msbuild.exe]</code></p>
         <p><code>nr-del [any arguments being passed to msbuild.exe]</code></p>
         <p><code>slngen [any arguments being passed to msbuild.exe]</code></p>

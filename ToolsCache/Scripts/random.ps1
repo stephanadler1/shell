@@ -61,6 +61,7 @@ try {
     Write-Host
     Write-Host 'Hexadecimal Representations'
     Write-Host 'length (bytes)....:' $rand.length
+    Write-Host 'iterations........:' $iterations
     Write-Host 'hex 1.............:' $hexString.Replace('-', '')
     Write-Host 'hex 2.............:' $hexString
     Write-Host 'hex 3.............:' $hexString.Replace('-', ':')

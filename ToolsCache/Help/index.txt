@@ -73,7 +73,7 @@ For more information on a specific command, type DHELP command-name.
  OPEN          Opens Visual Studio in the current directory.
  OPENSSL       Invokes OpenSSL.
  ORCA          Microsoft Orca - MSI Editor.
- PARSE-ASN1    Parses the provided file with OpenSSL asn1parse. Use with `asn1-parse file`.
+ PARSE-ASN1    Parses the provided file with OpenSSL, afterwards with CertUtil. Use with `parse-asn1 file`.
  PARSE-URI     Parses common URIs and extracts their relevant information.
  PLANTUML      PlantUML documentation.
  PYTHON        Invokes Python 3.
@@ -115,4 +115,4 @@ For more information on a specific command, type DHELP command-name.
  WINSCP-UI     Starts the UI of WinSCP.
  ZSTD          Zstandard compression tool.
 
-Use dhelp <command> to get more details.
+Use 'dhelp <command>' to get more details.

@@ -6,12 +6,14 @@ if errorlevel 1 (
 )
 
 call kubectl %*
-goto :EOF
+exit /b %ERRORLEVEL%
 
 
 :Error
-    echo:
-    echo **** SOMETHING REALLY BAD HAPPENED!
-    echo:
+    (
+        echo:
+        echo **** SOMETHING REALLY BAD HAPPENED!
+        echo:
+    ) 1>&2
     exit /b 1
 

@@ -1,4 +1,5 @@
 @if not defined _DEBUG echo off
+if defined _DEBUG set "VSCMD_DEBUG=3"
 
 :: -----------------------------------------------------------------------
 :: <copyright file="initdev.cmd" company="Stephan Adler">
@@ -23,6 +24,9 @@ set "_WORKINGDIR=%CD%"
 rem Disable isolation until .NET Standard 2.0 problem is solved
 set "MSBUILD_DISABLEISOLATION=1"
 
+rem Prefer 64 bit VS command shell
+rem set "VSCMD_DEBUG=3"
+
 rem Iterate through various Visual Studio version in priority order.
 for %%v in ("Microsoft Visual Studio\2022" "Microsoft Visual Studio\2019" "Microsoft Visual Studio\2017" "Microsoft Visual Studio 14.0" "Microsoft Visual Studio 12.0" "Microsoft Visual Studio 11.0") do (
     rem Iterate through various Visual Studio editions in priority order.
@@ -34,7 +38,7 @@ for %%v in ("Microsoft Visual Studio\2022" "Microsoft Visual Studio\2019" "Micro
                 if exist "%%~p\%%~v\%%~e\%%~t" (
                     echo Initializing developer command prompt %%~v %%~e...
                     echo:
-                    call "%%~p\%%~v\%%~e\%%~t"
+                    call "%%~p\%%~v\%%~e\%%~t" -arch=amd64
                     cd "%SYSTEMDRIVE%\"
                     echo:
                     goto LoadAliases
@@ -44,7 +48,7 @@ for %%v in ("Microsoft Visual Studio\2022" "Microsoft Visual Studio\2019" "Micro
     )
 )
 
-echo No developer command prompt found.
+echo No developer command prompt found. 1>&2
 echo:
 
 if not defined TOOLS (echo TOOLS missing.)
@@ -85,6 +89,13 @@ set "_WORKINGDIR="
 if /i "%CONEMUANSI%" equ "ON" (
     set PROMPT=$E[m$E[32m$T$S$E[92m$P$E[90m$_$E[90m$G$E[m$S$E]9;12$E\
 )
+
+:SetCommonEnvironmentVariables
+rem .NET environment variables are explained here:
+rem https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-environment-variables
+if not defined DOTNET_CLI_TELEMETRY_OPTOUT set "DOTNET_CLI_TELEMETRY_OPTOUT=1"
+if not defined DOTNET_SKIP_FIRST_TIME_EXPERIENCE set "DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true"
+
 
 :YourScript
 if "%~1" neq "" (

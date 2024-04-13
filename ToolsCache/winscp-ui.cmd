@@ -1,1 +1,1 @@
-@call winscp.exe
+@start winscp.exe

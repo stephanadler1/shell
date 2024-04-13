@@ -1,14 +1,20 @@
 @if not defined _DEBUG echo off
+
+if /i "%~1" equ "-help" goto ContinueAnyway
+if /i "%~1" equ "version" goto ContinueAnyway
+if /i "%~1" equ "-version" goto ContinueAnyway
+
 call where kubectl > nul 2>&1
 if errorlevel 1 (
     call "%~dp0aks.cmd"
     if errorlevel 1 goto :Error
 )
 
+:ContinueAnyway
 setlocal
 
 if not defined KUBE_CONFIG_PATH (
-    echo *** Path to kubectl config file not set, setting it now...
+    echo *** Path to kubectl config file not set, setting it now... 1>&2
     set "KUBE_CONFIG_PATH=%USERPROFILE%\.kube\config"
 )
 
@@ -28,8 +34,10 @@ if /i "%~1" equ "/?" (
 goto :EOF
 
 :Error
-    echo:
-    echo **** SOMETHING REALLY BAD HAPPENED!
-    echo:
+    (
+        echo:
+        echo **** SOMETHING REALLY BAD HAPPENED!
+        echo:
+    ) 1>&2
     exit /b 1
 
