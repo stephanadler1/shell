@@ -33,49 +33,17 @@ if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
     Write-Debug "PSVersion = $($PSVersionTable.PSVersion); PSEdition = $($PSVersionTable.PSEdition); ExecutionPolicy = $(Get-ExecutionPolicy)"
 }
 
-$private:userAgentString = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36'
-$private:ipRegex = "([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})"
+$private:rootPath = Split-Path $script:MyInvocation.MyCommand.Path -Parent
+$private:libPsmRoot = Join-Path -Path $rootPath -ChildPath 'psm'
+$private:libPsModules = @('network\Parsifal.Network.psd1')
+$libPsModules | ForEach-Object {
+    Import-Module -Name (Join-Path -Path $libPsmRoot -ChildPath $_) -Scope Local
+}
 
-try {
-    [string] $private:checkIpResult = Invoke-WebRequest -Uri 'http://checkip.dyndns.org:8245/' -Method Get `
-        -MaximumRedirection 0 -UseBasicParsing -Timeout 5 `
-        -UserAgent $userAgentString
-    Write-Debug "Full result..: $checkIpResult"
-
-    $private:checkIpParsed = Select-String -Pattern "(Current IP Address: )$ipRegex" -InputObject $checkIpResult
-
-    if (($null -eq $checkIpParsed.Matches) -and ($checkIpParsed.Matches.Groups.Length -ne 2))
-    {
-        throw "No IP address found in '$checkIpResult'."
+if ('Continue' -ieq $DebugPreference) {
+    Get-Module | ForEach-Object {
+        Write-Debug "$($_.Name) $($_.Version)"
     }
-
-    Write-Debug "IP address...: $($checkIpParsed.Matches.Groups[2])"
-
-    return $checkIpParsed.Matches.Groups[2].Value
-}
-catch {
-    # No op
 }
 
-try {
-    [string] $private:checkIpResult = Invoke-WebRequest -Uri 'https://checkip.amazonaws.com/' -Method Get `
-        -MaximumRedirection 0 -UseBasicParsing -Timeout 5 `
-        -UserAgent $userAgentString
-    Write-Debug "Full result..: $checkIpResult"
-
-    $private:checkIpParsed = Select-String -Pattern $ipRegex -InputObject $checkIpResult
-
-    if (($null -eq $checkIpParsed.Matches) -and ($checkIpParsed.Matches.Groups.Length -ne 1))
-    {
-        throw "No IP address found in '$checkIpResult'."
-    }
-
-    Write-Debug "IP address...: $($checkIpParsed.Matches.Groups[1])"
-
-    return $checkIpParsed.Matches.Groups[1].Value
-}
-catch {
-    # No op
-}
-
-Write-Error -Message 'External IP address could not be determined.'
+Write-Host $(Get-ExternalIpAddress -useCache)

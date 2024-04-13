@@ -227,7 +227,21 @@ if ([string]::IsNullOrWhiteSpace($toolsRootPathExpanded) -eq $true)
 [string] $script:sourceCodeFolder = '*** NOT DEFINED ***'
 if ([string]::IsNullOrEmpty($env:SOURCES_ROUT))
 {
+    # This will be the default.
     $sourceCodeFolder = [System.IO.Path]::Combine($dataDrive, $sourceCodeFolderName)
+
+    # Let's check a couple of folders that might be used instead of the
+    # default configured in $sourceCodeFolderName.
+    [array] $checkFolderNames = @('src', 'git')
+    foreach($testFolderName in $checkFolderNames)
+    {
+        $testFolder = [System.IO.Path]::Combine($dataDrive, $testFolderName)
+        if ($true -eq (Test-Path -Path $testFolder))
+        {
+            $sourceCodeFolder = $testFolder
+            break
+        }
+    }
 }
 else
 {
@@ -277,6 +291,15 @@ Write-Host "  Email address......: $(GetEmailAddress)"
 Write-Host
 
 # -----------------------------------------------------------------------
+# Test can be added here
+# -----------------------------------------------------------------------
+
+<#
+AddDesktopShortcut 'Update Status' '"%COMSPEC%"' @('/q', '/d', '/c', "`"$toolsRootOrigPath\toggle-status.cmd`"") -iconlocation $iconStatus -minimized $true
+exit 1
+#>
+
+# -----------------------------------------------------------------------
 # Scanning for threats
 # -----------------------------------------------------------------------
 
@@ -291,7 +314,7 @@ CreateOrUpdateFolder $sourceCodeFolder $iconLego 'Source code folder. Environmen
 [string] $script:existingAcls = & icacls $sourceCodeFolder
 if ($existingAcls.Contains($icaclsAddUserCheck) -eq $false)
 {
-	Write-Host 'Re-acling folder $sourceCodeFolder'
+	Write-Host "Re-acling folder $sourceCodeFolder"
 	& icacls $sourceCodeFolder $icaclsAddUser | Out-Null
 }
 
@@ -439,9 +462,9 @@ if ([System.IO.File]::Exists([System.Environment]::ExpandEnvironmentVariables($c
     # AddDesktopShortcut 'Command Shell' $conEmuPath @('-run', "`"$env:COMSPEC`"") 'Command Processor in ConEmu64' 'd:\dev'
     # AddDesktopShortcut 'Developer Shell' $conEmuPath @('-run', "`"$env:COMSPEC`"", '/k', "`"$rootPath\initdev.cmd`"") 'Developer Command Processor in ConEmu64' 'd:\dev'
     AddDesktopShortcut 'Command Shell' $conEmuPath @('-run', '"%COMSPEC%"', '/d', '/k', "`"title Command Prompt`"") 'Command Processor in ConEmu64' -workingDirectory "$env:HOMEDRIVE\$env:HOMEPATH" -iconLocation "$($conEmuPath),3"
-    AddDesktopShortcut 'Developer Shell' $conEmuPath @('-run', '"%COMSPEC%"', '/d', '/s', '/k', "`"`"$rootPath\initdev.cmd`"`"") 'Developer Command Processor in ConEmu64' -workingDirectory "$($dataDrive)dev" -iconLocation "$($conEmuPath),3"
-    AddDesktopShortcut 'PowerShell Shell' $conEmuPath @('-run', 'powershell.exe') 'PowerShell in ConEmu64' -workingDirectory 'd:\dev' -iconLocation "$($conEmuPath),3"
-    AddDesktopShortcut 'Developer Shell (PS)' $conEmuPath @('-run', 'powershell.exe', '-NoLogo', '-NoExit', '-Mta', '-ExecutionPolicy RemoteSigned', '-File', "`"$rootPath\initdev.ps1`"") 'Developer Command Processor (PS) in ConEmu64' -workingDirectory 'd:\dev' -iconLocation "$($conEmuPath),3"
+    AddDesktopShortcut 'Developer Shell' $conEmuPath @('-run', '"%COMSPEC%"', '/d', '/s', '/k', "`"`"$rootPath\initdev.cmd`"`"") 'Developer Command Processor in ConEmu64' -workingDirectory "$sourceCodeFolder" -iconLocation "$($conEmuPath),3"
+    AddDesktopShortcut 'PowerShell Shell' $conEmuPath @('-run', 'powershell.exe') 'PowerShell in ConEmu64' -workingDirectory "$sourceCodeFolder" -iconLocation "$($conEmuPath),3"
+    AddDesktopShortcut 'Developer Shell (PS)' $conEmuPath @('-run', 'powershell.exe', '-NoLogo', '-NoExit', '-Mta', '-ExecutionPolicy RemoteSigned', '-File', "`"$rootPath\initdev.ps1`"") 'Developer Command Processor (PS) in ConEmu64' -workingDirectory "$sourceCodeFolder" -iconLocation "$($conEmuPath),3"
 }
 else
 {
@@ -452,7 +475,7 @@ else
 # rundll32.exe user32.dll, LockWorkStation
 AddDesktopShortcut 'Lock Computer' '"%WINDIR%\System32\rundll32.exe"' @('user32.dll,LockWorkStation') -iconLocation $iconLockScreen -minimized $true
 AddDesktopShortcut 'Sign Out Computer' '"%WINDIR%\System32\logoff.exe"' @('') -iconLocation $iconLogoff -minimized $true
-AddDesktopShortcut 'Update Status' '"%COMSPEC%"' @('/q', '/d', '/c', "`"$toolsRootOrigPath\toggle-status.cmd`"") -iconlocation $iconStatus -minimized $true
+AddDesktopShortcut 'Update Presence Status' '"%COMSPEC%"' @('/q', '/d', '/c', "`"$toolsRootOrigPath\toggle-status.cmd`"") 'Windows Defender: stop miscategorizing this link as Trojan:Win32/Phonzy.C!ml' -iconlocation $iconStatus -minimized $true
 
 
 # -----------------------------------------------------------------------
@@ -469,7 +492,7 @@ Write-Host "Configure Symbol cache to be $symbolCacheDirectory..."
 $existingAcls = & icacls $symbolCacheDirectory
 if (-not $existingAcls.Contains($icaclsAddUserCheck))
 {
-	Write-Host 'Re-acling folder $symbolCacheDirectory'
+	Write-Host "Re-acling folder $symbolCacheDirectory"
 	& icacls $symbolCacheDirectory $icaclsAddUser | Out-Null
 }
 
@@ -491,22 +514,32 @@ SpecificDeveloperMachineSetup
 
 if ($null -ne $packageCacheRoot)
 {
-    Write-Host "Configure package root to be $packageCacheRoot..."
-    [System.IO.Directory]::CreateDirectory($packageCacheRoot) | Out-Null
-    # Compress the folder, prevent indexing, give current user full access
-    & compact /c "$packageCacheRoot" | Out-Null
-    & attrib +I "$packageCacheRoot" /s /d | Out-Null
-    & icacls $packageCacheRoot $icaclsAddUser | Out-Null
+    try {
+        Write-Host "Configure package root to be $packageCacheRoot..."
+        [System.IO.Directory]::CreateDirectory($packageCacheRoot) | Out-Null
+        # Compress the folder, prevent indexing, give current user full access
+        & compact /c "$packageCacheRoot" | Out-Null
+        & attrib +I "$packageCacheRoot" /s /d | Out-Null
+        & icacls $packageCacheRoot $icaclsAddUser | Out-Null
+    }
+    catch {
+        Write-Warning $_
+    }
 }
 
 if ($null -ne $nugetCacheRoot)
 {
-    Write-Host "Configure Nuget cache to be $nugetCacheRoot..."
-    [System.IO.Directory]::CreateDirectory($nugetCacheRoot) | Out-Null
-    # Compress the folder, prevent indexing, give current user full access
-    & compact /c "$nugetCacheRoot" | Out-Null
-    & attrib +I "$nugetCacheRoot" /s /d | Out-Null
-    & icacls $nugetCacheRoot $icaclsAddUser | Out-Null
+    try {
+        Write-Host "Configure Nuget cache to be $nugetCacheRoot..."
+        [System.IO.Directory]::CreateDirectory($nugetCacheRoot) | Out-Null
+        # Compress the folder, prevent indexing, give current user full access
+        & compact /c "$nugetCacheRoot" | Out-Null
+        & attrib +I "$nugetCacheRoot" /s /d | Out-Null
+        & icacls $nugetCacheRoot $icaclsAddUser | Out-Null
+    }
+    catch {
+        Write-Warning $_
+    }
 }
 
 # Configure NuGet for the source code folder based on template file
@@ -530,16 +563,21 @@ Write-Host "Configure Nuget global package folder to be $nugetGlobalCacheDirecto
 
 if ($null -ne $npmCacheRoot)
 {
-    # See https://docs.npmjs.com/misc/config
+    try {
+        # See https://docs.npmjs.com/misc/config
 
-    Write-Host "Configure NPM cache to be $npmCacheRoot..."
-    [System.IO.Directory]::CreateDirectory($npmCacheRoot) | Out-Null
-    # Compress the folder, prevent indexing, give current user full access
-    & compact /c "$npmCacheRoot" | Out-Null
-    & attrib +I "$npmCacheRoot" /s /d | Out-Null
-    & icacls $npmCacheRoot $icaclsAddUser | Out-Null
+        Write-Host "Configure NPM cache to be $npmCacheRoot..."
+        [System.IO.Directory]::CreateDirectory($npmCacheRoot) | Out-Null
+        # Compress the folder, prevent indexing, give current user full access
+        & compact /c "$npmCacheRoot" | Out-Null
+        & attrib +I "$npmCacheRoot" /s /d | Out-Null
+        & icacls $npmCacheRoot $icaclsAddUser | Out-Null
 
-    [System.Environment]::SetEnvironmentVariable('NPM_CONFIG_CACHE', $npmCacheRoot, $enviromentUserScope)
+        [System.Environment]::SetEnvironmentVariable('NPM_CONFIG_CACHE', $npmCacheRoot, $enviromentUserScope)
+    }
+    catch {
+        Write-Warning $_
+    }
 }
 
 
@@ -560,8 +598,8 @@ ConfigureGitGlobally $gitPath 'core.longpaths' 'true'
 ConfigureGitGlobally $gitPath 'user.name' $(GetUserName)
 ConfigureGitGlobally $gitPath 'user.email' $(GetEmailAddress)
 ConfigureGitGlobally $gitPath 'pull.ff' 'only'
-ConfigureGitGlobally $gitPath 'credential.helper' 'manager-core'
-ConfigureGitGlobally $gitPath 'credential.helperselector.selected' 'manager-core'
+ConfigureGitGlobally $gitPath 'credential.helper' 'manager'
+ConfigureGitGlobally $gitPath 'credential.helperselector.selected' 'manager'
 
 # More aliases to consider
 # http://haacked.com/archive/2014/07/28/github-flow-aliases/
@@ -582,7 +620,7 @@ ConfigureGitGlobally $gitPath 'alias.nb' '!f() { bn=${1-zzz_temp$RANDOM}; un=${U
 ConfigureGitGlobally $gitPath 'alias.nf' '!f() { bn=${1-zzz_temp$RANDOM}; db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); git checkout -b feature/$bn origin/$db; git push --set-upstream origin feature/$bn; }; f'
 ConfigureGitGlobally $gitPath 'alias.nr' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git push origin --delete dev/$un/$bn; git branch -d dev/$un/$bn; }; f'
 ConfigureGitGlobally $gitPath 'alias.st' 'status'
-ConfigureGitGlobally $gitPath 'alias.up' "!f() { git pull --rebase --prune $@; git submodule update --init --recursive; }; f"
+ConfigureGitGlobally $gitPath 'alias.up' "!f() { git pl --rebase; }; f"
 ConfigureGitGlobally $gitPath 'alias.wipe' "!f() { git add -A; git commit -qm '*** WIPED SAVEPOINT ***. Use git reflog to restore.'; git reset HEAD~1 --hard; }; f"
 ConfigureGitGlobally $gitPath 'alias.pause' "!f() { git add -A; git commit -m '*** SAVEPOINT ***. Use git start to resume work.'; }; f"
 ConfigureGitGlobally $gitPath 'alias.start' 'reset HEAD~1 --mixed'
@@ -594,6 +632,7 @@ ConfigureGitGlobally $gitPath 'alias.delete' '!f() { bn=${1-zzz_temp$RANDOM}; db
 ConfigureGitGlobally $gitPath 'alias.remove' '!f() { bn=${1-zzz_temp$RANDOM}; db=$(basename $(git symbolic-ref refs/remotes/origin/HEAD)); git fetch --prune --auto-gc; git checkout $db; git branch -D $bn; git push origin --delete $bn; }; f'
 # ConfigureGitGlobally $gitPath 'alias.nw' '!f() { bn=${1-zzz_temp$RANDOM}; un=${USERNAME,,}; git worktree add --track -b dev/$un/$bn \dev\$bn master; git branch --set-upstream-to origin dev/$un/$bn; }; f'
 ConfigureGitGlobally $gitPath 'alias.pf' 'push --force-with-lease'
+ConfigureGitGlobally $gitPath 'alias.pl' "!f() { git pull --prune $@; git submodule update --init --recursive; }; f"
 
 # https://github.blog/2022-04-12-git-security-vulnerability-announced/
 # The ceiling directories are being set in initdev.cmd if they are not yet defined.

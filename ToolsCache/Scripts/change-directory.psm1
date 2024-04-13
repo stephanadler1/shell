@@ -40,6 +40,7 @@ class SourceDepotRepository
 {
     [string] $comment
     [ValidateNotNullOrEmpty()][string] $repository_port
+    [ValidateNotNullOrEmpty()][string[]] $repository_ports
     $shortcuts
 }
 
@@ -129,6 +130,12 @@ function Get-ShortcutsPath()
 
             elseif (Test-SourceDepot -and ($null -ne $settings.sourcedepot_repositories))
             {
+                if ([string]::IsNullOrWhiteSpace($env:SDPORT) -eq $true)
+                {
+                    Write-Error 'This is not a properly configured Source Depot repository. SDPORT environment variable is not set.'
+                    exit 1
+                }
+
                 $repoUri = ($env:SDPORT).TrimEnd()
                 Write-Host "Current repository is '$repoUri'."
 
@@ -136,7 +143,8 @@ function Get-ShortcutsPath()
                 for($i = 0; $i -lt $settings.sourcedepot_repositories.Count; $i++)
                 {
                     $r = $settings.sourcedepot_repositories[$i]
-                    if ([String]::Equals($r.repository_port, $repoUri, [System.StringComparison]::OrdinalIgnoreCase))
+                    if ((($null -ne $r.repository_port) -and ([String]::Equals($r.repository_port, $repoUri, [System.StringComparison]::OrdinalIgnoreCase))) -or
+                        (($null -ne $r.repository_ports) -and ($r.repository_ports -contains $repoUri)))
                     {
                         Write-Debug "Found repository '$repoUri' in settings file."
 

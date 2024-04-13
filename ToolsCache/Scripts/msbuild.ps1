@@ -258,7 +258,7 @@ $startInfo.LoadUserProfile = $false
 
 Write-Host
 Write-Host "> `"$msbuildTool`" $arguments" -ForegroundColor Yellow
-Write-Host
+#Write-Host
 
 $started = $process.Start()
 if ($started)

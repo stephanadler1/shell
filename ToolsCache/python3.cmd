@@ -3,7 +3,7 @@ setlocal
 set "__EXEPATH=%~dp0python\python.exe"
 
 if not exist "%__EXEPATH%" (
-    echo "%~n0" is not installed at "%__EXEPATH%". Abort.
+    echo "%~n0" is not installed at "%__EXEPATH%". Abort. 1>&2
     exit /b -1
 )
 

@@ -49,7 +49,14 @@ if (($expectedHash -eq $null) -or ($expectedHash -eq ''))
 }
 else
 {
-    if ($hash.Hash -ne $expectedHash)
+    Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psm1') -Scope Local -Force
+
+    if ($null -ne (Test-FileExists $expectedHash))
+    {
+        $expectedHash = Get-Content -Path $expectedHash
+    }
+
+    if ($hash.Hash -ine $expectedHash)
     {
         throw "Hashes do not match! Expected is '$expectedHash' but found '$($hash.Hash)'."
     }

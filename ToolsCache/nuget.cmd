@@ -4,7 +4,7 @@ set "_EXITCODE=1"
 set "__EXEPATH=%~dp0%~n0\%~n0.exe"
 
 if not exist "%__EXEPATH%" (
-    echo "%~n0" is not installed at "%__EXEPATH%". Abort.
+    echo "%~n0" is not installed at "%__EXEPATH%". Abort. 1>&2
     exit /b %_EXITCODE%
 )
 

@@ -4,7 +4,7 @@ call "%~dp0Scripts\node.cmd"
 set "__EXEPATH=%__NODEPATH%\%~nx0"
 
 if not exist "%__EXEPATH%" (
-    echo "%~n0" is not installed at "%__EXEPATH%". Abort.
+    echo "%~n0" is not installed at "%__EXEPATH%". Abort. 1>&2
     exit /b 1
 )
 

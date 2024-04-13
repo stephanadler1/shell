@@ -48,14 +48,18 @@ if (-not ([System.String]::IsNullOrWhitespace($timeString)))
     [System.UInt64] $timeValue = 0
     if ([System.UInt64]::TryParse($timeString, [System.Globalization.NumberStyles]::Integer, $null, [ref] $timeValue))
     {
-        $parsingType = 'UNIXTIME'
-        $date = [System.DateTimeOffset]::FromUnixTimeSeconds($timeValue)
+        try
+        {
+            $parsingType = 'UNIXTIME'
+            $date = [System.DateTimeOffset]::FromUnixTimeSeconds($timeValue)
+        }
+        catch
+        {
+            # Assume it is a UTC tick
+            $parsingType = 'DateTimeOffset.UtcTicks'
+            $date = New-Object -Type 'System.DateTimeOffset' -ArgumentList @($timeValue, [System.TimeSpan]::Zero)
+        }
     }
-#    if ([System.UInt64]::TryParse($timeString, [System.Globalization.NumberStyles]::HexNumber, $null, [ref] $timeValue))
-#    {
-#        $parsingType = 'FILETIME'
-#        $date = [System.DateTimeOffset]::FromFileTime($timeValue)
-#    }
     else
     {
         # If it starts with 0x, try parsing it as a number again
@@ -69,6 +73,24 @@ if (-not ([System.String]::IsNullOrWhitespace($timeString)))
             else
             {
                 throw "Cannot parse $timeString as a hexadecimal number."
+            }
+        }
+        elseif ($timeString.EndsWith('_iOS', [System.StringComparison]::Ordinal))
+        {
+            # 20230213_194534000_iOS
+            # yyyyMMdd_HHmmsszzz_iOS
+            $parsingType = 'iOS file name'
+
+            [System.Globalization.DateTimeStyles] $styles = [System.Globalization.DateTimeStyles]::AllowWhiteSpaces
+            [System.DateTime] $timeValue = [System.DateTime]::Now
+            if ([System.DateTime]::TryParseExact($timeString.Substring(0, 18), "yyyyMMdd_HHmmssFFF", [System.Globalization.CultureInfo]::InvariantCulture, $styles, [ref] $timeValue))
+            {
+                Write-Debug "iOS TryParseExact: $($timeValue)"
+                $date = New-Object -Type 'System.DateTimeOffset' -ArgumentList @($timeValue, [System.TimeSpan]::Zero)
+                Write-Debug "iOS TryParseExact as DateTimeOffset: $($date)"
+            }
+            else {
+                throw "Cannot parse $timeString as an iOS file name."
             }
         }
         else

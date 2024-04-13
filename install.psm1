@@ -165,41 +165,45 @@ function script:AddDesktopShortcut
 {
     param([string] $shortcutName, [string] $targetPath, [string[]] $arguments, [string] $description, [string] $workingDirectory = $null, [string] $iconLocation = $null, [bool] $minimized = $false, $admin = $false)
 
-    if ([System.String]::IsNullOrWhiteSpace($workingDirectory) -eq $true)
-    {
-        $workingDirectory = '%USERPROFILE%'
+    try {
+        if ([System.String]::IsNullOrWhiteSpace($workingDirectory) -eq $true)
+        {
+            $workingDirectory = '%USERPROFILE%'
+        }
+
+        $windowStyle = 4
+        if ($minimized)
+        {
+            $windowStyle = 7
+        }
+
+        $wshShell = New-Object -ComObject WScript.Shell
+        $linkFile = ([System.IO.Path]::Combine([System.Environment]::GetFolderPath("Desktop"), $shortcutName + ".lnk"))
+        $shortcut = $wshShell.CreateShortcut($linkFile)
+        $shortcut.TargetPath = $targetPath
+        $shortcut.Arguments = [string]::Join(' ', $arguments)
+        $shortcut.Description = $description
+        $shortcut.WorkingDirectory = $workingDirectory
+        $shortcut.WindowStyle = $windowStyle
+
+        if ([System.String]::IsNullOrWhiteSpace($iconLocation) -ne $true)
+        {
+            $shortcut.IconLocation = $iconLocation
+        }
+
+        $shortcut.Save()
+
+        if ($admin)
+        {
+            # mark shortcut as run as admin
+            $bytes = [System.IO.File]::ReadAllBytes($linkFile)
+            $bytes[0x15] = $bytes[0x15] -bor 0x20 # set byte 21 (0x15) bit 6 (0x20) ON
+            [System.IO.File]::WriteAllBytes($linkFile, $bytes)
+        }
     }
-
-    $windowStyle = 4
-    if ($minimized)
-    {
-        $windowStyle = 7
+    catch {
+        Write-Error "Creating shortcut '$shortcutName' caused exception '$_'."
     }
-
-    $wshShell = New-Object -ComObject WScript.Shell
-    $linkFile = ([System.IO.Path]::Combine([System.Environment]::GetFolderPath("Desktop"), $shortcutName + ".lnk"))
-    $shortcut = $wshShell.CreateShortcut($linkFile)
-    $shortcut.TargetPath = $targetPath
-    $shortcut.Arguments = [string]::Join(' ', $arguments)
-    $shortcut.Description = $description
-    $shortcut.WorkingDirectory = $workingDirectory
-    $shortcut.WindowStyle = $windowStyle
-
-    if ([System.String]::IsNullOrWhiteSpace($iconLocation) -ne $true)
-    {
-        $shortcut.IconLocation = $iconLocation
-    }
-
-    $shortcut.Save()
-
-    if ($admin)
-    {
-        # mark shortcut as run as admin
-        $bytes = [System.IO.File]::ReadAllBytes($linkFile)
-        $bytes[0x15] = $bytes[0x15] -bor 0x20 # set byte 21 (0x15) bit 6 (0x20) ON
-        [System.IO.File]::WriteAllBytes($linkFile, $bytes)
-    }
-
 }
 
 function script:ConfigureGit
@@ -276,16 +280,31 @@ function script:CreateOrUpdateFolder
 
 function script:IsSystemDriveOnSsd
 {
-    $ssd = Get-CimInstance -Class Win32_LogicalDisk -Filter "DeviceID='$env:SystemDrive'" -KeyOnly |
-        Get-CimAssociatedInstance -ResultClassName Win32_DiskPartition -KeyOnly |
-        Get-CimAssociatedInstance -ResultClassName Win32_DiskDrive |
-        Where-Object { ($_.Caption.IndexOf('NVMe', [System.StringComparison]::OrdinalIgnoreCase) -ge 0) -or
-            ($_.Caption.IndexOf('SSD', [System.StringComparison]::OrdinalIgnoreCase) -ge 0) -or
-            ($_.Caption.IndexOf('MZFLV256HCHP-000MV', [System.StringComparison]::OrdinalIgnoreCase) -ge 0 <# Surface Book #> ) -or
-            ($_.Caption.IndexOf('TOSHIBA MEMORY', [System.StringComparison]::OrdinalIgnoreCase) -ge 0 <# Surface Book #> ) }
-    if ($null -ne $ssd)
+    $private:osDriveLetter = $null
+    if ($($env:SystemDrive).Length -eq 2)
     {
-        return $true
+        $osDriveLetter = $($env:SystemDrive)[0]
+    }
+
+    if ($null -ne $osDriveLetter)
+    {
+        try
+        {
+            $private:partitionInfo = Get-Partition -DriveLetter $osDriveLetter
+            $partitionInfo | ConvertTo-Json -Depth 1 | Write-Debug
+
+            $private:diskInfo = Get-Disk -Number $partitionInfo.DiskNumber
+            $diskInfo | ConvertTo-Json -Depth 1 | Write-Debug
+
+            $private:physDiskInfo = Get-PhysicalDisk -UniqueId $diskInfo.UniqueId
+            $physDiskInfo | ConvertTo-Json -Depth 1 | Write-Debug
+
+            return ($physDiskInfo.MediaType -ieq 'SSD')
+        }
+        catch
+        {
+            return $false
+        }
     }
 
     return $false

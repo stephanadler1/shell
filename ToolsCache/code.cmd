@@ -9,5 +9,5 @@ for %%p in ("%LOCALAPPDATA%\Programs\Microsoft VS Code Insiders\bin\" "%LOCALAPP
     )
 )
 
-echo Visual Studio Code is not installed in any of its default locations.
+echo Visual Studio Code is not installed in any of its default locations. 1>&2
 exit /b 1
