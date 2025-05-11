@@ -33,11 +33,11 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
-    $DebugPreference = 'Continue'
+    $global:DebugPreference = 'Continue'
     Write-Debug "PSVersion = $($PSVersionTable.PSVersion); PSEdition = $($PSVersionTable.PSEdition); ExecutionPolicy = $(Get-ExecutionPolicy)"
 }
 
-Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psm1') -Scope Local -Force
+Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psd1') -Scope Local -Force
 
 $script:tortGitPath = [IO.Path]::Combine($env:ProgramFiles, 'TortoiseGit\bin\TortoiseGitProc.exe')
 $script:tortSvnPath = [IO.Path]::Combine($env:ProgramFiles, 'TortoiseSVN\bin\TortoiseProc.exe')

@@ -345,8 +345,14 @@ function script:GetActiveDirectoryUser
 
 function script:GetADUserFullName
 {
-    $user = GetActiveDirectoryUser($env:USERNAME)
-    return $user.DisplayName
+    try {
+        $currentUser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+        return $(([adsi]"WinNT://$($currentUser.Split("\")[0])/$($currentUser.Split("\")[1]),user").FullName)
+    }
+    catch {
+        $user = GetActiveDirectoryUser($env:USERNAME)
+        return $user.DisplayName
+    }
 }
 
 function script:GetEmailAddress
@@ -385,3 +391,16 @@ function script:SpecificDeveloperMachineSetup
 {
 }
 
+function script:SetWindowsTerminalSetting
+{
+    param($configuration, [string] $settingsName, [string] $settingsValue)
+
+	try
+	{
+        $configuration.$settingsName = $settingsValue
+	}
+	catch
+	{
+		Add-Member -InputObject $configuration -MemberType NoteProperty -Name $settingsName -Value $settingsValue
+	}
+}

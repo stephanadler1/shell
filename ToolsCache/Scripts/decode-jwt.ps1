@@ -33,7 +33,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
-    $DebugPreference = 'Continue'
+    $global:DebugPreference = 'Continue'
     Write-Debug "PSVersion = $($PSVersionTable.PSVersion); PSEdition = $($PSVersionTable.PSEdition); ExecutionPolicy = $(Get-ExecutionPolicy)"
 }
 
@@ -84,6 +84,31 @@ for($i = 0; $i -lt $tokenParts.Count; $i++)
         }
 
         Write-Host $text
+
+        $j = ConvertFrom-Json -InputObject $text
+
+        try
+        {
+            if (Get-Member -InputObject $j -Name "iat" -Membertype Properties)
+            {
+                $j.iat = "$($j.iat) ($([System.DateTimeOffset]::FromUnixTimeSeconds($j.iat)))"
+            }
+
+            if (Get-Member -InputObject $j -Name "nbf" -Membertype Properties)
+            {
+                $j.nbf = "$($j.nbf) ($([System.DateTimeOffset]::FromUnixTimeSeconds($j.nbf)))"
+            }
+
+            if (Get-Member -InputObject $j -Name "exp" -Membertype Properties)
+            {
+                $j.exp = "$($j.exp) ($([System.DateTimeOffset]::FromUnixTimeSeconds($j.exp)))"
+            }
+        }
+        catch
+        {
+        }
+
+        $j | fl
     }
 }
 

@@ -19,7 +19,7 @@ if errorlevel 1 (
         echo:
         echo Exclude the folder "%__RUNDIR%" from AntiVirus/Malware scanning. Run
         echo:
-        echo    powershell -nologo -noprofile -executionPolicy RemoteSigned -command "Set-MpPreference -ExclusionPath '%__RUNDIR%'"
+        echo    pwsh -nologo -noprofile -executionPolicy RemoteSigned -command "Set-MpPreference -ExclusionPath '%__RUNDIR%'"
         echo:
         echo  or
         echo:

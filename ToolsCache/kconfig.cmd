@@ -11,3 +11,4 @@ if errorlevel 1 (
 )
 
 call code "%USERPROFILE%\.kube"
+if defined KUBECONFIG call "%~dp0.\n.cmd" "%KUBECONFIG%"

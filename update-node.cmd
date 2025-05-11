@@ -20,6 +20,9 @@ echo:
 echo Ensure NPM has the latest version
 call npm install -g npm@latest
 
+call "%ProgramFiles%\Windows Defender\MpCmdRun.exe" -scan -disableremediation -scantype 3 -timeout 1 -file "%_TARGETDIR%"
+
+
 echo:
 call npm version
 

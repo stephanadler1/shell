@@ -100,6 +100,7 @@ For more information on a specific command, type DHELP command-name.
  SRC           Like CD, but from the root of the development directory
  TERRAFORM     Invokes HashiCorp Terraform.
  TEX           TeX/LaTeX platform.
+ TOFU          Invokes OpenTofu.
  TOGGLE-DEBUG  Toggles between turning debug logging on and off.
  TOGGLE-MSBUILDISOLATION  Toggles between turning MSBuild build isolation on and off.
  TOGGLE-MSBUILDLOGGING  Toggles between turning MSBuild file logging on and off.
@@ -112,6 +113,7 @@ For more information on a specific command, type DHELP command-name.
  VSO           Opens the Visual Studio Online web site.
  WINDOWS-VERSION  Shows the Windows version information.
  WINMERGE      Starts WinMerge.
+ WINPERF       Windows Performance Toolkit.
  WINSCP-UI     Starts the UI of WinSCP.
  ZSTD          Zstandard compression tool.
 

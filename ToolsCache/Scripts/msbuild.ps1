@@ -64,11 +64,17 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
-    $DebugPreference = 'Continue'
+    $global:DebugPreference = 'Continue'
     Write-Debug "PSVersion = $($PSVersionTable.PSVersion); PSEdition = $($PSVersionTable.PSEdition); ExecutionPolicy = $(Get-ExecutionPolicy)"
 }
 
-Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psm1') -Scope Local -Force
+if (($PSVersionTable.PSVersion -ge '7.3') -and ($IsWindows -eq $true))
+{
+    $script:PSNativeCommandArgumentPassing = 'Legacy'
+    Write-Debug "Setting PSNativeCommandArgumentPassing to $PSNativeCommandArgumentPassing."
+}
+
+Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psd1') -Scope Local -Force
 
 # Get the initial MSBuild location from the environment.
 [string] $script:msbuildTool = $env:MSBUILD
@@ -107,7 +113,7 @@ if ($lowerPriority)
     $priorityClass = [System.Diagnostics.ProcessPriorityClass]::BelowNormal
 }
 
-#Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psm1') -Scope Local -Force
+#Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psd1') -Scope Local -Force
 
 Write-Host
 Write-Host 'Started' ([System.DateTime]::Now)
@@ -171,7 +177,7 @@ function ReportIsolation
 $msbuildTool = Test-FileExists($msbuildTool)
 if ([System.String]::IsNullOrEmpty($msbuildTool) -eq $true)
 {
-    & where.exe msbuild /q
+    & where.exe msbuild /q | Out-Null
     if ($LASTEXITCODE -ne 0)
     {
         Write-Error 'msbuild.exe was not found on the system. Either make it part of the PATH environment variable or create an environment variable MSBUILD to point to the version you wish to use.'

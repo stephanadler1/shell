@@ -21,7 +21,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
-    $DebugPreference = 'Continue'
+    $global:DebugPreference = 'Continue'
     Write-Debug "PSVersion = $($PSVersionTable.PSVersion); PSEdition = $($PSVersionTable.PSEdition); ExecutionPolicy = $(Get-ExecutionPolicy)"
 }
 
@@ -32,6 +32,7 @@ $env:_WORKINGDIR = (Get-Item -Path '.')
 
 Import-Module -Name "$env:TOOLS\Scripts\developer-console.psm1" -Force
 
+<#
 Write-Host 'GLOBAl TOOLS'
 Write-Host '------------'
 Get-ChildItem -Path $env:TOOLS -File | ForEach-Object { Write-Host "$_   " -NoNewline }
@@ -44,6 +45,6 @@ if ($env:TOOLS_GIT -ne '')
     Write-Host '------------------'
     & git config --global --get-regexp alias.
 }
-
+#>
 
 Write-Host

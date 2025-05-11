@@ -24,6 +24,14 @@ set "_WORKINGDIR=%CD%"
 rem Disable isolation until .NET Standard 2.0 problem is solved
 set "MSBUILD_DISABLEISOLATION=1"
 
+if not defined TOOLS_PS (
+    rem Prioritize PowerShell Core over PowerShell Desktop but if it isn't
+    rem present on the machine move back to the Desktop version.
+    set "TOOLS_PS=pwsh.exe"
+    call where "%TOOLS_PS%" > nul 2>&1
+    if errorlevel 1 set "TOOLS_PS=powershell.exe"
+)
+
 rem Prefer 64 bit VS command shell
 rem set "VSCMD_DEBUG=3"
 
@@ -87,7 +95,7 @@ set "_WORKINGDIR="
 
 :SetCommandPrompt
 if /i "%CONEMUANSI%" equ "ON" (
-    set PROMPT=$E[m$E[32m$T$S$E[92m$P$E[90m$_$E[90m$G$E[m$S$E]9;12$E\
+    set "PROMPT=$E[m$E[32m$T$S$E[92m$P$E[90m$_$E[90m$G$E[m$S$E]9;12$E\"
 )
 
 :SetCommonEnvironmentVariables
@@ -95,6 +103,12 @@ rem .NET environment variables are explained here:
 rem https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-environment-variables
 if not defined DOTNET_CLI_TELEMETRY_OPTOUT set "DOTNET_CLI_TELEMETRY_OPTOUT=1"
 if not defined DOTNET_SKIP_FIRST_TIME_EXPERIENCE set "DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true"
+
+rem https://learn.microsoft.com/en-us/cli/azure/azure-cli-configuration
+if not defined AZURE_CORE_COLLECT_TELEMETRY set "AZURE_CORE_COLLECT_TELEMETRY=0"
+
+rem  https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_telemetry?view=powershell-7.4
+if not defined POWERSHELL_TELEMETRY_OPTOUT set "POWERSHELL_TELEMETRY_OPTOUT=1"
 
 
 :YourScript
