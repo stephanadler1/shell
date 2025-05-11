@@ -31,7 +31,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
-    $DebugPreference = 'Continue'
+    $global:DebugPreference = 'Continue'
     Write-Debug "PSVersion = $($PSVersionTable.PSVersion); PSEdition = $($PSVersionTable.PSEdition); ExecutionPolicy = $(Get-ExecutionPolicy)"
 }
 
@@ -41,7 +41,7 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 {
     Write-Host 'Elevating to administrative privileges is required to re-configure the operating system...'
     $arg = "-nologo -noprofile -executionPolicy RemoteSigned -outputFormat Text -mta -file `"$($script:MyInvocation.MyCommand.Path)`""
-    Start-Process "$psHome\powershell.exe" -Verb Runas -ArgumentList $arg -wait
+    Start-Process -FilePath (Get-Process -Id $PID).Path -Verb Runas -ArgumentList $arg -wait
     exit
 }
 
@@ -132,9 +132,23 @@ if (-not (IsSystemDriveOnSsd))
 }
 else
 {
-    Write-Host 'Enable hibernate, since OS drive is an SSD...'
-    & $powerCfgTool @('/Hibernate', 'On')
+    # Only enable Hibernate if Modern Sleep isn't supported
+    [string] $powerCfgOutput = & powercfg.exe /availablesleepstates
+    if (-not $powerCfgOutput.StartsWith('The following sleep states are available on this system:     Standby (S0 Low Power Idle) Network Connected', [System.StringComparison]::OrdinalIgnoreCase))
+    {
+        Write-Host 'Enable hibernate, since OS drive is an SSD...'
+        & $powerCfgTool @('/Hibernate', 'On')
+    }
+
+    # Only enable Hibernate if machine isn't OEM...
+    [string] $manufacturer = (Get-WmiObject win32_bios).Manufacturer
+    if (-not $manufacturer.StartsWith('OEM', [System.StringComparison]::OrdinalIgnoreCase))
+    {
+        #Write-Host 'Enable hibernate, since OS drive is an SSD...'
+        #& $powerCfgTool @('/Hibernate', 'On')
+    }
 }
+
 # Write-Host 'Disabe firewall rules...'
 # Get-NetFirewallRule
 # Get-NetFirewallRule | ? {  $_.Direction -eq 'Inbound' } | % { $_ } | fl
@@ -241,6 +255,25 @@ $rk.Dispose()
 
 # Disable RDP over UDP
 # https://superuser.com/questions/1481191/remote-desktop-intermittently-freezing
+
+
+if ($env:POWERSHELL_TELEMETRY_OPTOUT -ne '1')
+{
+    # Disable telemetry gathering
+    # https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_telemetry?view=powershell-7.4
+    [System.Environment]::SetEnvironmentVariable('POWERSHELL_TELEMETRY_OPTOUT', '1', [System.EnvironmentVariableTarget]::Machine)
+
+    $rebootRequired = $true
+}
+
+if ($env:DOTNET_CLI_TELEMETRY_OPTOUT -ne '1')
+{
+    # Disable telemetry gathering
+    # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-environment-variables#net-sdk-and-cli-environment-variables
+    [System.Environment]::SetEnvironmentVariable('DOTNET_CLI_TELEMETRY_OPTOUT', '1', [System.EnvironmentVariableTarget]::Machine)
+
+    $rebootRequired = $true
+}
 
 
 Write-Host 'Done.'

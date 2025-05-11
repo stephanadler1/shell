@@ -1,6 +1,7 @@
 @if not defined _DEBUG echo off
 setlocal
 set "__EXEPATH=%~dp0npp"
+if /i "%PROCESSOR_ARCHITECTURE%" equ "ARM64" set "__EXEPATH=%~dp0%PROCESSOR_ARCHITECTURE%\npp"
 set "__EXETOOL=notepad++.exe"
 
 if not exist "%__EXEPATH%\%__EXETOOL%" (

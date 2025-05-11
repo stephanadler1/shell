@@ -2,7 +2,7 @@
 
 @{
     RootModule = 'parsifal.core.psm1'
-    ModuleVersion = '0.0.2.0'
+    ModuleVersion = '0.0.4.0'
     GUID = '1B427DAF-1599-4343-8820-3D025ABFEE66'
 
     CompatiblePSEditions = @("Core", "Desktop")
@@ -19,6 +19,8 @@
     RequiredAssemblies = @()
 
     FunctionsToExport = @(
+        'Invoke-Tool',
+
         'Remove-FileSecure',
         
         'Test-ForThreats',

@@ -55,6 +55,12 @@ echo // All .NET (Core) Runtimes
 call dotnet --list-runtimes
 echo:
 echo //////////////////////////////////////////////////////////////////////////
+echo // PowerShell Runtimes
+echo:
+call pwsh.exe -executionPolicy RemoteSigned -noprofile -nologo -command "(Get-Process -Id $PID).Path; $PSVersionTable"
+echo:
+call powershell.exe -executionPolicy RemoteSigned -noprofile -nologo -command "(Get-Process -Id $PID).Path; $PSVersionTable"
+echo //////////////////////////////////////////////////////////////////////////
 echo // Java Runtime Environment (JRE)
 call java -version
 echo:
@@ -126,7 +132,7 @@ echo:
 echo ==========================================================================
 echo AZURE, KUBERNETES
 echo ==========================================================================
-call aks --version > nul 2>&1
+call aks --nodocker > nul 2>&1
 echo:
 
 echo //////////////////////////////////////////////////////////////////////////
@@ -134,8 +140,16 @@ echo // Azure CLI
 call az version < nul
 echo:
 echo //////////////////////////////////////////////////////////////////////////
+echo // Azure Bicep
+call az bicep version < nul
+rem echo:
+echo //////////////////////////////////////////////////////////////////////////
 echo // Terraform
 call terraform version 2>nul
+echo:
+echo //////////////////////////////////////////////////////////////////////////
+echo // OpenTofu
+call tofu version 2>nul
 echo:
 echo //////////////////////////////////////////////////////////////////////////
 echo // Helm
@@ -146,8 +160,18 @@ echo // Kubernetes kubectl
 call kubectl version --client=true --output=json
 echo:
 echo //////////////////////////////////////////////////////////////////////////
+echo // Kubernetes kubelogin
+call kubelogin --version
+echo:
+echo //////////////////////////////////////////////////////////////////////////
 echo // Docker
-call docker --version
+call docker --version > nul 2>&1
+if %ERRORLEVEL% neq 0 (
+    (
+        echo:
+        echo *** DOCKER IS NOT INSTALLED.
+    ) 1>&2
+)
 if %ERRORLEVEL% equ 0 (
     echo:
     call docker version
@@ -156,6 +180,12 @@ echo:
 echo //////////////////////////////////////////////////////////////////////////
 echo // Windows Subsystem for Linux (WSL)
 call wsl --status
+if %ERRORLEVEL% neq 0 (
+    (
+        echo:
+        echo *** WSL IS NOT INSTALLED.
+    ) 1>&2
+)
 if %ERRORLEVEL% equ 0 (
     echo:
     call wsl --version

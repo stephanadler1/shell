@@ -9,6 +9,10 @@ if not exist "%__EXEPATH%" (
     exit /b %_EXITCODE%
 )
 
+if /i "%~1" equ "v" (
+    call "%~dp0WinRAR\%~n0.exe" %*
+    exit /b 0
+)
 
 if /i "%~1" equ "/?" (
     call "%__EXEPATH%" "/?"

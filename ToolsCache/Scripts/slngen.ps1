@@ -32,12 +32,12 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
-    $DebugPreference = 'Continue'
+    $global:DebugPreference = 'Continue'
     Write-Debug "PSVersion = $($PSVersionTable.PSVersion); PSEdition = $($PSVersionTable.PSEdition); ExecutionPolicy = $(Get-ExecutionPolicy)"
 }
 
 $private:scriptPath = (Split-Path -Parent $PSCommandPath)
-Import-Module -Name (Join-Path -Path $scriptPath -ChildPath 'script-collection.psm1') -Scope Local -Force
+Import-Module -Name (Join-Path -Path $scriptPath -ChildPath 'script-collection.psd1') -Scope Local -Force
 
 
 $script:workingCopyRoot = (Get-WorkingCopyRootPath)

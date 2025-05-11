@@ -110,9 +110,11 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
-    $DebugPreference = 'Continue'
+    $global:DebugPreference = 'Continue'
     Write-Debug "PSVersion = $($PSVersionTable.PSVersion); PSEdition = $($PSVersionTable.PSEdition); ExecutionPolicy = $(Get-ExecutionPolicy)"
 }
+
+[bool] $runningArm64 = ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64')
 
 # -----------------------------------------------------------------------
 # Auto-detecting the data drive
@@ -184,7 +186,7 @@ $rootPath = $shortcutPath
 $script:toolsRootPath = ([System.IO.Path]::Combine($rootPath, 'ToolsCache'))
 $script:toolsRootOrigPath = ([System.IO.Path]::Combine($rootPathOrig, 'ToolsCache'))
 $script:pathEnvVar = 'PATH'
-$script:enviromentUserScope = 'User'
+[System.EnvironmentVariableTarget] $script:enviromentUserScope = [System.EnvironmentVariableTarget]::User
 
 $script:icaclsAddUserCheck = "$($env:USERDOMAIN)\$($env:USERNAME):(OI)(CI)(F)"
 $script:icaclsAddUser = @(
@@ -197,6 +199,13 @@ $script:icaclsUserOnly = @(
     '/grant:r', "$($env:USERDOMAIN)\$($env:USERNAME):(OI)(CI)(F)",
     '/inheritance:r',
     '/c')
+
+[int] $script:parallalism = [int]::Parse($env:NUMBER_OF_PROCESSORS) * 2
+if ($parallalism -le 0)
+{
+    $parallalism = 4
+}
+
 
 $iconLockScreen = '%WINDIR%\System32\Shell32.dll,47'
 $iconLogoff = '%WINDIR%\System32\Shell32.dll,27'
@@ -387,7 +396,12 @@ ConvertPathToRegExpandSz $pathEnvVar
 AddPath2 $pathEnvVar $enviromentUserScope $toolsRootPath 'TOOLS' 'Tools'
 [System.Environment]::SetEnvironmentVariable('TOOLS_ORIG', $rootPathOrig, $enviromentUserScope)
 
-AddPath2 $pathEnvVar $enviromentUserScope ([System.IO.Path]::Combine($toolsRootPath, 'Sysinternals')) 'TOOLS_SYSINTERNALS' 'Sysinternals'
+[string] $script:sysinternalsPath = 'Sysinternals'
+if ($true -eq $runningArm64)
+{
+	$sysinternalsPath = 'Sysinternals\ARM64'
+}
+AddPath2 $pathEnvVar $enviromentUserScope ([System.IO.Path]::Combine($toolsRootPath, $sysinternalsPath)) 'TOOLS_SYSINTERNALS' 'Sysinternals'
 AddPath2 $pathEnvVar $enviromentUserScope ([System.IO.Path]::Combine($toolsRootPath, 'Various')) 'TOOLS_VARIOUS' 'Various Tools'
 AddPath2 $pathEnvVar $enviromentUserScope ([System.IO.Path]::Combine($toolsRootPath, 'GnuWin32.CoreTools\bin')) 'TOOLS_GNUWINCORETOOLS' 'GnuWin 32 Core Tools'
 
@@ -395,6 +409,11 @@ $script:gitPath = [System.IO.Path]::Combine($toolsRootPath, 'git.vsts\cmd')
 if ([System.IO.Directory]::Exists([System.Environment]::ExpandEnvironmentVariables($gitPath)) -ne $true)
 {
     $gitPath = [System.IO.Path]::Combine($toolsRootPath, 'git.portable\cmd')
+    if ($true -eq $runningArm64)
+    {
+        $gitPath = [System.IO.Path]::Combine($toolsRootPath, 'ARM64\git.portable\cmd')
+    }
+
     if ([System.IO.Directory]::Exists([System.Environment]::ExpandEnvironmentVariables($gitPath)) -ne $true)
     {
         $gitPath = [System.IO.Path]::Combine($toolsRootPath, 'git\cmd')
@@ -434,6 +453,37 @@ if ([System.IO.File]::Exists($graphVizPath) -eq $true)
 
 
 # -----------------------------------------------------------------------
+# Configure preferred PowerShell version
+# -----------------------------------------------------------------------
+
+$script:preferredPowerShell = 'pwsh.exe'
+Write-Host 'Configuring preferred PowerShell version...'
+& where.exe $preferredPowerShell | Out-Null
+if ($LASTEXITCODE -eq 0)
+{
+    [System.Environment]::SetEnvironmentVariable('TOOLS_PS', $preferredPowerShell, $enviromentUserScope)
+}
+else
+{
+    [System.Environment]::SetEnvironmentVariable('TOOLS_PS', 'powershell.exe', $enviromentUserScope)
+}
+
+
+# -----------------------------------------------------------------------
+# Disable Telemetry Gathering
+# -----------------------------------------------------------------------
+
+# https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_telemetry?view=powershell-7.4
+[System.Environment]::SetEnvironmentVariable('POWERSHELL_TELEMETRY_OPTOUT', '1', $enviromentUserScope)
+
+# https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-environment-variables#net-sdk-and-cli-environment-variables
+[System.Environment]::SetEnvironmentVariable('DOTNET_CLI_TELEMETRY_OPTOUT', '1', $enviromentUserScope)
+
+# https://learn.microsoft.com/en-us/cli/azure/azure-cli-configuration
+[System.Environment]::SetEnvironmentVariable('AZURE_CORE_COLLECT_TELEMETRY', '0', $enviromentUserScope)
+
+
+# -----------------------------------------------------------------------
 # Configure the command shell
 # -----------------------------------------------------------------------
 
@@ -442,6 +492,7 @@ Write-Host 'Configuring command processor...'
 
 if ([System.Environment]::OSVersion.Version.Major -ge 10)
 {
+    # https://superuser.com/questions/413073/windows-console-with-ansi-colors-handling
     [System.Environment]::SetEnvironmentVariable('PROMPT', '$E[m$E[32m$T$S$E[92m$P$E[90m$_$E[90m$G$E[m$S$E]9;12$E\', $enviromentUserScope)
 }
 else
@@ -455,20 +506,27 @@ else
 # Create Desktop Shortcuts if ConEmu is available
 # -----------------------------------------------------------------------
 
-$script:conEmuPath = ([System.IO.Path]::Combine($toolsRootOrigPath, 'ConEmu\ConEmu64.exe'))
-if ([System.IO.File]::Exists([System.Environment]::ExpandEnvironmentVariables($conEmuPath)) -eq $true)
+if ($true -eq $runningArm64)
 {
-    Write-Host 'Set ConEmu Desktop shortcuts...'
-    # AddDesktopShortcut 'Command Shell' $conEmuPath @('-run', "`"$env:COMSPEC`"") 'Command Processor in ConEmu64' 'd:\dev'
-    # AddDesktopShortcut 'Developer Shell' $conEmuPath @('-run', "`"$env:COMSPEC`"", '/k', "`"$rootPath\initdev.cmd`"") 'Developer Command Processor in ConEmu64' 'd:\dev'
-    AddDesktopShortcut 'Command Shell' $conEmuPath @('-run', '"%COMSPEC%"', '/d', '/k', "`"title Command Prompt`"") 'Command Processor in ConEmu64' -workingDirectory "$env:HOMEDRIVE\$env:HOMEPATH" -iconLocation "$($conEmuPath),3"
-    AddDesktopShortcut 'Developer Shell' $conEmuPath @('-run', '"%COMSPEC%"', '/d', '/s', '/k', "`"`"$rootPath\initdev.cmd`"`"") 'Developer Command Processor in ConEmu64' -workingDirectory "$sourceCodeFolder" -iconLocation "$($conEmuPath),3"
-    AddDesktopShortcut 'PowerShell Shell' $conEmuPath @('-run', 'powershell.exe') 'PowerShell in ConEmu64' -workingDirectory "$sourceCodeFolder" -iconLocation "$($conEmuPath),3"
-    AddDesktopShortcut 'Developer Shell (PS)' $conEmuPath @('-run', 'powershell.exe', '-NoLogo', '-NoExit', '-Mta', '-ExecutionPolicy RemoteSigned', '-File', "`"$rootPath\initdev.ps1`"") 'Developer Command Processor (PS) in ConEmu64' -workingDirectory "$sourceCodeFolder" -iconLocation "$($conEmuPath),3"
+    Write-Host "Use Windows Terminal instead."
 }
 else
 {
-    Write-Host "Unable to find ConEmu at '$conEmuPath'."
+    $script:conEmuPath = ([System.IO.Path]::Combine($toolsRootOrigPath, 'ConEmu\ConEmu64.exe'))
+    if ([System.IO.File]::Exists([System.Environment]::ExpandEnvironmentVariables($conEmuPath)) -eq $true)
+    {
+        Write-Host 'Set ConEmu Desktop shortcuts...'
+        # AddDesktopShortcut 'Command Shell' $conEmuPath @('-run', "`"$env:COMSPEC`"") 'Command Processor in ConEmu64' 'd:\dev'
+        # AddDesktopShortcut 'Developer Shell' $conEmuPath @('-run', "`"$env:COMSPEC`"", '/k', "`"$rootPath\initdev.cmd`"") 'Developer Command Processor in ConEmu64' 'd:\dev'
+        AddDesktopShortcut 'Command Shell' $conEmuPath @('-run', '"%COMSPEC%"', '/d', '/k', "`"title Command Prompt`"") 'Command Processor in ConEmu64' -workingDirectory "$env:HOMEDRIVE\$env:HOMEPATH" -iconLocation "$($conEmuPath),3"
+        AddDesktopShortcut 'Developer Shell' $conEmuPath @('-run', '"%COMSPEC%"', '/d', '/s', '/k', "`"`"$rootPath\initdev.cmd`"`"") 'Developer Command Processor in ConEmu64' -workingDirectory "$sourceCodeFolder" -iconLocation "$($conEmuPath),3"
+        AddDesktopShortcut 'PowerShell Shell' $conEmuPath @('-run', '"%TOOLS_PS%"') 'PowerShell in ConEmu64' -workingDirectory "$sourceCodeFolder" -iconLocation "$($conEmuPath),3"
+        AddDesktopShortcut 'Developer Shell (PS)' $conEmuPath @('-run', '"%TOOLS_PS%"', '-NoLogo', '-NoExit', '-Mta', '-ExecutionPolicy RemoteSigned', '-File', "`"$rootPath\initdev.ps1`"") 'Developer Command Processor (PS) in ConEmu64' -workingDirectory "$sourceCodeFolder" -iconLocation "$($conEmuPath),3"
+    }
+    else
+    {
+        Write-Host "Unable to find ConEmu at '$conEmuPath'."
+    }
 }
 
 # https://www.tenforums.com/tutorials/77458-rundll32-commands-list-windows-10-a.html
@@ -499,6 +557,77 @@ if (-not $existingAcls.Contains($icaclsAddUserCheck))
 $script:defaultSymbolPath = "SRV*$symbolCacheDirectory*https://msdl.microsoft.com/download/symbols;SRV*$symbolCacheDirectory*https://referencesource.microsoft.com/symbols"
 # Invalid: ;SRV*$symbolCacheDirectory*http://srv.symbolsource.org/pdb/Public
 SetSymbolServers $defaultSymbolPath $enviromentUserScope
+
+
+# -----------------------------------------------------------------------
+# Configure the Windows Terminal
+# -----------------------------------------------------------------------
+
+$script:windowsTerminalConfigPath = "$env:USERPROFILE\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+if (Test-Path $windowsTerminalConfigPath)
+{
+    Write-Host 'Windows Terminal installation found. Applying customization...'
+    $script:windowsTerminalConfig = Get-Content -Path $windowsTerminalConfigPath | ConvertFrom-Json
+
+    $script:terminalProfile = @{
+        guid = "{7817925a-5c89-4d2e-a8f4-03f79bb0de8e}"
+        hidden = $false
+        name = "Developer Shell"
+        commandline = '"%COMSPEC%" /d /s /k ""%TOOLS%\..\initdev.cmd""'
+        startingDirectory = "%SOURCES_ROOT%"
+        icon = "%TOOLS%\Scripts\FolderIcon-Lego.ico"
+        fontFace = "Consolas"
+        fontSize = 11
+        colorScheme = "DevShell"
+        useAcrylic = $false
+    }
+
+    # Check if the profile exists
+    $script:existingProfile = $windowsTerminalConfig.profiles.list | Where-Object { $_.guid -ieq $terminalProfile.guid }
+    if ($null -eq $existingProfile)
+    {
+        Write-Host 'Installing Terminal profile...'
+        $windowsTerminalConfig.profiles.list += $terminalProfile
+		$windowsTerminalConfig.defaultProfile = $terminalProfile.guid
+    }
+
+    $script:terminalScheme = @{
+        name = "DevShell"
+        foreground = "#FDF6E3"
+        background = "#002B36"
+        cursorColor = "#FFFFFF"
+        brightBlack = "#93A1A1"
+        brightBlue = "#268BD2"
+        brightGreen = "#4FB636"
+        brightCyan = "#2AA198"
+        brightRed = "#DC322F"
+        brightPurple = "#D33682"
+        brightYellow = "#B58900"
+        brightWhite = "#FDF6E3"
+        black = "#002B36"
+        blue = "#073642"
+        green = "#008080"
+        cyan = "#3182A4"
+        red = "#CB4B16"
+        purple = "#9C36B6"
+        yellow = "#859900"
+        white = "#EEE8D5"
+    }
+
+    # Check if the schema exists
+    $script:existingSchema = $windowsTerminalConfig.schemes | Where-Object { $_.name -ieq $terminalScheme.name }
+    if ($null -eq $existingSchema)
+    {
+        Write-Host 'Installing Terminal schema...'
+        $windowsTerminalConfig.schemes += $terminalScheme
+    }
+
+	# Other customizations
+    SetWindowsTerminalSetting $windowsTerminalConfig 'wordDelimiters' ' '
+
+	$windowsTerminalConfig | ConvertTo-Json -Depth 100 | Write-Debug
+    $windowsTerminalConfig | ConvertTo-Json -Depth 100 | Set-Content -Path $windowsTerminalConfigPath
+}
 
 
 # -----------------------------------------------------------------------
@@ -601,6 +730,20 @@ ConfigureGitGlobally $gitPath 'pull.ff' 'only'
 ConfigureGitGlobally $gitPath 'credential.helper' 'manager'
 ConfigureGitGlobally $gitPath 'credential.helperselector.selected' 'manager'
 
+# Increase parallelism of fetch/clone operations
+# See https://git-scm.com/docs/git-config
+ConfigureGitGlobally $gitPath 'fetch.parallel' "$parallalism"
+ConfigureGitGlobally $gitPath 'submodule.fetchJobs' "$parallalism"
+
+# See https://github.com/git-ecosystem/git-credential-manager/blob/main/docs/azrepos-users-and-tokens.md
+# and https://github.com/git-ecosystem/git-credential-manager/blob/main/docs/configuration.md#credentialazreposcredentialtype
+ConfigureGitGlobally $gitPath 'credential.azreposCredentialType' 'oauth'
+
+# Activate recording of resolved conflicts, so that identical conflict hunks can be resolved automatically,
+# should they be encountered again. By default, git-rerere(1) is enabled if there is an rr-cache directory
+# under the $GIT_DIR, e.g. if "rerere" was previously used in the repository.
+ConfigureGitGlobally $gitPath 'rerere.enabled' 'true'
+
 # More aliases to consider
 # http://haacked.com/archive/2014/07/28/github-flow-aliases/
 # http://durdn.com/blog/2012/11/22/must-have-git-aliases-advanced-examples/
@@ -638,6 +781,16 @@ ConfigureGitGlobally $gitPath 'alias.pl' "!f() { git pull --prune $@; git submod
 # The ceiling directories are being set in initdev.cmd if they are not yet defined.
 [System.Environment]::SetEnvironmentVariable('GIT_CEILING_DIRECTORIES', $sourceCodeFolder, $enviromentUserScope)
 AddPath2 'GIT_CEILING_DIRECTORIES' $enviromentUserScope '%SOURCES_ROOT%' 'SOURCES_ROOT' 'Git Ceiling directories'
+
+# -----------------------------------------------------------------------
+# Configure WSL
+# -----------------------------------------------------------------------
+
+$wslConfigFile = [System.IO.Path]::Combine($env:USERPROFILE, '.wslconfig')
+if ([System.IO.File]::Exists($nugetConfigFile) -ne $true)
+{
+    Copy-Item ([System.IO.Path]::Combine($toolsRootPathExpanded, 'Scripts\.wslconfig.template.txt')) -Destination $wslConfigFile -Force
+}
 
 
 Write-Host 'Done.'

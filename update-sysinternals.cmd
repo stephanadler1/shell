@@ -18,8 +18,15 @@ rem all files are always considered changed.
 for /f "tokens=1* delims=:" %%a in ('call findstr "^PsTools Version in this package" "%_SYSINTERNALSLIVE%\psversion.txt"') do (set "_SOURCEVER=%%b")
 for /f "tokens=1* delims=:" %%a in ('call findstr "^PsTools Version in this package" "%_TARGETDIR%\psversion.txt"') do (set "_TARGETVER=%%b")
 if "%_SOURCEVER%" equ "%_TARGETVER%" (
-    echo No changes detected. Exiting... 1>&2
-    goto :ExitWithError
+    (
+        echo No changes detected. Exiting...
+        echo Source version: %_SOURCEVER%
+        echo:
+        echo Press Ctrl+C to exit or Enter to copy anyway.
+    ) 1>&2
+
+    pause
+    if errorlevel 1 goto :ExitWithError
 )
 
 :KillRunningApps
@@ -34,7 +41,7 @@ if exist "%_TARGETDIR%" (
 )
 
 echo You are in '%CD%'.
-call robocopy . "%_TARGETDIR%" /MIR /DST /R:5 /XD ARM64
+call robocopy . "%_TARGETDIR%" /MIR /DST /TIMFIX /R:5
 echo Last updated: %DATE% %TIME% > "%_TARGETDIR%\_LastUpdated.txt"
 
 call "%ProgramFiles%\Windows Defender\MpCmdRun.exe" -scan -disableremediation -scantype 3 -timeout 1 -file "%_TARGETDIR%\."

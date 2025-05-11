@@ -16,7 +16,7 @@ if defined _DEV_ENV_INIT (
     goto :EOF
 )
 
-for /f "usebackq tokens=*" %%o in (`powershell -nologo -noprofile -executionPolicy RemoteSigned -outputFormat Text -mta -file "%~dp0scripts\change-directory.ps1" -option dev %1`) do (
+for /f "usebackq tokens=*" %%o in (`call "%TOOLS_PS%" -nologo -noprofile -executionPolicy RemoteSigned -outputFormat Text -mta -file "%~dp0scripts\change-directory.ps1" -option dev %1`) do (
     if "%%~o" neq "" (
 
         call :ResetCorextEnvVars

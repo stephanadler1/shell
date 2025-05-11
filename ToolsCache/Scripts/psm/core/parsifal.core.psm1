@@ -4,8 +4,87 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
 {
-    $DebugPreference = 'Continue'
+    $global:DebugPreference = 'Continue'
     Write-Debug "PSVersion = $($PSVersionTable.PSVersion); PSEdition = $($PSVersionTable.PSEdition); ExecutionPolicy = $(Get-ExecutionPolicy)"
+}
+
+
+# A list of tools that always use legacy argument passing, irrespective of the 
+# arguments themselves.
+$legacyArgumentPassingToolList = @(
+    #'azcopy', 'azcopy.exe'
+    #, 'git', 'git.exe'
+)
+
+
+function Invoke-Tool
+{
+    <#
+    .SYNOPSIS
+    Invokes an external tool and applies certain mitigations to ensure command lines
+    are passed to the invoked tool and not intercepted and interpreted by PowerShell.
+    #>
+
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string] $FilePath,
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [string[]] $ArgumentList,
+
+        [Parameter(Mandatory = $false)]
+        [switch] $ForceLegacy = $false
+    )
+
+    $private:currentBehavior = $null
+    if (($PSVersionTable.PSVersion -ge '7.3') -and ($IsWindows -eq $true))
+    {
+        # See PSNativeCommandArgumentPassing description and its ramifications in 
+        # https://learn.microsoft.com/en-us/powershell/scripting/learn/experimental-features?view=powershell-7.4#psnativecommandargumentpassing
+        if ($ForceLegacy)
+        {
+            $currentBehavior = $PSNativeCommandArgumentPassing
+        }
+        elseif ($legacyArgumentPassingToolList -icontains $FilePath)
+        {
+            $currentBehavior = $PSNativeCommandArgumentPassing
+        }
+        else 
+        {
+            $ArgumentList | ForEach-Object {
+                if (($_ -match '(%| |&|\?)') -and -not $_.StartsWith('"'))
+                {
+                    $currentBehavior = $PSNativeCommandArgumentPassing
+                }
+            }
+        }
+        
+    }
+
+    try
+    {
+        if ($null -ne $currentBehavior)
+        {
+            Write-Debug "Tool invocation (with legacy argument passing): $FilePath $ArgumentList"
+            $script:PSNativeCommandArgumentPassing = 'Legacy'
+        }
+        else
+        {
+            Write-Debug "Tool invocation: $FilePath $ArgumentList"
+        }
+
+        & $FilePath $ArgumentList
+    }
+    finally {
+        if ($null -ne $currentBehavior)
+        {
+            $script:PSNativeCommandArgumentPassing = $currentBehavior
+        }
+    }
+
+    Write-Debug "Tool invocation -> Exit code: $LASTEXITCODE"
 }
 
 
@@ -74,7 +153,7 @@ function Test-ForThreats
         '-scantype', '3',
         '-timeout', '1',
         '-file', "$path")
-    & $avtool $scanArgs
+    Invoke-Tool $avtool $scanArgs
     if ($LASTEXITCODE -eq 2)
     {
         throw 'Virus detected.'
@@ -114,5 +193,5 @@ function Remove-FileSecure
         '-accepteula')
 
     $private:sDeleteArgs = $sDeleteDefaultArgs + ($file)
-    & $sDeleteToolPath $sDeleteArgs | Write-Debug
+    Invoke-Tool $sDeleteToolPath $sDeleteArgs
 }

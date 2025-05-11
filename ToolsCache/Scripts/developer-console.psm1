@@ -34,39 +34,53 @@ function script:Push-LocationUp2 { Push-Location '..\..' }
 function script:Push-LocationUp3 { Push-Location '..\..\..' }
 function script:Push-LocationUp { Push-Location '..\..\..\..' }
 
-function script:Push-LocationDev 
-{ 
+function script:Push-LocationDev
+{
     if ([string]::IsNullOrEmpty($args) -eq $true)
     {
-        & "$(Join-Path -Path $scriptDir -ChildPath 'change-directory.ps1')" -option dev -relativepath "." | Out-Null 
+        & "$(Join-Path -Path $scriptDir -ChildPath 'change-directory.ps1')" -option dev -relativepath "." | Out-Null
     }
     else
     {
-        & "$(Join-Path -Path $scriptDir -ChildPath 'change-directory.ps1')" -option dev -relativepath "$args" | Out-Null 
+        & "$(Join-Path -Path $scriptDir -ChildPath 'change-directory.ps1')" -option dev -relativepath "$args" | Out-Null
     }
 }
 
 function script:Push-LocationRoot
-{ 
+{
     if ([string]::IsNullOrEmpty($args) -eq $true)
     {
-        & "$(Join-Path -Path $scriptDir -ChildPath 'change-directory.ps1')" -option root -relativepath "." | Out-Null 
+        & "$(Join-Path -Path $scriptDir -ChildPath 'change-directory.ps1')" -option root -relativepath "." | Out-Null
     }
     else
     {
-        & "$(Join-Path -Path $scriptDir -ChildPath 'change-directory.ps1')" -option root -relativepath "$args" | Out-Null 
+        & "$(Join-Path -Path $scriptDir -ChildPath 'change-directory.ps1')" -option root -relativepath "$args" | Out-Null
     }
 }
 
 function script:Push-LocationSelf
-{ 
+{
     if ([string]::IsNullOrEmpty($args) -eq $true)
     {
-        & "$(Join-Path -Path $scriptDir -ChildPath 'change-directory.ps1')" -option self -relativepath "." | Out-Null 
+        & "$(Join-Path -Path $scriptDir -ChildPath 'change-directory.ps1')" -option self -relativepath "." | Out-Null
     }
     else
     {
-        & "$(Join-Path -Path $scriptDir -ChildPath 'change-directory.ps1')" -option self -relativepath "$args" | Out-Null 
+        & "$(Join-Path -Path $scriptDir -ChildPath 'change-directory.ps1')" -option self -relativepath "$args" | Out-Null
+    }
+}
+
+function script:ToggleDebug
+{
+    if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
+    {
+        [System.Environment]::SetEnvironmentVariable('_DEBUG', $null, [System.EnvironmentVariableTarget]::Process)
+        Write-Host 'Debug logging is off.'
+    }
+    else
+    {
+        [System.Environment]::SetEnvironmentVariable('_DEBUG', '1', [System.EnvironmentVariableTarget]::Process)
+        Write-Host 'Debug logging is on.'
     }
 }
 
@@ -83,4 +97,4 @@ Set-Alias -Name 'dev' Push-LocationDev
 Set-Alias -Name 'src' Push-LocationDev
 Set-Alias -Name 'root' Push-LocationRoot
 Set-Alias -Name 'self' Push-LocationSelf
-
+Set-Alias -name 'toggle-debug' ToggleDebug

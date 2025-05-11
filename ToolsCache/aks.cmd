@@ -10,16 +10,16 @@ echo Ensure Azure CLI is working...
 call az --version < nul > nul 2>&1
 if errorlevel 1 goto ErrorAzureCliOrKubeCtlMissing
 
-echo Validating KubeCtl is installed...
+echo Validating Azure KubeCtl is installed...
 call where kubectl | call findstr /c:"kubectl.exe" /in | call findstr /c:"1:%USERPROFILE%" /i > nul 2>&1
 if errorlevel 1 (
     rem if it is not already on the path, it's default installation location
     rem when done through Azure CLI is in 'C:\Users\Stephan\.azure-kubectl'.
     rem Let's assume it is supposed to be there.
 
-    echo Adding KubeCtl to PATH...
+    echo Adding Azure KubeCtl to PATH...
     if not exist "%USERPROFILE%\.azure-kubectl" goto ErrorAzureCliOrKubeCtlMissing
-    set "PATH=%USERPROFILE%\.azure-kubectl;%PATH%"
+    set "PATH=%USERPROFILE%\.azure-kubectl;%USERPROFILE%\.azure-kubelogin;%PATH%"
 )
 
 echo Ensure KubeCtl is working...
@@ -30,13 +30,13 @@ if not defined KUBE_CONFIG_PATH set "KUBE_CONFIG_PATH=%USERPROFILE%\.kube\config
 
 echo Validating Docker is installed...
 call where docker.exe > nul 2>&1
-if errorlevel 1 call :ErrorDockerCliMissing
-if errorlevel 0 (
-
+if errorlevel 1 (
+    call :ErrorDockerCliMissing
+) else (
     echo Ensure Docker CLI is working...
     call docker version > nul 2>&1
     if errorlevel 1 (
-        if /i "%~1" neq "--version" (
+        if /i "%~1" neq "--nodocker" (
             echo Starting Docker Desktop...
             start /min "" "%ProgramFiles%\Docker\Docker\Docker Desktop.exe"
         )

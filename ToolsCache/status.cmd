@@ -9,11 +9,11 @@ if /i "%~1" equ "on" (
     call "%~dp0toggle-status.cmd" "on"
     goto :EOF
 ) else (
-    call powershell -nologo -noprofile -executionPolicy RemoteSigned -outputFormat Text -mta -file "%~dp0scripts\presence-light.ps1" -status "%~1"
+    call "%TOOLS_PS%" -nologo -noprofile -executionPolicy RemoteSigned -outputFormat Text -mta -file "%~dp0scripts\presence-light.ps1" -status "%~1"
     goto :EOF
 )
 
 
 :ShowHelp
-    call powershell -nologo -noprofile -executionPolicy RemoteSigned -outputFormat Text -mta -command "get-help '%~dp0scripts\presence-light.ps1' -detailed"
+    call "%TOOLS_PS%" -nologo -noprofile -executionPolicy RemoteSigned -outputFormat Text -mta -command "get-help '%~dp0scripts\presence-light.ps1' -detailed"
     goto :EOF

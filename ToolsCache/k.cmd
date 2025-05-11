@@ -5,7 +5,7 @@ if errorlevel 1 (
     if errorlevel 1 goto :Error
 )
 
-call kubectl %*
+call kubectl %* < nul
 exit /b %ERRORLEVEL%
 
 

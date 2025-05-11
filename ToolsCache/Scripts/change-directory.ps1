@@ -34,11 +34,11 @@ begin {
     $ErrorActionPreference = 'Stop'
     if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
     {
-        $DebugPreference = 'Continue'
+        $global:DebugPreference = 'Continue'
         Write-Debug "PSVersion = $($PSVersionTable.PSVersion); PSEdition = $($PSVersionTable.PSEdition); ExecutionPolicy = $(Get-ExecutionPolicy)"
     }
 
-    Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psm1')
+    Import-Module -Name (Join-Path -Path (Split-Path -Parent $PSCommandPath) -ChildPath 'script-collection.psd1')
 
     if ($host.Version.Major -ge 5)
     {

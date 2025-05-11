@@ -16,6 +16,21 @@
 # limitations under the License.
 # -----------------------------------------------------------------------
 
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+if (-not ([System.String]::IsNullOrWhitespace($env:_DEBUG)))
+{
+    $global:DebugPreference = 'Continue'
+    Write-Debug "PSVersion = $($PSVersionTable.PSVersion); PSEdition = $($PSVersionTable.PSEdition); ExecutionPolicy = $(Get-ExecutionPolicy)"
+}
+
+$private:rootPath = Split-Path $script:MyInvocation.MyCommand.Path -Parent
+$private:libPsmRoot = Join-Path -Path $rootPath -ChildPath 'psm'
+$private:libPsModules = @('core\Parsifal.Core.psd1')
+$libPsModules | ForEach-Object {
+    Import-Module -Name (Join-Path -Path $libPsmRoot -ChildPath $_) -Scope Local
+}
+
 # -----------------------------------------------------------------------
 # STRING HELPER FUNCTIONS
 # -----------------------------------------------------------------------
@@ -38,7 +53,7 @@ function Remove-Newline
 
 <#
 .SYNOPSIS
-    The home path of the developer. Usually this is the user profile of 
+    The home path of the developer. Usually this is the user profile of
     current user.
 #>
 function Get-DeveloperHomePath
@@ -104,7 +119,8 @@ function Get-WorkingCopyRootPath
     try {
         if (Test-Git)
         {
-            $rootDir = & git rev-parse --show-cdup
+            #$rootDir = & git rev-parse --show-cdup
+            $rootDir = Invoke-Tool git @('rev-parse', "--show-cdup")
             if ([System.String]::IsNullOrWhitespace($rootDir))
             {
                 $rootDir = '.'
@@ -120,7 +136,8 @@ function Get-WorkingCopyRootPath
     try {
         if (Test-Subversion)
         {
-            $svnOutput = & svn info .
+            #$svnOutput = & svn info .
+            $svnOutput = Invoke-Tool svn @('info', '.')
             if ($LASTEXITCODE -eq 0)
             {
                 $regEx = New-Object System.Text.RegularExpressions.Regex('Working Copy Root Path: (.*?)URL:')
@@ -255,16 +272,3 @@ function Test-Mercurial
 
     return $false
 }
-
-
-Export-ModuleMember -Function Remove-Newline
-
-Export-ModuleMember -Function Get-DeveloperHomePath
-Export-ModuleMember -Function Get-SourceCodeRootPath
-Export-ModuleMember -Function Get-WorkingCopyRootPath
-
-Export-ModuleMember -Function Test-FileExists
-Export-ModuleMember -Function Test-SourceDepot
-Export-ModuleMember -Function Test-Git
-Export-ModuleMember -Function Test-Subversion
-Export-ModuleMember -Function Test-Mercurial
